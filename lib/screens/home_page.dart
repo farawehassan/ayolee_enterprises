@@ -21,9 +21,9 @@ class _MyHomePageState extends State<MyHomePage> {
   double quantity;
   String selectedProduct;
   double unitPrice;
-  double totalPrice = 0.0;
+  double totalPrice; //= 0.0;
   int increment = 0;
-  final List<Map> detailsList = [];
+  List<Map> detailsList = [];
   Map details = {};
 
   List<Row> rows = List();
@@ -126,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print(detailsList);
   }
 
+
   void deleteItem(index){
     setState((){
       print(index);
@@ -138,6 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void undoDeletion(index, item){
     setState((){
       rows.insert(index, item);
+      detailsList.insert(index, item);
     });
   }
 
@@ -153,9 +155,10 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.white,
             ),
             onPressed: () {
+              //print(detailsList);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Receipt(sentProducts: detailsList,)),
+                MaterialPageRoute(builder: (context) => Receipt(sentProducts: detailsList)),
               );
             },
           ),
@@ -170,22 +173,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(
-                    "QTY",
-                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                      "PRODUCT",
-                      style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
-                  ),
-                  Text(
-                    "PRICE",
-                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "TOTAL",
-                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                  ),
+                  titleText("QTY"),
+                  titleText("PRODUCT"),
+                  titleText("PRICE"),
+                  titleText("TOTAL"),
                 ],
               ),
             ),
@@ -261,12 +252,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pop(context);
               },
             ),
-            ListTile(
-              title: Text('Sign Out'),
-              onTap: (){
-                Navigator.pop(context);
-              },
-            ),
           ],
         ),
       ),
@@ -277,5 +262,5 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
+  
 }

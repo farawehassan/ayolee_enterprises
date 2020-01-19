@@ -15,3 +15,10 @@ const kTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(8.0)),
   ),
 );
+
+Text titleText(String title){
+  return Text(
+    title,
+    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+  );
+}
