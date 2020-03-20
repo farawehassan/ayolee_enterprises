@@ -1,10 +1,17 @@
-import 'package:flutter/cupertino.dart';
+import 'package:ayolee_stores/database/DBHelper.dart';
+import 'package:ayolee_stores/model/availableProductDB.dart';
+import 'package:ayolee_stores/utils/product_suggestions.dart';
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:ayolee_stores/constants.dart';
-import 'package:ayolee_stores/screens/available_drinks.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:ayolee_stores/sample/sample_data_provider.dart';
-import 'package:ayolee_stores/screens/receipt_page.dart';
+import 'package:ayolee_stores/ui/available_drinks.dart';
+import 'package:ayolee_stores/ui/receipt_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ayolee_stores/ui/welcome_screen.dart';
+import 'package:ayolee_stores/ui/daily_reports.dart';
+
+
+FirebaseUser loggedInUser;
 
 class MyHomePage extends StatefulWidget {
 
@@ -18,35 +25,74 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  final _auth = FirebaseAuth.instance;
+
   double quantity;
   String selectedProduct;
   double unitPrice;
-  double totalPrice; //= 0.0;
+  double totalPrice;
+
   int increment = 0;
   List<Map> detailsList = [];
   Map details = {};
+  List<String> availableProducts = [];
 
   List<Row> rows = List();
+
+  void getCurrentUser() async {
+    try{
+      final user = await _auth.currentUser();
+      if(user != null){
+        loggedInUser = user;
+      }
+    } catch(e){
+      print(e);
+    }
+  }
+
+  Future<List<AvailableProduct>> getProductsFromDB() async {
+    var dbHelper = DBHelper();
+    Future<List<AvailableProduct>> availableProduct = dbHelper.getProducts();
+    return availableProduct;
+  }
+
+  void availableProductNames() {
+    Future<List<AvailableProduct>> productNames = getProductsFromDB();
+    productNames.then((value) {
+      for (int i = 0; i < value.length; i++){
+        availableProducts.add(value[i].productName);
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    getCurrentUser();
+    availableProductNames();
     details = {'qty':'$quantity','product':selectedProduct,'unitPrice':'$unitPrice','totalPrice':'$totalPrice'};
   }
 
   void addRow(){
+    availableProducts.clear();
+    availableProductNames();
     print(detailsList);
+    final TextEditingController priceController = TextEditingController();
     final TextEditingController productController = TextEditingController();
+    final TextEditingController totalPriceController = TextEditingController();
+
+    double total = 0.0;
     setState(() {
       details = {'qty':'$quantity','product':selectedProduct,'unitPrice':'$unitPrice','totalPrice':'$totalPrice'};
       increment ++;
+
       print(increment);
       rows.add(Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Flexible(
             child: Container(
-              width: 50.0,
+              width: 80.0,
                 child: TextField(
                   keyboardType: TextInputType.number,
                   onChanged: (value) {
@@ -66,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: kTextFieldDecoration.copyWith(hintText: 'Product'),
                 ),
                 suggestionsCallback: (pattern) {
-                  return AvailableProducts.getSuggestions(pattern);
+                  return AvailableProducts.getSuggestions(pattern, availableProducts);
                 },
                 itemBuilder: (context, suggestion) {
                   return ListTile(
@@ -91,11 +137,19 @@ class _MyHomePageState extends State<MyHomePage> {
           Flexible(
             child: Container(
               width: 100.0,
+              margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
               child: TextField(
+                controller: priceController,
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   unitPrice = double.parse(value);
                   details['unitPrice'] = '$unitPrice';
+                  setState(() {
+                    totalPrice = double.parse(value) * quantity;
+                    total = totalPrice;
+                    totalPriceController.text = totalPrice.toString();
+                    details['totalPrice'] = '$totalPrice';
+                  });
                 },
                 decoration: kTextFieldDecoration.copyWith(hintText: '0.0'),
               ),
@@ -105,27 +159,23 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               width: 150.0,
               child: TextField(
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  totalPrice = double.parse(value);
-                  details['totalPrice'] = '$totalPrice';
-                  //getTotalPrice(quantity, unitPrice);
-                },
-                decoration: kTextFieldDecoration.copyWith(hintText: '0.0',),
+                controller: totalPriceController,
+                decoration: kTextFieldDecoration.copyWith(hintText: '0.0'),
               ),
             ),
           ),
         ],
       ));
+      print(total);
     });
+
     print(details);
-    //details = {'qty':'$quantity','product':selectedProduct,'unitPrice':'$unitPrice','totalPrice':'$totalPrice'};
     detailsList.add(details);
     details.clear();
+    priceController.clear();
     print(rows.length);
     print(detailsList);
   }
-
 
   void deleteItem(index){
     setState((){
@@ -155,7 +205,6 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.white,
             ),
             onPressed: () {
-              //print(detailsList);
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => Receipt(sentProducts: detailsList)),
@@ -228,7 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
               leading: Icon(Icons.create),
               title: Text('Daily Sales'),
               onTap: (){
-                Navigator.pop(context);
+                Navigator.pushNamed(context, MyHomePage.id);
               },
             ),
             ListTile(
@@ -242,7 +291,7 @@ class _MyHomePageState extends State<MyHomePage> {
               leading: Icon(Icons.assignment_returned),
               title: Text('Daily Reports'),
               onTap: (){
-                Navigator.pop(context);
+                Navigator.pushNamed(context, DailyReports.id);
               },
             ),
             ListTile(
@@ -250,6 +299,13 @@ class _MyHomePageState extends State<MyHomePage> {
               title: Text('Weekly Report'),
               onTap: (){
                 Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('Sign Out'),
+              onTap: (){
+                _auth.signOut();
+                Navigator.pushReplacementNamed(context, WelcomeScreen.id);
               },
             ),
           ],
@@ -262,5 +318,5 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-  
+
 }

@@ -14,6 +14,14 @@ dependencies:
   font_awesome_flutter: ^8.5.0
   flutter_typeahead: ^1.7.0
   folding_cell: ^0.1.2
+  animated_text_kit: ^2.0.0
+  firebase_core: ^0.4.3+2
+  firebase_auth: ^0.15.3+1
+  fluttertoast: ^3.1.3
+  modal_progress_hud: ^0.1.3
+  sqflite: ^1.2.0
+  path_provider: ^1.6.5
+  intl: ^0.15.8
 
 dev_dependencies:
   flutter_test:
@@ -22,5 +30,10 @@ dev_dependencies:
 flutter:
 
   uses-material-design: true
-  # assets:
-  #  - images/a_dot_burr.jpeg
+  assets:
+    - images/
+
+  fonts:
+    - family: SFUIDisplay
+      fonts:
+        - asset: Assets/fonts/sf-ui-display-light.otf

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 
 const kTextFieldDecoration = InputDecoration(
-  hintText: 'Products',
   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
   border: OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -16,9 +17,16 @@ const kTextFieldDecoration = InputDecoration(
   ),
 );
 
+const kAddProductDecoration = InputDecoration(
+  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+  hintText: 'Type your message here...',
+  //border: InputBorder.none,
+);
+
 Text titleText(String title){
   return Text(
     title,
     style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
   );
 }
+
