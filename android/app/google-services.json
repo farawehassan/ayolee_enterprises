@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "942024233721",
+    "firebase_url": "https://ayolee-stores.firebaseio.com",
+    "project_id": "ayolee-stores",
+    "storage_bucket": "ayolee-stores.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942024233721:android:332a9b30a013ea8908c828",
+        "android_client_info": {
+          "package_name": "com.mrfarawe.ayolee_stores"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "942024233721-s7kvo04coviuv12j44jok02or46jo682.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mrfarawe.ayolee_stores",
+            "certificate_hash": "32ff0d53fa602ff02fde9c3c4825dff8c1d9da97"
+          }
+        },
+        {
+          "client_id": "942024233721-ma7adg4jc02m7shejrcm466sdlvu5714.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnbOpF45Zz3PXk5szXBMfd8lcoxhY3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942024233721-ma7adg4jc02m7shejrcm466sdlvu5714.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
