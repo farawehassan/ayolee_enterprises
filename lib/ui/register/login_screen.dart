@@ -1,11 +1,14 @@
+import 'package:ayolee_stores/database/user_db_helper.dart';
+import 'package:ayolee_stores/model/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ayolee_stores/ui/home_page.dart';
+import 'file:///C:/AndroidWorkspace/00-Flutter/ayolee_stores/lib/ui/navs/home_page.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ayolee_stores/styles/theme.dart' as Theme;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'login_screen_presenter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = 'login_screen';
@@ -16,14 +19,19 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
-    with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin
+    implements LoginScreenContract {
+
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  LoginScreenPresenter _presenter;
+
+  _LoginScreenState() {
+    _presenter = new LoginScreenPresenter(this);
+  }
 
   final FocusNode myFocusNodeEmailLogin = FocusNode();
   final FocusNode myFocusNodePasswordLogin = FocusNode();
-  final _auth = FirebaseAuth.instance;
-
   final FocusNode myFocusNodePassword = FocusNode();
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
@@ -31,8 +39,8 @@ class _LoginScreenState extends State<LoginScreen>
   TextEditingController loginEmailController = new TextEditingController();
   TextEditingController loginPasswordController = new TextEditingController();
 
-  String email;
-  String password;
+  String _phoneNumber;
+  String _pin;
   bool showSpinner = false;
 
   bool _obscureTextLogin = true;
@@ -64,8 +72,8 @@ class _LoginScreenState extends State<LoginScreen>
             decoration: new BoxDecoration(
               gradient: new LinearGradient(
                   colors: [
-                    Theme.Colors.loginGradientStart,
-                    Theme.Colors.loginGradientEnd
+                    Theme.ColorGradients.loginGradientStart,
+                    Theme.ColorGradients.loginGradientEnd
                   ],
                   begin: const FractionalOffset(0.0, 0.0),
                   end: const FractionalOffset(1.0, 1.0),
@@ -114,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen>
                         width: 250.0,
                         height: 191.0,
                         fit: BoxFit.fill,
-                        image: new AssetImage('images/login_logo.png')),
+                        image: new AssetImage('Assets/images/login_logo.png')),
                   ),
                   Container(
                     child: _buildSignIn(context),
@@ -189,21 +197,21 @@ class _LoginScreenState extends State<LoginScreen>
                         child: TextField(
                           focusNode: myFocusNodeEmailLogin,
                           controller: loginEmailController,
-                          keyboardType: TextInputType.emailAddress,
+                          keyboardType: TextInputType.phone,
                           style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black),
                           onChanged: (value){
-                            email = value;
+                            _phoneNumber = value;
                           },
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             icon: Icon(
-                              FontAwesomeIcons.envelope,
+                              FontAwesomeIcons.phone,
                               color: Colors.black,
                               size: 22.0,
                             ),
-                            hintText: "Email Address",
+                            hintText: "Phone Number",
                             hintStyle: TextStyle(
                               fontSize: 17.0
                             ),
@@ -222,6 +230,7 @@ class _LoginScreenState extends State<LoginScreen>
                           focusNode: myFocusNodePasswordLogin,
                           controller: loginPasswordController,
                           obscureText: _obscureTextLogin,
+                          keyboardType: TextInputType.number,
                           style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black),
@@ -232,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen>
                               size: 22.0,
                               color: Colors.black,
                             ),
-                            hintText: "Password",
+                            hintText: "Pin",
                             hintStyle: TextStyle(
                               fontSize: 17.0
                             ),
@@ -248,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ),
                           onChanged: (value){
-                            password = value;
+                            _pin = value;
                           },
                         ),
                       ),
@@ -262,20 +271,20 @@ class _LoginScreenState extends State<LoginScreen>
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Theme.Colors.loginGradientStart,
+                      color: Theme.ColorGradients.loginGradientStart,
                       offset: Offset(1.0, 6.0),
                       blurRadius: 20.0,
                     ),
                     BoxShadow(
-                      color: Theme.Colors.loginGradientEnd,
+                      color: Theme.ColorGradients.loginGradientEnd,
                       offset: Offset(1.0, 6.0),
                       blurRadius: 20.0,
                     ),
                   ],
                   gradient: new LinearGradient(
                       colors: [
-                        Theme.Colors.loginGradientEnd,
-                        Theme.Colors.loginGradientStart
+                        Theme.ColorGradients.loginGradientEnd,
+                        Theme.ColorGradients.loginGradientStart
                       ],
                       begin: const FractionalOffset(0.2, 0.2),
                       end: const FractionalOffset(1.0, 1.0),
@@ -284,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 child: MaterialButton(
                     highlightColor: Colors.transparent,
-                    splashColor: Theme.Colors.loginGradientEnd,
+                    splashColor: Theme.ColorGradients.loginGradientEnd,
                     //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -298,27 +307,7 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                     ),
                     onPressed: () async {
-                      setState(() {
-                        showSpinner = true;
-                      });
-                      try{
-                        final newUser = await _auth.signInWithEmailAndPassword(email: email, password: password);
-                        if(newUser != null){
-                          loginEmailController.clear();
-                          loginPasswordController.clear();
-                          Navigator.pushReplacementNamed(context, MyHomePage.id);
-                        }
-                        setState(() {
-                          showSpinner = false;
-                        });
-                      }catch(e){
-                        setState(() {
-                          showSpinner = false;
-                          loginPasswordController.clear();
-                          showInSnackBar(e.toString());
-                        });
-                        print(e);
-                      }
+                      _submit();
                     }
                 ),
               ),
@@ -398,4 +387,36 @@ class _LoginScreenState extends State<LoginScreen>
     });
   }
 
+  void _submit() {
+    setState(() => showSpinner = true);
+    _presenter.doLogin(_phoneNumber, _pin);
+  }
+
+  addBoolToSF(bool state) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', state);
+    if (state == true){
+      Navigator.of(context).pushReplacementNamed(MyHomePage.id);
+    }
+    loginEmailController.clear();
+    loginPasswordController.clear();
+  }
+
+  @override
+  void onLoginError(String errorTxt) {
+    showInSnackBar(errorTxt);
+    setState(() => showSpinner = false);
+    loginPasswordController.clear();
+  }
+
+  @override
+  void onLoginSuccess(User user) async {
+    showInSnackBar('Login Successfully');
+    setState(() => showSpinner = false);
+    loginEmailController.clear();
+    loginPasswordController.clear();
+    var db = new DatabaseHelper();
+    await db.saveUser(user);
+    addBoolToSF(true);
+  }
 }

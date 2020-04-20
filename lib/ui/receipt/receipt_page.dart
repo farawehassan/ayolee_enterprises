@@ -1,8 +1,12 @@
-import 'package:ayolee_stores/database/DBHelper.dart';
+import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/daily_reportsDB.dart';
+import 'package:ayolee_stores/networking/rest_data.dart';
+import 'package:ayolee_stores/ui/receipt/printing_receipt.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ayolee_stores/model/availableProductDB.dart';
+import 'package:ayolee_stores/model/available_productDB.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
+import 'package:intl/intl.dart';
 
 class Receipt extends StatefulWidget {
   static const String id = 'receipt_page';
@@ -16,7 +20,10 @@ class Receipt extends StatefulWidget {
 }
 
 class _ReceiptState extends State<Receipt> {
-  String companyName = "Ayo-Lee Nigeria Enterprises";
+
+  var futureValue = FutureValues();
+
+  String companyName = "Ayo-Lee Enterprises";
 
   String address = "14, Leigh street Off Ojuelegba Road Surulere Lagos";
 
@@ -42,19 +49,23 @@ class _ReceiptState extends State<Receipt> {
 
   List<Map> productsList = [];
 
-  Future<List<AvailableProduct>> getProductsFromDB() async {
-    var dbHelper = DBHelper();
-    Future<List<AvailableProduct>> availableProduct = dbHelper.getProducts();
-    return availableProduct;
+  String getFormattedTime(String dateTime) {
+    return DateFormat('h:mm a').format(DateTime.parse(dateTime)).toString();
+  }
+
+  FlutterMoneyFormatter money(double value){
+    FlutterMoneyFormatter val;
+    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
+    return val;
   }
 
   void availableProductNames() {
-    Future<List<AvailableProduct>> productNames = getProductsFromDB();
+    Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
     productNames.then((value) {
       for (int i = 0; i < value.length; i++) {
         print(value[i].productName);
         String name = value[i].productName;
-        double qty = value[i].currentQuantity;
+        double qty = double.parse(value[i].currentQuantity);
         products = {name: qty};
         productsList.add(products);
       }
@@ -63,18 +74,16 @@ class _ReceiptState extends State<Receipt> {
 
   void addProducts() {
     for (var product in widget.sentProducts) {
-      //print(product);
-      if (product.isNotEmpty) {
-        //print('incoming...');
+      if (product.isNotEmpty && product.containsKey('qty') && product.containsKey('product') && product.containsKey('unitPrice') && product.containsKey('totalPrice'))  {
         receivedProducts.add(product);
+        totalPrice += double.parse(product['totalPrice']);
       }
     }
-    //print(receivedProducts);
   }
 
-  DataTable dataTable() {
+  Widget dataTable() {
     return DataTable(
-      columnSpacing: 8.0,
+      columnSpacing: 1.0,
       columns: [
         DataColumn(
           label: Text(
@@ -84,27 +93,26 @@ class _ReceiptState extends State<Receipt> {
         ),
         DataColumn(
             label: Text(
-          'QTY',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        )),
+              'QTY',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            )),
         DataColumn(
             label: Text(
-          'PRODUCT',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        )),
+              'PRODUCT',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            )),
         DataColumn(
             label: Text(
-          'UNIT PRICE',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        )),
+              'UNIT PRICE',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            )),
         DataColumn(
             label: Text(
-          'TOTAL PRICE',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        )),
+              'TOTAL PRICE',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            )),
       ],
       rows: receivedProducts.map((product) {
-        totalPrice += double.parse(product['totalPrice']);
         return DataRow(cells: [
           DataCell(
             Text((widget.sentProducts.indexOf(product) + 1).toString()),
@@ -116,10 +124,10 @@ class _ReceiptState extends State<Receipt> {
             Text(product['product'].toString()),
           ),
           DataCell(
-            Text(product['unitPrice'].toString()),
+            Text(money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
           ),
           DataCell(
-            Text(product['totalPrice'].toString()),
+            Text(money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
           ),
         ]);
       }).toList(),
@@ -151,6 +159,7 @@ class _ReceiptState extends State<Receipt> {
             onPressed: () {
               showDialog(
                 context: context,
+                barrierDismissible: false,
                 builder: (_) => Dialog(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16.0),
@@ -158,7 +167,7 @@ class _ReceiptState extends State<Receipt> {
                   elevation: 0.0,
                   backgroundColor: Colors.white,
                   child: Container(
-                    height: 150.0,
+                    height: 200.0,
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,6 +213,7 @@ class _ReceiptState extends State<Receipt> {
                                       .pop(); // To close the dialog
                                   showDialog(
                                     context: context,
+                                    barrierDismissible: false,
                                     builder: (_) => Dialog(
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
@@ -247,50 +257,29 @@ class _ReceiptState extends State<Receipt> {
                                               children: <Widget>[
                                                 Align(
                                                   alignment:
+                                                  Alignment.bottomLeft,
+                                                  child: FlatButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop(); // To close the dialog
+                                                      saveProduct('Iya Bimbo');
+                                                    },
+                                                    textColor: Colors.blueAccent,
+                                                    child: Text('Iya Bimbo'),
+                                                  ),
+                                                ),
+                                                Align(
+                                                  alignment:
                                                       Alignment.bottomLeft,
                                                   child: FlatButton(
                                                     onPressed: () {
                                                       Navigator.of(context)
                                                           .pop(); // To close the dialog
-                                                      for (var product
-                                                          in receivedProducts) {
-                                                        try {
-                                                          saveNewDailyReport(
-                                                              double.parse(
-                                                                  product[
-                                                                      'qty']),
-                                                              product[
-                                                                  'product'],
-                                                              double.parse(product[
-                                                                  'unitPrice']),
-                                                              double.parse(product[
-                                                                  'totalPrice']),
-                                                              "Transfer");
-                                                        } catch (e) {
-                                                          Fluttertoast.showToast(
-                                                              msg: e.toString(),
-                                                              toastLength: Toast
-                                                                  .LENGTH_SHORT,
-                                                              backgroundColor:
-                                                                  Colors.white,
-                                                              textColor:
-                                                                  Colors.black);
-                                                          print(e);
-                                                        }
-                                                      }
-                                                      Fluttertoast.showToast(
-                                                          msg: "Items saved",
-                                                          toastLength: Toast
-                                                              .LENGTH_SHORT,
-                                                          backgroundColor:
-                                                              Colors.white,
-                                                          textColor:
-                                                              Colors.black);
-                                                      Navigator.pop(context);
+                                                      saveProduct('Transfer');
                                                     },
                                                     textColor:
                                                         Colors.blueAccent,
-                                                    child: Text('TRANSFER'),
+                                                    child: Text('Transfer'),
                                                   ),
                                                 ),
                                                 Align(
@@ -300,45 +289,11 @@ class _ReceiptState extends State<Receipt> {
                                                     onPressed: () {
                                                       Navigator.of(context)
                                                           .pop(); // To close the dialog
-                                                      for (var product
-                                                      in receivedProducts) {
-                                                        try {
-                                                          saveNewDailyReport(
-                                                              double.parse(
-                                                                  product[
-                                                                  'qty']),
-                                                              product[
-                                                              'product'],
-                                                              double.parse(product[
-                                                              'unitPrice']),
-                                                              double.parse(product[
-                                                              'totalPrice']),
-                                                              "Cash");
-                                                        } catch (e) {
-                                                          Fluttertoast.showToast(
-                                                              msg: e.toString(),
-                                                              toastLength: Toast
-                                                                  .LENGTH_SHORT,
-                                                              backgroundColor:
-                                                              Colors.white,
-                                                              textColor:
-                                                              Colors.black);
-                                                          print(e);
-                                                        }
-                                                      }
-                                                      Fluttertoast.showToast(
-                                                          msg: "Items saved",
-                                                          toastLength: Toast
-                                                              .LENGTH_SHORT,
-                                                          backgroundColor:
-                                                          Colors.white,
-                                                          textColor:
-                                                          Colors.black);
-                                                      Navigator.pop(context);
+                                                      saveProduct('Cash');
                                                     },
                                                     textColor:
                                                     Colors.blueAccent,
-                                                    child: Text('CASH'),
+                                                    child: Text('Cash'),
                                                   ),
                                                 ),
                                               ],
@@ -367,7 +322,12 @@ class _ReceiptState extends State<Receipt> {
               Icons.print,
               color: Colors.white,
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PrintingReceipt(sentProducts: receivedProducts)),
+              );
+            },
           ),
         ],
       ),
@@ -385,10 +345,8 @@ class _ReceiptState extends State<Receipt> {
                   ),
                 ),
               ),
-              SizedBox(
-                height: 2.0,
-              ),
               Container(
+                padding: EdgeInsets.all(2.0),
                 child: Text(
                   address,
                   style: TextStyle(
@@ -461,7 +419,7 @@ class _ReceiptState extends State<Receipt> {
                     ),
                     Container(
                       child: Text(
-                        "Date: $dateTime",
+                        "Date: ${getFormattedTime(dateTime.toString())}",
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
                         ),
@@ -489,7 +447,7 @@ class _ReceiptState extends State<Receipt> {
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      '$totalPrice',
+                      '${money(totalPrice).output.symbolOnLeft.toString()}',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -502,24 +460,65 @@ class _ReceiptState extends State<Receipt> {
     );
   }
 
+  void showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black);
+  }
+
+  void saveProduct(String paymentMode){
+    for (var product in receivedProducts) {
+      try {
+        saveNewDailyReport(
+            double.parse(
+                product[
+                'qty']),
+            product[
+            'product'],
+            double.parse(product[
+            'unitPrice']),
+            double.parse(product[
+            'totalPrice']),
+            paymentMode);
+      } catch (e) {
+        showMessage(e.toString());
+        print(e);
+      }
+    }
+    showMessage("Items saved");
+    Navigator.pop(context);
+  }
+
   void saveNewDailyReport(double qty, String productName, double unitPrice,
       double total, String paymentMode) {
-    var dailyReport = DailyReportsData();
-    dailyReport.quantity = qty;
-    dailyReport.productName = productName;
-    dailyReport.unitPrice = unitPrice;
-    dailyReport.totalPrice = total;
-    dailyReport.paymentMode = paymentMode;
-    dailyReport.time = DateTime.now().toString();
+    try {
+      var dailyReport = DailyReportsData();
+      dailyReport.quantity = qty.toString();
+      dailyReport.productName = productName.toString();
+      dailyReport.unitPrice = unitPrice.toString();
+      dailyReport.totalPrice = total.toString();
+      dailyReport.paymentMode = paymentMode;
+      dailyReport.time = DateTime.now().toString();
+      print(dailyReport.time);
 
-    var dbHelper = DBHelper();
-    dbHelper.addNewDailyReport(dailyReport);
-    for (int i = 0; i < productsList.length; i++){
-      if(productsList[i].containsKey(productName)){
-        print(productsList[i]);
-        print(productsList[i][productName]);
-        dbHelper.updateSales(productName, (productsList[i][productName] - qty));
+      var api = RestDataSource();
+      api.addNewDailyReport(dailyReport);
+      for (int i = 0; i < productsList.length; i++){
+        if(productsList[i].containsKey(productName)){
+          print(productsList[i]);
+          print(productsList[i][productName]);
+          api.sellProduct(productName, (productsList[i][productName] - qty).toString());
+        }
       }
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(
+          msg: "Error in saving data",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.white,
+          textColor: Colors.black);
     }
   }
 }

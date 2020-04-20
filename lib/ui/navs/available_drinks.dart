@@ -1,16 +1,19 @@
-import 'package:ayolee_stores/model/availableProductDB.dart';
+import 'package:ayolee_stores/database/user_db_helper.dart';
+import 'package:ayolee_stores/model/available_productDB.dart';
+import 'package:ayolee_stores/networking/rest_data.dart';
+import 'package:ayolee_stores/ui/profile_page.dart';
+import 'package:ayolee_stores/ui/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:folding_cell/folding_cell.dart';
 import 'package:ayolee_stores/utils/constants.dart';
-import 'package:ayolee_stores/database/DBHelper.dart';
-
-Future<List<AvailableProduct>> getProductsFromDB() async {
-  var dbHelper = DBHelper();
-  Future<List<AvailableProduct>> availableProduct = dbHelper.getProducts();
-  return availableProduct;
-}
+import 'package:ayolee_stores/bloc/future_values.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'daily/daily_reports.dart';
+import 'home_page.dart';
+import 'monthly/reports_page.dart';
 
 class Products extends StatefulWidget {
   static const String id = 'available_drinks';
@@ -20,75 +23,331 @@ class Products extends StatefulWidget {
 }
 
 class _ProductsState extends State<Products> {
+
   AvailableProduct product = new AvailableProduct();
 
   String productName;
   double costPrice, sellingPrice, initialQuantity, currentQuantity;
 
+  var futureValue = FutureValues();
+
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   final formKey = new GlobalKey<FormState>();
 
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
+  final TextEditingController _filter = new TextEditingController();
+  String _searchText = "";
+  List<AvailableProduct> names = new List();
+  List<AvailableProduct> filteredNames = new List();
+  Icon _searchIcon = new Icon(Icons.search);
+  Widget _appBarTitle = new Text('Available Products');
+
+  String username;
+
+  void getCurrentUser() async {
+    await futureValue.getCurrentUser().then((user) {
+      username = user.name;
+    }).catchError((Object error) {
+      print(error.toString());
+    });
+  }
+
+  _ProductsState(){
+    _filter.addListener(() {
+      if (_filter.text.isEmpty) {
+        setState(() {
+          _searchText = "";
+          filteredNames = names;
+        });
+      }
+      else {
+        setState(() {
+          _searchText = _filter.text;
+        });
+      }
+    });
+  }
+
+  String capitalize(String string) {
+    String result = '';
+
+    if (string == null) {
+      throw ArgumentError("string: $string");
+    }
+
+    if (string.isEmpty) {
+      return string;
+    }
+
+    else{
+      List<String> values = string.split(' ');
+      List<String> valuesToJoin = new List();
+
+      if(values.length == 1){
+        result = string[0].toUpperCase() + string.substring(1);
+      }
+      else{
+        for(int i = 0; i < values.length; i++){
+          if(values[i].isNotEmpty){
+            valuesToJoin.add(values[i][0].toUpperCase() + values[i].substring(1));
+          }
+        }
+        result = valuesToJoin.join(' ');
+      }
+
+    }
+    return result;
+  }
+
   void refreshData(){
     setState(() {
-      getProductsFromDB();
+      _getNames();
+    });
+  }
+
+  void _getNames() async {
+    List<AvailableProduct> tempList = new List();
+    Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
+    await productNames.then((value) {
+      for (int i = 0; i < value.length; i++){
+        tempList.add(value[i]);
+      }
+    });
+    setState(() {
+      names = tempList;
+      filteredNames = names;
+    });
+  }
+
+  void _searchPressed() {
+    setState(() {
+      if (this._searchIcon.icon == Icons.search) {
+        this._searchIcon = new Icon(Icons.close);
+        this._appBarTitle = new TextField(
+          controller: _filter,
+          decoration: new InputDecoration(
+              prefixIcon: new Icon(Icons.search),
+              hintText: 'Search...'
+          ),
+        );
+      }
+      else {
+        this._searchIcon = new Icon(Icons.search);
+        this._appBarTitle = new Text('Available Products');
+        filteredNames = names;
+        _filter.clear();
+      }
+    });
+  }
+
+  Widget _buildBar(BuildContext context) {
+    return new AppBar(
+      centerTitle: true,
+      title: _appBarTitle,
+      actions: <Widget>[
+        IconButton(
+          icon: _searchIcon,
+          onPressed: _searchPressed,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildList() {
+    if (_searchText.isNotEmpty) {
+      List<AvailableProduct> tempList = new List();
+      for (int i = 0; i < filteredNames.length; i++) {
+        if (filteredNames[i].productName.toLowerCase().contains(_searchText.toLowerCase())) {
+          tempList.add(filteredNames[i]);
+        }
+      }
+      filteredNames = tempList;
+    }
+    if(filteredNames == null || filteredNames.length == 0){
+      return Container(
+          alignment: AlignmentDirectional.center,
+          child: Text("No available products"));
+    }
+    else if(filteredNames.length > 0){
+      return ListView.builder(
+        itemCount: names == null ? 0 : filteredNames.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SimpleFoldingCell(
+              frontWidget: buildFrontWidget(
+                  filteredNames[index].productName),
+              innerTopWidget: buildInnerTopWidget(
+                  filteredNames[index].productName),
+              innerBottomWidget: buildInnerBottomWidget(
+                  filteredNames[index].productName,
+                  double.parse(filteredNames[index].initialQuantity),
+                  double.parse(filteredNames[index].currentQuantity),
+                  double.parse(filteredNames[index].costPrice),
+                  double.parse(filteredNames[index].sellingPrice)),
+              cellSize: Size(MediaQuery.of(context).size.width, 90),
+              padding: EdgeInsets.all(8.0),
+              animationDuration: Duration(milliseconds: 300),
+              borderRadius: 10,
+              onOpen: () => print('$index cell opened'),
+              onClose: () => print('$index cell closed'));
+        },
+      );
+    }
+    return Container(
+      alignment: AlignmentDirectional.center,
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  @override
+  void initState() {
+    this._getNames();
+    super.initState();
+  }
+
+  Future<Null> _refresh() {
+    List<AvailableProduct> tempList = new List();
+    Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
+    return productNames.then((value) {
+      for (int i = 0; i < value.length; i++){
+        tempList.add(value[i]);
+      }
+      setState(() {
+        names = tempList;
+        filteredNames = names;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    //addText(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Search'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.search,
-              color: Colors.white,
-            ),
-            onPressed: () {},
-          ),
-        ],
+      appBar: _buildBar(context),
+      body: RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: _refresh,
+        child: Container(
+          child: _buildList(),
+        ),
       ),
-      body: Container(
-        child: FutureBuilder<List<AvailableProduct>>(
-          future: getProductsFromDB(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
-                  itemCount: snapshot.data.length,
-                  itemBuilder: (context, index) {
-                    print(snapshot.data);
-                    return SimpleFoldingCell(
-                        frontWidget: buildFrontWidget(
-                            snapshot.data[index].productName),
-                        innerTopWidget: buildInnerTopWidget(
-                            snapshot.data[index].productName),
-                        innerBottomWidget: buildInnerBottomWidget(
-                            snapshot.data[index].productName,
-                            snapshot.data[index].initialQuantity,
-                            snapshot.data[index].currentQuantity,
-                            snapshot.data[index].costPrice,
-                            snapshot.data[index].sellingPrice),
-                        cellSize: Size(MediaQuery.of(context).size.width, 90),
-                        padding: EdgeInsets.all(8.0),
-                        animationDuration: Duration(milliseconds: 300),
-                        borderRadius: 10,
-                        onOpen: () => print('$index cell opened'),
-                        onClose: () => print('$index cell closed'));
-                  });
-            }
-            else if(snapshot.data == null || snapshot.data.length == 0){
-              return Container(
-                  alignment: AlignmentDirectional.center,
-                  child: Text("No available products"));
-            }
-            // Show loading while snapshot is not loaded
-            return Container(
-              alignment: AlignmentDirectional.center,
-              child: CircularProgressIndicator(),
-            );
-          },
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountName: Text("Ayolee Enterprises"),
+              accountEmail: Text("farawebola@gmail.com"),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('Assets/images/mum.JPG'),
+                backgroundColor:
+                Theme.of(context).platform == TargetPlatform.iOS ? Colors.blue : Colors.white,
+              ),
+              onDetailsPressed: (){
+                if(username == 'Farawe'){
+                  Navigator.pushNamed(context, Profile.id);
+                }else{
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.create),
+              title: Text('Sales Record'),
+              onTap: (){
+                Navigator.pushNamed(context, MyHomePage.id);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.book),
+              title: Text('Available Drinks'),
+              onTap: (){
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.assignment_returned),
+              title: Text('Daily Reports'),
+              onTap: (){
+                Navigator.pushNamed(context, DailyReports.id);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.assignment_returned),
+              title: Text('Monthly Report'),
+              onTap: (){
+                Navigator.pushNamed(context, Reports.id);
+              },
+            ),
+            ListTile(
+              title: Text('Sign Out'),
+              onTap: (){
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    elevation: 0.0,
+                    backgroundColor: Colors.white,
+                    child: Container(
+                      height: 150.0,
+                      padding: const EdgeInsets.all(16.0),
+                      child:  Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Align(
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 16.0),
+                              child: Text(
+                                "Are you sure you want to sign out",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 24.0,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              Align(
+                                alignment: Alignment.bottomLeft,
+                                child: FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // To close the dialog
+                                  },
+                                  textColor: Colors.blueAccent,
+                                  child: Text('No'),
+                                ),
+                              ),
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // To close the dialog
+                                    logout();
+                                  },
+                                  textColor: Colors.blueAccent,
+                                  child: Text('Yes'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -157,7 +416,7 @@ class _ProductsState extends State<Products> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
                           Container(
-                            width: 150.0,
+                            width: 110.0,
                             child: TextFormField(
                               keyboardType: TextInputType.number,
                               validator: (val) =>
@@ -176,7 +435,7 @@ class _ProductsState extends State<Products> {
                             width: 20.0,
                           ),
                           Container(
-                            width: 150.0,
+                            width: 110.0,
                             child: TextFormField(
                               keyboardType: TextInputType.number,
                               validator: (value) =>
@@ -235,6 +494,7 @@ class _ProductsState extends State<Products> {
                 ),
               ),
             ),
+            barrierDismissible: false,
           );
         },
         tooltip: 'Add new product',
@@ -302,11 +562,17 @@ class _ProductsState extends State<Products> {
 
   Widget buildInnerBottomWidget(
       String name, double iq, double cq, double cp, double sp) {
+    final controllerProduct = TextEditingController();
     final controllerQty = TextEditingController();
     final controllerCp = TextEditingController();
     final controllerSp = TextEditingController();
 
+    FlutterMoneyFormatter cpVal;
+    FlutterMoneyFormatter spVal;
+
     return Builder(builder: (context) {
+      cpVal = FlutterMoneyFormatter(amount: cp, settings: MoneyFormatterSettings(symbol: 'N'));
+      spVal = FlutterMoneyFormatter(amount: sp, settings: MoneyFormatterSettings(symbol: 'N'));
       return GestureDetector(
         onTap: () {
           SimpleFoldingCellState foldingCellState = context.findAncestorStateOfType<SimpleFoldingCellState>();
@@ -358,8 +624,8 @@ class _ProductsState extends State<Products> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('CP: $cp'),
-                    Text('SP: $sp'),
+                    Text('CP: ${cpVal.output.symbolOnLeft}'),
+                    Text('SP: ${spVal.output.symbolOnLeft}'),
                   ],
                 ),
                 IconButton(
@@ -392,6 +658,15 @@ class _ProductsState extends State<Products> {
                                 ),
                               ),
                               Container(
+                                width: 270.0,
+                                child: TextFormField(
+                                  keyboardType: TextInputType.text,
+                                  controller: controllerProduct,
+                                  decoration: kAddProductDecoration.copyWith(
+                                      hintText: "Product name (if needed)"),
+                                ),
+                              ),
+                              Container(
                                 width: 150.0,
                                 child: TextFormField(
                                   keyboardType: TextInputType.number,
@@ -406,7 +681,7 @@ class _ProductsState extends State<Products> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
                                   Container(
-                                    width: 150.0,
+                                    width: 110.0,
                                     child: TextFormField(
                                       keyboardType: TextInputType.number,
                                       validator: (val) =>
@@ -420,7 +695,7 @@ class _ProductsState extends State<Products> {
                                     width: 20.0,
                                   ),
                                   Container(
-                                    width: 150.0,
+                                    width: 110.0,
                                     child: TextFormField(
                                       keyboardType: TextInputType.number,
                                       validator: (value) =>
@@ -455,30 +730,20 @@ class _ProductsState extends State<Products> {
                                     alignment: Alignment.bottomRight,
                                     child: FlatButton(
                                       onPressed: () {
-                                        var dbHelper = DBHelper();
-                                        AvailableProduct product =
-                                            AvailableProduct();
-                                        product.productName = name;
-                                        product.initialQuantity =
-                                            double.parse(controllerQty.text) +
-                                                iq;
-                                        product.costPrice =
-                                            double.parse(controllerCp.text);
-                                        product.sellingPrice =
-                                            double.parse(controllerSp.text);
-                                        product.currentQuantity =
-                                            double.parse(controllerQty.text) +
-                                                cq;
-                                        dbHelper
-                                            .updateAvailableProduct(product);
-                                        Fluttertoast.showToast(
-                                            msg: "$name is updated",
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            backgroundColor: Colors.white,
-                                            textColor: Colors.black);
-                                        setState(() {
-                                          getProductsFromDB();
-                                        });
+
+                                        double initialQty = double.parse(controllerQty.text) + iq;
+                                        double currentQty =  double.parse(controllerQty.text) + cq;
+
+                                        updateProduct(
+                                          name.toString(),
+                                          controllerProduct.text.toString(),
+                                          initialQty,
+                                          double.parse(controllerCp.text),
+                                          double.parse(controllerSp.text),
+                                          currentQty);
+
+                                        refreshData();
+
                                         Navigator.of(context)
                                             .pop(); // To close the dialog
                                       },
@@ -492,6 +757,7 @@ class _ProductsState extends State<Products> {
                           ),
                         ),
                       ),
+                      barrierDismissible: false,
                     );
                   },
                 ),
@@ -504,24 +770,92 @@ class _ProductsState extends State<Products> {
   }
 
   void saveNewProduct() {
+    var api = new RestDataSource();
+    var product = AvailableProduct();
     if (this.formKey.currentState.validate()) {
       formKey.currentState.save();
     } else {
       return null;
     }
-    var product = AvailableProduct();
-    product.productName = productName;
-    product.costPrice = costPrice;
-    product.sellingPrice = sellingPrice;
-    product.initialQuantity = initialQuantity;
-    product.currentQuantity = currentQuantity = initialQuantity;
+    try {
+      product.productName = capitalize(productName);
+      product.costPrice = costPrice.toString();
+      product.sellingPrice = sellingPrice.toString();
+      product.initialQuantity = initialQuantity.toString();
+      product.currentQuantity /*= currentQuantity*/ = initialQuantity.toString();
 
-    var dbHelper = DBHelper();
-    dbHelper.addNewAvailableProduct(product);
-    Fluttertoast.showToast(
-        msg: "Product was added",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black);
+      api.addProduct(product).then((value) {
+        Fluttertoast.showToast(
+            msg: "${product.productName} was added",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.white,
+            textColor: Colors.black);
+      }).catchError((Object error) {
+        Fluttertoast.showToast(
+            msg: "${error.toString()}",
+            toastLength: Toast.LENGTH_SHORT,
+            backgroundColor: Colors.white,
+            textColor: Colors.black);
+      });
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(
+          msg: "Error in adding data",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.white,
+          textColor: Colors.black);
+    }
+  }
+
+  void updateProduct(String name, String updateName, double initialQty, double cp, double sp, double currentQty,){
+    var api = new RestDataSource();
+    var product = AvailableProduct();
+
+    try {
+      if(updateName == ""){
+        product.productName = name;
+      }else{
+        product.productName = capitalize(updateName);
+      }
+      product.costPrice = cp.toString();
+      product.sellingPrice = sp.toString();
+      product.initialQuantity = initialQty.toString();
+      product.currentQuantity = currentQty.toString();
+
+      api.updateProduct(product, name);
+
+      Fluttertoast.showToast(
+          msg: "$name is updated",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.white,
+          textColor: Colors.black);
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(
+          msg: "Error in adding data",
+          toastLength: Toast.LENGTH_SHORT,
+          backgroundColor: Colors.white,
+          textColor: Colors.black);
+    }
+  }
+
+  void logout() async {
+    var db = new DatabaseHelper();
+    await db.deleteUsers();
+    getBoolValuesSF();
+  }
+
+  getBoolValuesSF() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool boolValue = prefs.getBool('loggedIn') ?? true;
+    if(boolValue == true){
+      addBoolToSF();
+    }
+  }
+
+  addBoolToSF() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', false);
+    Navigator.of(context).pushReplacementNamed(WelcomeScreen.id);
   }
 }

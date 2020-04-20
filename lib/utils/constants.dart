@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 
+class Constants{
+
+  static const String Create = 'Create a worker';
+
+  static const List<String> choices = <String>[
+    Create,
+  ];
+}
+
 const kTextFieldDecoration = InputDecoration(
   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
   border: OutlineInputBorder(
