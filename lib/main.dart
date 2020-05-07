@@ -31,7 +31,12 @@ class MyApp extends StatelessWidget {
       title: 'Ayo-Lee Enterprises',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        brightness: Brightness.light,
         primarySwatch: Colors.blue,
+      ),
+      darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          //primarySwatch: Colors.blue
       ),
       initialRoute: Splash.id,
       routes: {
