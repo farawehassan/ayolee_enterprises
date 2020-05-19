@@ -106,11 +106,14 @@ class _ProfileState extends State<Profile> {
                       children: <Widget>[
                         Align(
                           alignment: Alignment.center,
-                          child: CircleAvatar(
-                            backgroundColor: Colors.blue,
-                            maxRadius: 80.0,
-                            minRadius: 40.0,
-                            backgroundImage: AssetImage('Assets/images/mum.JPG'),
+                          child: Hero(
+                            tag: 'displayPicture',
+                            child: CircleAvatar(
+                              backgroundColor: Colors.blue,
+                              maxRadius: 80.0,
+                              minRadius: 40.0,
+                              backgroundImage: AssetImage('Assets/images/mum.JPG'),
+                            ),
                           ),
                         ),
                         SizedBox(height: 30.0,),

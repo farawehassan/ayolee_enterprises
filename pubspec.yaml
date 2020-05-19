@@ -22,8 +22,6 @@ dependencies:
   intl: ^0.15.8
   flutter_money_formatter: ^0.8.3
   pie_chart: ^3.1.1
-  charts_flutter: ^0.9.0
-  fl_chart: ^0.9.4
   flutter_sparkline: ^0.1.0
   shared_preferences: ^0.5.6+3
   splashscreen: ^1.2.0

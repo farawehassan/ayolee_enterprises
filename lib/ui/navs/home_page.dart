@@ -298,20 +298,24 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: Drawer(
         child: ListView(
           children: <Widget>[
-            UserAccountsDrawerHeader(
-              accountName: Text("Ayolee Enterprises"),
-              accountEmail: Text("farawebola@gmail.com"),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: AssetImage('Assets/images/mum.JPG'),
-                backgroundColor: Colors.blue,
-              ),
-              onDetailsPressed: (){
-                if(username == 'Farawe'){
-                  Navigator.pushNamed(context, Profile.id);
-                }else{
-                  Navigator.of(context).pop();
-                }
+            GestureDetector(
+              onTap: (){
+                showProfile();
               },
+              child: UserAccountsDrawerHeader(
+                accountName: Text("Ayolee Enterprises"),
+                accountEmail: Text("farawebola@gmail.com"),
+                currentAccountPicture: Hero(
+                  tag: 'displayPicture',
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage('Assets/images/mum.JPG'),
+                    backgroundColor: Colors.blue,
+                  ),
+                ),
+                onDetailsPressed: (){
+                  showProfile();
+                },
+              ),
             ),
             ListTile(
               leading: Icon(Icons.create),
@@ -421,6 +425,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  void showProfile(){
+    if(username == 'Farawe'){
+      Navigator.pushNamed(context, Profile.id);
+    }else{
+      Navigator.of(context).pop();
+    }
   }
 
   void showNullMessage(){
