@@ -153,8 +153,6 @@ class DailyReportList extends StatelessWidget {
     var api = RestDataSource();
     api.deleteReport(report['id']);
 
-    //TODO  DELETE
-
     for (int i = 0; i < productsList.length; i++) {
       if (productsList[i].containsKey(report['productName'])) {
         print(productsList[i]);
