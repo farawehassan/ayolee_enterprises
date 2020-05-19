@@ -50,6 +50,42 @@ class _ProfitChartsState extends State<ProfitCharts> {
     });
   }
 
+  Widget _buildChart(){
+    if(dataMap.length > 0 && dataMap.isNotEmpty){
+      return PieChart(
+        dataMap: dataMap,
+        animationDuration: Duration(milliseconds: 800),
+        chartLegendSpacing: 8.0,
+        chartRadius: MediaQuery.of(context).size.width / 4.7,
+        showChartValuesInPercentage: false,
+        showChartValues: true,
+        showChartValuesOutside: false,
+        chartValueBackgroundColor: Colors.grey[200],
+        colorList: colorList,
+        showLegends: true,
+        legendPosition: LegendPosition.left,
+        decimalPlaces: 1,
+        showChartValueLabel: true,
+        initialAngle: 0,
+        chartValueStyle: defaultChartValueStyle.copyWith(
+          color: Colors.blueGrey[900].withOpacity(0.9),
+        ),
+        chartType: ChartType.disc,
+      );
+    }
+    else{
+      Container();
+    }
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,7 +110,7 @@ class _ProfitChartsState extends State<ProfitCharts> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            '+$average',
+            '+ N$average',
             style: TextStyle(
               fontSize: 18.0,
               color: Colors.blue,
@@ -84,31 +120,7 @@ class _ProfitChartsState extends State<ProfitCharts> {
         ),
         Padding(
           padding: EdgeInsets.all(8.0),
-          child: dataMap.isEmpty
-              ? Container(
-              alignment: AlignmentDirectional.center,
-              child: Text("")
-          )
-              : PieChart(
-            dataMap: dataMap,
-            animationDuration: Duration(milliseconds: 800),
-            chartLegendSpacing: 8.0,
-            chartRadius: MediaQuery.of(context).size.width / 4.7,
-            showChartValuesInPercentage: true,
-            showChartValues: true,
-            showChartValuesOutside: false,
-            chartValueBackgroundColor: Colors.grey[200],
-            colorList: colorList,
-            showLegends: true,
-            legendPosition: LegendPosition.left,
-            decimalPlaces: 1,
-            showChartValueLabel: true,
-            initialAngle: 0,
-            chartValueStyle: defaultChartValueStyle.copyWith(
-              color: Colors.blueGrey[900].withOpacity(0.9),
-            ),
-            chartType: ChartType.disc,
-          ),
+          child: _buildChart(),
         ),
       ],
     );

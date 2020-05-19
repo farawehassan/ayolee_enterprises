@@ -4,6 +4,13 @@ import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter/material.dart';
 import 'future_values.dart';
 
+class Sales {
+  final String year;
+  final int sales;
+
+  Sales(this.year, this.sales);
+}
+
 class PointsLineChart extends StatefulWidget {
 
   static const String id = 'point_line_chart';
@@ -40,6 +47,31 @@ class _PointsLineChartState extends State<PointsLineChart> {
     });
   }
 
+  Widget _buildLineChart(){
+    if(details.length > 0 && details.isNotEmpty){
+      return Sparkline(
+        data: details,
+        lineColor: Colors.lightBlueAccent,
+        fillMode: FillMode.below,
+        fillColor: Colors.white70,
+        pointsMode: PointsMode.all,
+        pointSize: 5.0,
+        pointColor: Colors.white70,
+      );
+    }
+    else{
+      Container();
+    }
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[300]),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -64,20 +96,7 @@ class _PointsLineChartState extends State<PointsLineChart> {
           ),
           Padding(
             padding: const EdgeInsets.all(12.0),
-            child: details.isEmpty || details == null
-              ? Container(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(""),
-                )
-              :Sparkline(
-                data: details,
-                lineColor: Colors.blue[200],
-                fillMode: FillMode.below,
-                fillColor: Colors.white,
-                pointsMode: PointsMode.all,
-                pointSize: 5.0,
-                pointColor: Colors.white70,
-              ),
+            child: _buildLineChart(),
           ),
         ],
       ),

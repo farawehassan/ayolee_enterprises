@@ -200,8 +200,8 @@ class _ProfileState extends State<Profile> {
                   decoration: BoxDecoration(
                     gradient: new LinearGradient(
                       colors: [
-                        Colors.blue[600],
-                        Colors.blue[700]
+                        Colors.blue,
+                        Colors.blueAccent
                       ],
                       begin: const FractionalOffset(0.0, 0.0),
                       end: const FractionalOffset(1.0, 1.0),

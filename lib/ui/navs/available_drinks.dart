@@ -1,8 +1,5 @@
-import 'package:ayolee_stores/database/user_db_helper.dart';
 import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
-import 'package:ayolee_stores/ui/profile_page.dart';
-import 'package:ayolee_stores/ui/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,10 +7,6 @@ import 'package:folding_cell/folding_cell.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'daily/daily_reports.dart';
-import 'home_page.dart';
-import 'monthly/reports_page.dart';
 
 class Products extends StatefulWidget {
   static const String id = 'available_drinks';
@@ -41,16 +34,6 @@ class _ProductsState extends State<Products> {
   List<AvailableProduct> filteredNames = new List();
   Icon _searchIcon = new Icon(Icons.search);
   Widget _appBarTitle = new Text('Available Products');
-
-  String username;
-
-  void getCurrentUser() async {
-    await futureValue.getCurrentUser().then((user) {
-      username = user.name;
-    }).catchError((Object error) {
-      print(error.toString());
-    });
-  }
 
   _ProductsState(){
     _filter.addListener(() {
@@ -163,12 +146,7 @@ class _ProductsState extends State<Products> {
       }
       filteredNames = tempList;
     }
-    if(filteredNames == null || filteredNames.length == 0){
-      return Container(
-          alignment: AlignmentDirectional.center,
-          child: Text("No available products"));
-    }
-    else if(filteredNames.length > 0){
+    if(filteredNames.length > 0 && filteredNames.isNotEmpty){
       return ListView.builder(
         itemCount: names == null ? 0 : filteredNames.length,
         itemBuilder: (BuildContext context, int index) {
@@ -192,9 +170,19 @@ class _ProductsState extends State<Products> {
         },
       );
     }
-    return Container(
-      alignment: AlignmentDirectional.center,
-      child: CircularProgressIndicator(),
+    else{
+      Container(
+        alignment: AlignmentDirectional.center,
+        child: Center(child: Text("No available products")),
+      );
+    }
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+        ),
+      ),
     );
   }
 
@@ -227,127 +215,6 @@ class _ProductsState extends State<Products> {
         onRefresh: _refresh,
         child: Container(
           child: _buildList(),
-        ),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            UserAccountsDrawerHeader(
-              accountName: Text("Ayolee Enterprises"),
-              accountEmail: Text("farawebola@gmail.com"),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: AssetImage('Assets/images/mum.JPG'),
-                backgroundColor:
-                Theme.of(context).platform == TargetPlatform.iOS ? Colors.blue : Colors.white,
-              ),
-              onDetailsPressed: (){
-                if(username == 'Farawe'){
-                  Navigator.pushNamed(context, Profile.id);
-                }else{
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.create),
-              title: Text('Sales Record'),
-              onTap: (){
-                Navigator.pushNamed(context, MyHomePage.id);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.book),
-              title: Text('Available Drinks'),
-              onTap: (){
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.assignment_returned),
-              title: Text('Daily Reports'),
-              onTap: (){
-                Navigator.pushNamed(context, DailyReports.id);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.assignment_returned),
-              title: Text('Monthly Report'),
-              onTap: (){
-                Navigator.pushNamed(context, Reports.id);
-              },
-            ),
-            ListTile(
-              title: Text('Sign Out'),
-              onTap: (){
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => Dialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    elevation: 0.0,
-                    backgroundColor: Colors.white,
-                    child: Container(
-                      height: 150.0,
-                      padding: const EdgeInsets.all(16.0),
-                      child:  Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 16.0),
-                              child: Text(
-                                "Are you sure you want to sign out",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 24.0,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: <Widget>[
-                              Align(
-                                alignment: Alignment.bottomLeft,
-                                child: FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // To close the dialog
-                                  },
-                                  textColor: Colors.blueAccent,
-                                  child: Text('No'),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.bottomRight,
-                                child: FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // To close the dialog
-                                    logout();
-                                  },
-                                  textColor: Colors.blueAccent,
-                                  child: Text('Yes'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -839,23 +706,4 @@ class _ProductsState extends State<Products> {
     }
   }
 
-  void logout() async {
-    var db = new DatabaseHelper();
-    await db.deleteUsers();
-    getBoolValuesSF();
-  }
-
-  getBoolValuesSF() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool boolValue = prefs.getBool('loggedIn') ?? true;
-    if(boolValue == true){
-      addBoolToSF();
-    }
-  }
-
-  addBoolToSF() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('loggedIn', false);
-    Navigator.of(context).pushReplacementNamed(WelcomeScreen.id);
-  }
 }

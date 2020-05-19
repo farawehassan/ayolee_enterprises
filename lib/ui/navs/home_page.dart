@@ -4,9 +4,9 @@ import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:ayolee_stores/ui/receipt/receipt_page.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:ayolee_stores/ui/welcome_screen.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../profile_page.dart';
@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void availableProductNames() {
-    Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
+    Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
     productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         availableProducts.add(value[i].productName);
@@ -85,21 +85,21 @@ class _MyHomePageState extends State<MyHomePage> {
           Flexible(
             child: Container(
               width: 80.0,
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  controller: qtyController,
-                  onChanged: (value) {
-                    setState(() {
-                      quantity = double.parse(value);
-                      details['qty'] = '$quantity';
-                      if(priceController.text != null){
-                        totalPrice = double.parse(priceController.text) * double.parse(qtyController.text);
-                        //total = totalPrice;
-                        totalPriceController.text = totalPrice.toString();
-                        details['totalPrice'] = '$totalPrice';
-                      }
-                    });
-                  },
+              child: TextField(
+                keyboardType: TextInputType.number,
+                controller: qtyController,
+                onChanged: (value) {
+                  setState(() {
+                    quantity = double.parse(value);
+                    details['qty'] = '$quantity';
+                    if(priceController.text != null){
+                      totalPrice = double.parse(priceController.text) * double.parse(qtyController.text);
+                      //total = totalPrice;
+                      totalPriceController.text = totalPrice.toString();
+                      details['totalPrice'] = '$totalPrice';
+                    }
+                  });
+                },
                 decoration: kTextFieldDecoration.copyWith(hintText: '0'),
               ),
             ),
@@ -174,14 +174,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     });
 
-    /*do {
-      detailsList.add(details);
-      details.clear();
-      qtyController.clear();
-      priceController.clear();
-      print(detailsList);
-    } while (details['qty'] != null && details['product'] != null && details['unitPrice'] && null && details['totalPrice'] != null);*/
-
     if(details['qty'].toString().isNotEmpty && details['product'].toString().isNotEmpty && details['unitPrice'].toString().isNotEmpty && details['totalPrice'].toString().isNotEmpty){
       try {
         detailsList.add(details);
@@ -239,12 +231,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => Receipt(sentProducts: detailsList)),
                   );
                 } catch (e) {
-                    print(e);
-                    Fluttertoast.showToast(
-                    msg: "Error in records",
-                    toastLength: Toast.LENGTH_SHORT,
-                    backgroundColor: Colors.white,
-                    textColor: Colors.black);
+                  print(e);
+                  Fluttertoast.showToast(
+                      msg: "Error in records",
+                      toastLength: Toast.LENGTH_SHORT,
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black);
                 }
               }
               else{
@@ -258,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: Padding(
+      body:  Padding(
         padding: EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
         child: Column(
           children: <Widget>[
@@ -311,8 +303,7 @@ class _MyHomePageState extends State<MyHomePage> {
               accountEmail: Text("farawebola@gmail.com"),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: AssetImage('Assets/images/mum.JPG'),
-                backgroundColor:
-                Theme.of(context).platform == TargetPlatform.iOS ? Colors.blue : Colors.white,
+                backgroundColor: Colors.blue,
               ),
               onDetailsPressed: (){
                 if(username == 'Farawe'){

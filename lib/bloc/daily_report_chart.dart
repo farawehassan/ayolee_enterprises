@@ -63,35 +63,50 @@ class _DailyChartState extends State<DailyChart> {
     super.initState();
   }
 
+  Widget _buildChart(){
+    if(dataMap.length > 0 && dataMap.isNotEmpty){
+      return PieChart(
+        dataMap: dataMap,
+        animationDuration: Duration(milliseconds: 800),
+        chartLegendSpacing: 32.0,
+        chartRadius: MediaQuery.of(context).size.width / 2.7,
+        showChartValuesInPercentage: false,
+        showChartValues: true,
+        showChartValuesOutside: false,
+        chartValueBackgroundColor: Colors.grey[200],
+        colorList: colorList,
+        showLegends: true,
+        legendPosition: LegendPosition.right,
+        decimalPlaces: 1,
+        showChartValueLabel: true,
+        initialAngle: 0,
+        chartValueStyle: defaultChartValueStyle.copyWith(
+          color: Colors.blueGrey[900].withOpacity(0.9),
+        ),
+        chartType: ChartType.ring,
+      );
+    }
+    else{
+      Container(
+        alignment: AlignmentDirectional.center,
+        child: Center(child: Text("No sales yet")),
+      );
+    }
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Center(
-        child: dataMap.isEmpty
-            ? Container(
-                alignment: AlignmentDirectional.center,
-                child: Text("No sales yet")
-              )
-            : PieChart(
-          dataMap: dataMap,
-          animationDuration: Duration(milliseconds: 800),
-          chartLegendSpacing: 32.0,
-          chartRadius: MediaQuery.of(context).size.width / 2.7,
-          showChartValuesInPercentage: true,
-          showChartValues: true,
-          showChartValuesOutside: false,
-          chartValueBackgroundColor: Colors.grey[200],
-          colorList: colorList,
-          showLegends: true,
-          legendPosition: LegendPosition.right,
-          decimalPlaces: 1,
-          showChartValueLabel: true,
-          initialAngle: 0,
-          chartValueStyle: defaultChartValueStyle.copyWith(
-            color: Colors.blueGrey[900].withOpacity(0.9),
-          ),
-          chartType: ChartType.disc,
-        ),
+        child: _buildChart(),
       ),
     );
   }

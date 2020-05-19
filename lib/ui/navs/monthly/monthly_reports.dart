@@ -133,18 +133,16 @@ class _MonthReportState extends State<MonthReport> {
       }
       filteredSales = tempList;
     }
-    if(filteredSales == null || filteredSales.length == 0){
-      return Container(
-          alignment: AlignmentDirectional.center,
-          child: Text("No sales yet"));
-    }
-    else if(filteredSales.length > 0){
+    if(filteredSales.length > 0 && filteredSales.isNotEmpty){
       return dataTable(filteredSales);
     }
-    return Container(
-      alignment: AlignmentDirectional.center,
-      child: CircularProgressIndicator(),
-    );
+    else{
+      Container(
+        alignment: AlignmentDirectional.center,
+        child: Center(child: Text("No sales yet")),
+      );
+    }
+    return Container();
   }
 
   FlutterMoneyFormatter money(double value){

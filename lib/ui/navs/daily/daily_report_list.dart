@@ -126,14 +126,19 @@ class DailyReportList extends StatelessWidget {
                       }
                       return dataTable(reports);
                     }
-                    else if(snapshot.data == null || snapshot.data.length == 0){
-                      return Container(
-                          alignment: AlignmentDirectional.center,
-                          child: Text("No sales yet"));
+                    else {
+                      Container(
+                        alignment: AlignmentDirectional.center,
+                        child: Text("No sales yet")
+                      );
                     }
-                    return Container(
-                      alignment: AlignmentDirectional.center,
-                      child: CircularProgressIndicator(),
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                        ),
+                      ),
                     );
                   },
                 ),
