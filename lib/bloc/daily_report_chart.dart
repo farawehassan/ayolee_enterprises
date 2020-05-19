@@ -29,6 +29,7 @@ class _DailyChartState extends State<DailyChart> {
   void getReports() async {
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
     await report.then((value) {
+      if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           if(reportValue.checkIfToday(value[i].time)){

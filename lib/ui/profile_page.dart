@@ -37,6 +37,7 @@ class _ProfileState extends State<Profile> {
   void getStoreValues() async {
     Future<StoreDetails> details = futureValue.availableProducts();
     await details.then((value) {
+      if (!mounted) return;
       setState(() {
         cpNetWorth = money(value.cpNetWorth).output.symbolOnLeft;
         spNetWorth = money(value.spNetWorth).output.symbolOnLeft;
@@ -48,6 +49,7 @@ class _ProfileState extends State<Profile> {
   void getReports() async {
     Future<List<LinearSales>> report = futureValue.getYearReports();
     await report.then((value) {
+      if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           totalProfit += value[i].profit;

@@ -22,8 +22,6 @@ class _MonthReportState extends State<MonthReport> {
 
   var futureValue = FutureValues();
 
-  //List<Map> reports = [];
-
   double totalSalesPrice = 0.0;
 
   double availableCash = 0.0;
@@ -40,12 +38,14 @@ class _MonthReportState extends State<MonthReport> {
   _MonthReportState(){
     _filter.addListener(() {
       if (_filter.text.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _searchText = "";
           filteredSales = sales;
         });
       }
       else {
+        if (!mounted) return;
         setState(() {
           _searchText = _filter.text;
         });
@@ -70,6 +70,7 @@ class _MonthReportState extends State<MonthReport> {
       }
       totalSalesPrice = availableCash + totalTransfer;
     });
+    if (!mounted) return;
     setState(() {
       sales = tempList;
       filteredSales = sales;
@@ -77,6 +78,7 @@ class _MonthReportState extends State<MonthReport> {
   }
 
   void _searchPressed() {
+    if (!mounted) return;
     setState(() {
       if (this._searchIcon.icon == Icons.search) {
         this._searchIcon = new Icon(Icons.close);

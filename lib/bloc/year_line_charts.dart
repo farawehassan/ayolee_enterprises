@@ -38,6 +38,7 @@ class _PointsLineChartState extends State<PointsLineChart> {
   void getReports() async {
     Future<List<LinearSales>> report = futureValue.getYearReports();
     await report.then((value) {
+      if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           details.add(value[i].sales);

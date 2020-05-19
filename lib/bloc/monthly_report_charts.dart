@@ -54,6 +54,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     print(widget.month);
     Future<List<DailyReportsData>> report = futureValue.getMonthReports(widget.month);
     await report.then((value) {
+      if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           calculateProfit(value[i]);
@@ -84,6 +85,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
           print(profitMade);
         }
       }
+      if (!mounted) return;
       setState(() {
         totalProfitMade += profitMade;
       });

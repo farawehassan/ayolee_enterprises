@@ -65,6 +65,7 @@ class _DailyReportsState extends State<DailyReports> {
           print(profitMade);
         }
       }
+      if (!mounted) return;
       setState(() {
         totalProfitMade += profitMade;
       });
@@ -74,6 +75,7 @@ class _DailyReportsState extends State<DailyReports> {
   void getReports() async {
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
     await report.then((value) {
+      if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           if(reportValue.checkIfToday(value[i].time)){

@@ -38,12 +38,14 @@ class _ProductsState extends State<Products> {
   _ProductsState(){
     _filter.addListener(() {
       if (_filter.text.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _searchText = "";
           filteredNames = names;
         });
       }
       else {
+        if (!mounted) return;
         setState(() {
           _searchText = _filter.text;
         });
@@ -83,6 +85,7 @@ class _ProductsState extends State<Products> {
   }
 
   void refreshData(){
+    if (!mounted) return;
     setState(() {
       _getNames();
     });
@@ -96,6 +99,7 @@ class _ProductsState extends State<Products> {
         tempList.add(value[i]);
       }
     });
+    if (!mounted) return;
     setState(() {
       names = tempList;
       filteredNames = names;
@@ -103,6 +107,7 @@ class _ProductsState extends State<Products> {
   }
 
   void _searchPressed() {
+    if (!mounted) return;
     setState(() {
       if (this._searchIcon.icon == Icons.search) {
         this._searchIcon = new Icon(Icons.close);
@@ -192,6 +197,11 @@ class _ProductsState extends State<Products> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<Null> _refresh() {
     List<AvailableProduct> tempList = new List();
     Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
@@ -199,6 +209,7 @@ class _ProductsState extends State<Products> {
       for (int i = 0; i < value.length; i++){
         tempList.add(value[i]);
       }
+      if (!mounted) return;
       setState(() {
         names = tempList;
         filteredNames = names;

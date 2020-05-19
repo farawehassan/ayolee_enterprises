@@ -30,6 +30,7 @@ class _ProfitChartsState extends State<ProfitCharts> {
   void getReports() async {
     Future<List<LinearSales>> report = futureValue.getYearReports();
     await report.then((value) {
+      if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           profitMade.add(value[i].profit);
@@ -40,6 +41,7 @@ class _ProfitChartsState extends State<ProfitCharts> {
   }
 
   void getQuarterlyMonth(){
+    if (!mounted) return;
     setState(() {
       dataMap['Q1'] = profitMade[0] + profitMade[1] + profitMade[2];
       dataMap['Q2'] = profitMade[3] + profitMade[4] + profitMade[5];
