@@ -13,22 +13,26 @@ import 'ui/profile_page.dart';
 import 'ui/register/create_worker.dart';
 import 'ui/splash.dart';
 
+/// Enabling platform override for desktop
 void enablePlatformOverrideForDesktop() {
   if (!kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
 }
 
+/// Function to call my main application [MyApp()]
+/// and [enablePlatformOverrideForDesktop()]
 void main() {
   enablePlatformOverrideForDesktop();
   runApp(MyApp());
 }
 
+/// A StatelessWidget class to hold basic details and routes of my application
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ayo-Lee Enterprises',
+      title: 'Ayo-Lee Stores',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.light,

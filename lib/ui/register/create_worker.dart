@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
+/// A StatefulWidget class that creates a new user (worker) that can have access
+/// to read and write data in the application except from viewing the business's
+/// profile [Profile]
 class CreateWorker extends StatefulWidget {
 
   static const String id = 'create_worker_page';
@@ -15,13 +18,28 @@ class CreateWorker extends StatefulWidget {
 
 class _CreateWorkerState extends State<CreateWorker> {
 
+  /// A [GlobalKey] to hold the form state of my form widget for form validation
   final _formKey = GlobalKey<FormState>();
+
+  /// A [TextEditingController] to control the input text for the user's name
   TextEditingController _nameController = new TextEditingController();
+
+  /// A [TextEditingController] to control the input text for the user's phone
   TextEditingController _phoneController = new TextEditingController();
+
+  /// A [TextEditingController] to control the input text for the user's pin
   TextEditingController _pinController = new TextEditingController();
+
+  /// A [TextEditingController] to control the input text for the user's
+  /// confirmation pin
   TextEditingController _confirmPinController = new TextEditingController();
+
+  /// A boolean variable to hold the [inAsyncCall] value in my
+  /// [ModalProgressHUD] widget
   bool showSpinner = false;
 
+  /// Method to capitalize the first letter of each word in a productName [string]
+  /// while adding a new product or updating a particular product
   String capitalize(String string) {
     String result = '';
 
@@ -152,6 +170,8 @@ class _CreateWorkerState extends State<CreateWorker> {
     );
   }
 
+  /// Function that creates a new user by calling
+  /// [signUp] in the [RestDataSource] class
   void createUser(String name, String phoneNumber, String pin, String confirmPin){
     var user = CreateUser();
     var api = new RestDataSource();

@@ -7,23 +7,29 @@ import 'package:ayolee_stores/networking/rest_data.dart';
 import 'daily_report_value.dart';
 import 'package:ayolee_stores/model/linear_sales.dart';
 
+/// A class to handle my asynchronous methods linking to the server or database
 class FutureValues{
 
-  /// Method to get all the current user
+  /// Method to get the current [user] in the database using the
+  /// [DatabaseHelper] class
   Future<User> getCurrentUser() async {
     var dbHelper = DatabaseHelper();
     Future<User> user = dbHelper.getUser();
     return user;
   }
 
-  /// Method to get all the products from database
+  /// Method to get all the products from the database in the server with
+  /// the help of [RestDataSource]
+  /// It returns a list of [AvailableProduct]
   Future<List<AvailableProduct>> getProductFromDB() async {
     var data = RestDataSource();
     Future<List<AvailableProduct>> availableProduct = data.fetchAllProducts();
     return availableProduct;
   }
 
-  /// Method to get all the available products from database
+  /// Method to get all the products from the database in the server that its
+  /// [currentQuantity] is not 0 with the help of [RestDataSource]
+  /// It returns a list of [AvailableProduct]
   Future<List<AvailableProduct>> getProductsFromDB() async {
     var data = RestDataSource();
     List<AvailableProduct> products = new List();
@@ -34,25 +40,35 @@ class FutureValues{
           products.add(value[i]);
         }
       }
+    }).catchError((e){
+      throw e;
     });
     return products;
   }
 
-  /// Method to get daily reports from database
+  /// Method to get all the reports from the database in the server with
+  /// the help of [RestDataSource]
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getDailyReportsFromDB() async {
     var data = RestDataSource();
     Future<List<DailyReportsData>> dailyReportData = data.fetchAllReports();
     return dailyReportData;
   }
 
-  /// Method to get today's reports from daily reports
+  /// Method to get today's reports from [DailyReportValue] based on time by
+  /// calling the [getTodayReport]
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getTodayReports() async {
     var reportValue = DailyReportValue();
     Future<List<DailyReportsData>> todayReport = reportValue.getTodayReport();
     return todayReport;
   }
 
-  /// Method to get all the available products details
+  /// Method to get all the store details such as:
+  ///   cost price net worth [cpNetWorth] += [costPrice] * [currentQuantity]
+  ///   selling price net worth [spNetWorth] += [costPrice] * [currentQuantity]
+  ///   number of product items [numberOfItems] += [currentQuantity]
+  /// It returns a model of [StoreDetails]
   Future<StoreDetails> availableProducts() async {
     StoreDetails storeDetails = new StoreDetails();
     double cpNetWorth = 0;
@@ -72,7 +88,11 @@ class FutureValues{
     return storeDetails;
   }
 
-  /// Method to calculate profit of a report
+  /// Method to calculate profit made of a report by deducting the report's
+  /// [unitPrice] from the product's [costPrice] and multiplying the value by the
+  /// report's [quantity]
+  /// It is done if the report's [paymentMode] is not 'Iya Bimbo'
+  /// or else it returns 0
   Future<double> calculateProfit(DailyReportsData data) async {
     double profitMade = 0.0;
     Future<List<AvailableProduct>> products = getProductFromDB();
@@ -89,7 +109,11 @@ class FutureValues{
     return profitMade;
   }
 
-  /// Method to get report of a year
+  /// Method to get report of a year by accumulating the report of each month
+  /// using the [LinearSales] model by calculating the [totalSales] as the
+  /// sum of every [totalPrice] in the [DailyReportValue] if its [paymentMode]
+  /// != 'Iya Bimbo' and also calculating the profit using [calculateProfit()] function
+  /// It returns a list of [LinearSales]
   Future<List<LinearSales>> getYearReports() async {
     List<LinearSales> sales = new List();
     var reportValue = DailyReportValue();
@@ -338,7 +362,8 @@ class FutureValues{
 
   }
 
-  /// Method to get report of a month
+  /// Method to get report of a [month] using the class [DailyReportValue]
+  /// /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getMonthReports(String month) {
     var reportValue = DailyReportValue();
 

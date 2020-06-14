@@ -6,13 +6,15 @@ import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
+/// A StatefulWidget class creating a pie chart for my monthly report records
 class MonthlyReportCharts extends StatefulWidget {
-
-  MonthlyReportCharts({@required this.month});
 
   static const String id = 'monthly_report_charts';
 
+  /// Passing the month to load its data in this class constructor
   final String month;
+
+  MonthlyReportCharts({@required this.month});
 
   @override
   _MonthlyReportChartsState createState() => _MonthlyReportChartsState();
@@ -20,22 +22,34 @@ class MonthlyReportCharts extends StatefulWidget {
 
 class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
 
+  /// Instantiating a class of the [DailyReportValue]
   var reportValue = DailyReportValue();
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
+  /// A variable holding the list of primary colors and accents colors
   List<Color> colours = (Colors.primaries.cast<Color>() + Colors.accents.cast<Color>());
 
+  /// A variable holding my daily report data as a map
   var data = {};
 
-  Map<String, double> dataMap = Map();
+  /// Creating a map to my [data]'s product name to it's quantity for my charts
+  Map<String, double> dataMap = new Map();
 
+  /// A variable holding the list of colors needed for my pie chart
   List<Color> colorList = [];
 
+  /// A variable holding the total profit made
   double totalProfitMade = 0.0;
 
+  /// A variable holding the length my daily report data
+  int _dataLength;
+
+  /// Variable to hold the name of the user logged in
   String username;
 
+  /// Setting the current user's name logged in to [_username]
   void getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
       username = user.name;
@@ -44,18 +58,23 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     });
   }
 
+  /// Convert a double [value] to naira
   FlutterMoneyFormatter money(double value){
     FlutterMoneyFormatter val;
     val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
     return val;
   }
 
+  /// Function to get this [month] report and map [data] it's product name to
+  /// its quantity accordingly
+  /// It also calls the function [getColors()]
   void getReports() async {
     print(widget.month);
     Future<List<DailyReportsData>> report = futureValue.getMonthReports(widget.month);
     await report.then((value) {
       if (!mounted) return;
       setState(() {
+        _dataLength = value.length;
         for(int i = 0; i < value.length; i++){
           calculateProfit(value[i]);
           if(data.containsKey(value[i].productName)){
@@ -70,6 +89,11 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     getColors();
   }
 
+  /// Method to calculate profit made of a report by deducting the report's
+  /// [unitPrice] from the product's [costPrice] and multiplying the value by the
+  /// report's [quantity]
+  /// It is done if the report's [paymentMode] is not 'Iya Bimbo'
+  /// or else it returns 0
   void calculateProfit(DailyReportsData data) async {
     double profitMade = 0.0;
     Future<List<AvailableProduct>> products = futureValue.getProductFromDB();
@@ -92,6 +116,8 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     });
   }
 
+  /// Function to get the amount of colors needed for the pie chart and map
+  /// [data] to [dataMap]
   void getColors() {
     for(int i = 0; i < data.length; i++){
       colorList.add(colours[i]);
@@ -101,6 +127,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     });
   }
 
+  /// It calls [getReports()] and [getCurrentUser()] while initializing my state
   @override
   void initState() {
     super.initState();
@@ -108,6 +135,8 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     getCurrentUser();
   }
 
+  /// Function to build my pie chart if dataMap is not empty and it's length is
+  /// > 0 using pie_chart package
   Widget _buildChart(){
     if(dataMap.length > 0 && dataMap.isNotEmpty){
       return PieChart(
@@ -131,8 +160,8 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
         chartType: ChartType.ring,
       );
     }
-    else{
-      Container(
+    else if(_dataLength == 0){
+      return Container(
         alignment: AlignmentDirectional.center,
         child: Center(child: Text("No sales yet")),
       );
@@ -147,6 +176,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     );
   }
 
+  /// It doesn't show user's [totalProfitMade] if the [username] is not 'Farawe'
   @override
   Widget build(BuildContext context) {
     return Container(

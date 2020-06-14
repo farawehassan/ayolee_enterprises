@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:ayolee_stores/utils/reusable_card.dart';
 import 'monthly_reports.dart';
 
+/// A StatelessWidget class that displays all the months in a year
 // ignore: must_be_immutable
 class Reports extends StatelessWidget {
 
   static const String id = 'reports_page';
   var futureValue = FutureValues();
 
+  /// Instantiating a class of the [FutureValues]
   @override
   Widget build(context) {
     return Scaffold(

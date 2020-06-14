@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
 
+/// A [ReusableCard] StatelessWidget class to build a card
 class ReusableCard extends StatelessWidget {
   ReusableCard({this.cardChild, this.onPress});
 
@@ -22,8 +23,10 @@ class ReusableCard extends StatelessWidget {
       ),
     );
   }
+
 }
 
+/// A [ProfileCard] StatelessWidget class to build a dynamic profile card
 class ProfileCard extends StatelessWidget {
 
   ProfileCard({this.cardChild});

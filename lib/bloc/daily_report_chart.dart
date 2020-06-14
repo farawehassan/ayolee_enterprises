@@ -4,6 +4,7 @@ import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/model/daily_reportsDB.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
 
+/// A StatefulWidget class creating a pie chart for my daily report records
 class DailyChart extends StatefulWidget {
 
   static const String id = 'daily_chart';
@@ -14,25 +15,39 @@ class DailyChart extends StatefulWidget {
 
 class _DailyChartState extends State<DailyChart> {
 
+  /// Instantiating a class of the [DailyReportValue]
   var reportValue = DailyReportValue();
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
+  /// A variable holding the list of primary colors and accents colors
   List<Color> colours = (Colors.primaries.cast<Color>() + Colors.accents.cast<Color>());
 
+  /// A variable holding my daily report data as a map
   var data = {};
 
+  /// Creating a map to my [data]'s product name to it's quantity for my charts
   Map<String, double> dataMap = Map();
 
+  /// A variable holding the length my daily report data
+  int _dataLength;
+
+  /// A variable holding the list of colors needed for my pie chart
   List<Color> colorList = [];
 
+  /// Function to get today's report and map [data] it's product name to
+  /// its quantity accordingly
+  /// It also calls the function [getColors()]
   void getReports() async {
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
     await report.then((value) {
       if (!mounted) return;
       setState(() {
+        _dataLength = 0;
         for(int i = 0; i < value.length; i++){
           if(reportValue.checkIfToday(value[i].time)){
+            _dataLength += 1;
             if(data.containsKey(value[i].productName)){
               data[value[i].productName] = (double.parse(data[value[i].productName]) + double.parse(value[i].quantity)).toString();
             }else{
@@ -43,27 +58,30 @@ class _DailyChartState extends State<DailyChart> {
         print(data);
       });
     });
+    print(_dataLength);
     getColors();
   }
 
+  /// Function to get the amount of colors needed for the pie chart and map
+  /// [data] to [dataMap]
   void getColors() {
     for(int i = 0; i < data.length; i++){
       colorList.add(colours[i]);
     }
-    print(data);
-    print(colorList);
     data.forEach((k,v) {
       dataMap.putIfAbsent("$k", () => double.parse('$v'));
     });
-    print(dataMap);
   }
 
+  /// It calls [getReports()] while initializing my state
   @override
   void initState() {
-    getReports();
     super.initState();
+    getReports();
   }
 
+  /// Function to build my pie chart if dataMap is not empty and it's length is
+  /// > 0 using pie_chart package
   Widget _buildChart(){
     if(dataMap.length > 0 && dataMap.isNotEmpty){
       return PieChart(
@@ -87,8 +105,8 @@ class _DailyChartState extends State<DailyChart> {
         chartType: ChartType.ring,
       );
     }
-    else{
-      Container(
+    else if(_dataLength == 0){
+      return Container(
         alignment: AlignmentDirectional.center,
         child: Center(child: Text("No sales yet")),
       );

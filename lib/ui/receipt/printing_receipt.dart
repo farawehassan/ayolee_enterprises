@@ -12,10 +12,12 @@ import 'package:image/image.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:esc_pos_printer/esc_pos_printer.dart';
 
+///
 class PrintingReceipt extends StatefulWidget {
 
   static const String id = 'printing_receipt';
 
+  /// Passing the products recorded in this class constructor
   final List<Map> sentProducts;
 
   PrintingReceipt({@required this.sentProducts});
@@ -26,16 +28,32 @@ class PrintingReceipt extends StatefulWidget {
 
 class _PrintingReceiptState extends State<PrintingReceipt> {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
+
+  /// A List to hold the Map of [sentProducts]
   List<Map> receivedProducts = [];
+
+  /// A Map to hold the details of a sales record
   Map products = {};
+
+  /// A List to hold the Map of the data above
   List<Map> productsList = [];
+
+  /// Variable holding the total price
   double totalPrice = 0.0;
 
+  /// A class [PrinterBluetoothManager] to handle bluetooth connection and
+  /// sending of receipt through the package [esc_pos_printer]
   PrinterBluetoothManager printerManager = PrinterBluetoothManager();
+
+  /// A list of [PrinterBluetooth] holding the bluetooth devices
+  /// available around you
   List<PrinterBluetooth> _devices = [];
 
-  void addProducts() {
+  /// This adds the product details [sentProducts] to [receivedProducts] if it's
+  /// not empty and calculate the total price [totalPrice]
+  void _addProducts() {
     for (var product in widget.sentProducts) {
       if (product.isNotEmpty)  {
         receivedProducts.add(product);
@@ -44,7 +62,9 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
     }
   }
 
-  void availableProductNames() {
+  /// Function to fetch all the available product's names from the database to
+  /// [availableProducts]
+  void _availableProductNames() {
     Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
     productNames.then((value) {
       for (int i = 0; i < value.length; i++) {
@@ -57,19 +77,24 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
     });
   }
 
+  /// Calls [_addProducts()] and [_availableProductNames()]
+  /// before the class builds its widgets
   @override
   void initState() {
     super.initState();
-    addProducts();
-    availableProductNames();
+    _addProducts();
+    _availableProductNames();
   }
 
-  FlutterMoneyFormatter money(double value){
+  /// Convert a double [value] to naira
+  FlutterMoneyFormatter _money(double value){
     FlutterMoneyFormatter val;
     val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
     return val;
   }
 
+  /// Function to build a ticket of [receivedProducts] using the
+  /// package [esc_pos_printer]
   Future<Ticket> showReceipt() async{
     Ticket ticket = Ticket(PaperSize.mm58);
 
@@ -125,7 +150,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
             width: PosTextSize.size2,
           )),
       PosColumn(
-          text: '${money(totalPrice).output.symbolOnLeft}',
+          text: '${_money(totalPrice).output.symbolOnLeft}',
           width: 6,
           styles: PosStyles(
             align: PosTextAlign.right,
@@ -357,6 +382,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
     );
   }
 
+  /// Using flutter toast to display a toast message [message]
   void showMessage(String message){
     Fluttertoast.showToast(
         msg: "$message",
@@ -365,6 +391,8 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
         textColor: Colors.black);
   }
 
+  /// This function calls [saveNewDailyReport()] with the details in
+  /// [receivedProducts]
   void saveProduct(String paymentMode){
     for (var product in receivedProducts) {
       try {
@@ -388,6 +416,8 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
     Navigator.pushReplacementNamed(context, MyHomePage.id);
   }
 
+  /// Function that adds new report to the database by calling
+  /// [addNewDailyReport] in the [RestDataSource] class
   void saveNewDailyReport(double qty, String productName, double unitPrice,
       double total, String paymentMode) {
     try {

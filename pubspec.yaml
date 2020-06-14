@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^0.1.2
+  connectivity: ^0.4.8+6
   font_awesome_flutter: ^8.5.0
   flutter_typeahead: ^1.7.0
   folding_cell: ^0.1.2
@@ -24,7 +25,6 @@ dependencies:
   pie_chart: ^3.1.1
   flutter_sparkline: ^0.1.0
   shared_preferences: ^0.5.6+3
-  splashscreen: ^1.2.0
   #esc_pos_printer: ^3.1.6
   esc_pos_printer: ^2.1.2
   http: ^0.12.0+4

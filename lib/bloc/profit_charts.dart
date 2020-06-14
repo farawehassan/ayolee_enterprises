@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'future_values.dart';
 
+/// A StatefulWidget class creating a pie chart for my quarterly month profits
 class ProfitCharts extends StatefulWidget {
 
   static const String id = 'profit_charts';
@@ -13,8 +14,10 @@ class ProfitCharts extends StatefulWidget {
 
 class _ProfitChartsState extends State<ProfitCharts> {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
+  /// A variable holding the list of colors needed for my pie chart
   List<Color> colorList = [
     Color(0xff4285F4),
     Color(0xfff3af00),
@@ -22,9 +25,13 @@ class _ProfitChartsState extends State<ProfitCharts> {
     Color(0xff40b24b),
   ];
 
+  /// A variable holding the list total profit made
   List<double> profitMade = [];
+
+  /// A variable holding my average value for all the month
   double average = 0;
 
+  /// Creating a map to my data's product name to it's quantity for my pie chart
   Map<String, double> dataMap = Map();
 
   void getReports() async {
@@ -40,6 +47,8 @@ class _ProfitChartsState extends State<ProfitCharts> {
     getQuarterlyMonth();
   }
 
+  /// Function to set all the month's profit made and
+  /// calculate its average quarterly
   void getQuarterlyMonth(){
     if (!mounted) return;
     setState(() {
@@ -52,6 +61,8 @@ class _ProfitChartsState extends State<ProfitCharts> {
     });
   }
 
+  /// Function to build my pie chart if dataMap is not empty and it's length is
+  /// > 0 using pie_chart package
   Widget _buildChart(){
     if(dataMap.length > 0 && dataMap.isNotEmpty){
       return PieChart(
@@ -88,6 +99,7 @@ class _ProfitChartsState extends State<ProfitCharts> {
     );
   }
 
+  /// It calls [getReports()] while initializing my state
   @override
   void initState() {
     super.initState();

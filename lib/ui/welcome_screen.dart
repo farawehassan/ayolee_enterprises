@@ -3,6 +3,7 @@ import 'package:ayolee_stores/ui/register/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'navs/home_page.dart';
 
+/// A StatefulWidget class that checks whether a user is logged in
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
   @override
@@ -17,6 +18,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Container();
   }
 
+  /// This function that checks whether a user is logged in with
+  /// a [SharedPreferences] value of bool
+  /// It navigates to [MyHomePage] if the value is true and [LoginScreen]
+  /// if the value is false
   void getBoolValuesSF() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool boolValue = prefs.getBool('loggedIn');

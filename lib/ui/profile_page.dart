@@ -10,6 +10,8 @@ import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:ayolee_stores/bloc/year_line_charts.dart';
 import 'package:ayolee_stores/bloc/profit_charts.dart';
 
+/// A StatefulWidget class that displays the business's profile
+/// only the admin can have access to this page
 class Profile extends StatefulWidget {
 
   static const String id = 'profile_page';
@@ -20,49 +22,62 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
-  String cpNetWorth = '';
-  String spNetWorth = '';
-  double numberOfItems = 0.0;
+  /// A string value to hold the cost price net worth of the products
+  String _cpNetWorth= '';
 
-  double totalProfit = 0.0;
+  /// A string value to hold the selling price net worth of the products
+  String _spNetWorth = '';
 
-  FlutterMoneyFormatter money(double value){
+  /// A double value to hold the total number of items available
+  double _numberOfItems = 0.0;
+
+  /// A double value to hold the total profit made so far
+  double _totalProfit = 0.0;
+
+  /// Convert a double [value] to naira
+  FlutterMoneyFormatter _money(double value){
     FlutterMoneyFormatter val;
     val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
     return val;
   }
 
-  void getStoreValues() async {
+  /// A function to set the values [_cpNetWorth], [_spNetWorth], [_numberOfItems],
+  /// from the [StoreDetails] model fetching from the database
+  void _getStoreValues() async {
     Future<StoreDetails> details = futureValue.availableProducts();
     await details.then((value) {
       if (!mounted) return;
       setState(() {
-        cpNetWorth = money(value.cpNetWorth).output.symbolOnLeft;
-        spNetWorth = money(value.spNetWorth).output.symbolOnLeft;
-        numberOfItems = value.numberOfItems;
+        _cpNetWorth = _money(value.cpNetWorth).output.symbolOnLeft;
+        _spNetWorth = _money(value.spNetWorth).output.symbolOnLeft;
+        _numberOfItems = value.numberOfItems;
       });
     });
   }
 
-  void getReports() async {
+  /// A function to calculate and set the value for [_totalProfit]
+  /// from the [LinearSales] model fetching from the database
+  void _getReports() async {
     Future<List<LinearSales>> report = futureValue.getYearReports();
     await report.then((value) {
       if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
-          totalProfit += value[i].profit;
+          _totalProfit += value[i].profit;
         }
       });
     });
   }
 
+  /// Calling [_getStoreValues()] and [_getReports()] before the page loads
   @override
   void initState() {
     super.initState();
-    getStoreValues();
-    getReports();
+    _getStoreValues();
+    _getReports();
   }
 
   @override
@@ -158,7 +173,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                               ),
                               Text(
-                                '$cpNetWorth',
+                                '$_cpNetWorth',
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   color: Colors.blue,
@@ -177,7 +192,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                               ),
                               Text(
-                                '$spNetWorth',
+                                '$_spNetWorth',
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   color: Colors.blue,
@@ -266,7 +281,7 @@ class _ProfileState extends State<Profile> {
                                 Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Text(
-                                      '${money(totalProfit).output.symbolOnLeft}',
+                                      '${_money(_totalProfit).output.symbolOnLeft}',
                                       style: TextStyle(
                                         fontSize: 20.0,
                                         color: Colors.blue,
@@ -291,7 +306,7 @@ class _ProfileState extends State<Profile> {
                                 Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Text(
-                                      '$numberOfItems',
+                                      '$_numberOfItems',
                                       style: TextStyle(
                                         fontSize: 20.0,
                                         color: Colors.blue,
@@ -315,6 +330,8 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  /// A function to set the routes to navigate to when an option is pressed with
+  /// the value [choice]
   void choiceAction(String choice){
     if(choice == Constants.Create){
       Navigator.pushNamed(context, CreateWorker.id);

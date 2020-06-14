@@ -2,41 +2,44 @@ import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:ayolee_stores/model/daily_reportsDB.dart';
 import 'future_values.dart';
 
+/// A class to handle methods needed with daily report records in the database
 class DailyReportValue{
 
+  /// Variable [now] holding today's current date time
   static DateTime now = DateTime.now();
 
+  /// Variable to hold today's date in year, month and day
   final today = DateTime(now.year, now.month, now.day);
 
+  /// Variable to hold today's date in weekday
   final weekday = DateTime(now.weekday);
 
-  static double totalSalesPrice = 0.0;
-
-  static double availableCash = 0.0;
-
-  static double totalTransfer = 0.0;
-
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
-  /// Method to return today's date
+  /// Method to format a string value [dateTime] to a [DateTime]
+  /// of year, month and day only
   DateTime getFormattedDay(String dateTime) {
     DateTime day = DateTime.parse(dateTime);
     return DateTime(day.year, day.month, day.day);
   }
 
-  /// Method to return today's week
+  /// Method to format a string value [dateTime] to a [DateTime]
+  /// of weekday only
   DateTime getFormattedWeek(String dateTime) {
     DateTime day = DateTime.parse(dateTime);
     return DateTime(day.weekday);
   }
 
-  /// Method to return today's month
+  /// Method to format a string value [dateTime] to a [DateTime]
+  /// of year and month only
   DateTime getFormattedMonth(String dateTime) {
     DateTime day = DateTime.parse(dateTime);
     return DateTime(day.year, day.month);
   }
 
   /// Method to check if a date is today
+  /// It returns true if it is and false if it's not
   bool checkIfToday(String dateTime){
     if(getFormattedDay(dateTime) == today){
       return true;
@@ -45,6 +48,7 @@ class DailyReportValue{
   }
 
   /// Method to check if a date is this month
+  /// It returns true if it is and false if it's not
   bool checkMonth(String dateTime, DateTime month){
     if(getFormattedMonth(dateTime) == month){
       return true;
@@ -52,6 +56,11 @@ class DailyReportValue{
     return false;
   }
 
+  /// Method to calculate profit made of a report by deducting the report's
+  /// [unitPrice] from the product's [costPrice] and multiplying the value by the
+  /// report's [quantity]
+  /// It is done if the report's [paymentMode] is not 'Iya Bimbo'
+  /// or else it returns 0
   Future<double> calculateProfit(List<DailyReportsData> data) async {
     double totalProfitMade = 0.0;
     Future<List<AvailableProduct>> products = futureValue.getProductFromDB();
@@ -74,6 +83,7 @@ class DailyReportValue{
   }
 
   /// Method to get today's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getTodayReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -95,6 +105,7 @@ class DailyReportValue{
   }
 
   /// Method to get January's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getJanReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -116,6 +127,7 @@ class DailyReportValue{
   }
 
   /// Method to get February's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getFebReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -137,6 +149,7 @@ class DailyReportValue{
   }
 
   /// Method to get March's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getMarReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -158,6 +171,7 @@ class DailyReportValue{
   }
 
   /// Method to get April's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getAprReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -179,6 +193,7 @@ class DailyReportValue{
   }
 
   /// Method to get May's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getMayReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -200,6 +215,7 @@ class DailyReportValue{
   }
 
   /// Method to get June's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getJunReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -221,6 +237,7 @@ class DailyReportValue{
   }
 
   /// Method to get July's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getJulReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -242,6 +259,7 @@ class DailyReportValue{
   }
 
   /// Method to get August's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getAugReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -263,6 +281,7 @@ class DailyReportValue{
   }
 
   /// Method to get September's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getSepReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -284,6 +303,7 @@ class DailyReportValue{
   }
 
   /// Method to get October's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getOctReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -305,6 +325,7 @@ class DailyReportValue{
   }
 
   /// Method to get November's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getNovReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
@@ -326,6 +347,7 @@ class DailyReportValue{
   }
 
   /// Method to get December's report based on time
+  /// It returns a list of [DailyReportsData]
   Future<List<DailyReportsData>> getDecReport() async {
     List<DailyReportsData> reports = new List();
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();

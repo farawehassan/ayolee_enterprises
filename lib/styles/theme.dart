@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 
+/// A class for setting themes for color gradients
 class ColorGradients {
 
   const ColorGradients();

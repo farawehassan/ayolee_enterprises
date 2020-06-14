@@ -1,19 +1,86 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:splashscreen/splashscreen.dart';
 import 'welcome_screen.dart';
 
-class Splash extends StatelessWidget {
+/// A StatefulWidget class to show the splash screen of my application
+class Splash extends StatefulWidget {
 
   static const String id = 'splash_screen_page';
 
   @override
-  Widget build(BuildContext context) {
-    return SplashScreen(
-        seconds: 3,
-        navigateAfterSeconds: WelcomeScreen.id,
-        image: new Image.asset('Assets/images/splash_logo.png'),
-        photoSize: 200.0,
-        onClick: ()=>print("My Splash")
+  _SplashState createState() => _SplashState();
+}
+
+class _SplashState extends State<Splash> {
+
+  /// Calling [navigate()] before the page loads
+  @override
+  void initState() {
+    super.initState();
+    navigate();
+  }
+
+  /// A function to set a 3 seconds timer for my splash screen to show
+  /// and navigate to my [welcome] screen after
+  void navigate(){
+    Timer(
+      Duration(seconds: 3),
+      () {
+        Navigator.of(context).pushReplacementNamed(WelcomeScreen.id);
+      },
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: InkWell(
+        onTap: (){},
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: new Container(
+                      child: new Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          new CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            child: new Container(
+                                child: Image.asset('Assets/images/splash_logo.png'),
+                            ),
+                            radius: 200,
+                          ),
+                          new Padding(
+                            padding: const EdgeInsets.only(top: 10.0),
+                          ),
+                        ],
+                      )),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CircularProgressIndicator(
+                        valueColor: new AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

@@ -1,14 +1,33 @@
 
+/// A class to hold my [AvailableProduct] model
 class AvailableProduct {
 
-  AvailableProduct({this.productName, this.costPrice, this.sellingPrice, this.initialQuantity, this.currentQuantity});
+  /// Setting constructor for [AvailableProduct] class
+  AvailableProduct({
+    this.productName,
+    this.costPrice,
+    this.sellingPrice,
+    this.initialQuantity,
+    this.currentQuantity
+  });
 
+  /// A string variable to hold my product name
   String productName;
+
+  /// A string variable to hold my cost price
   String costPrice;
+
+  /// A string variable to hold my selling price
   String sellingPrice;
+
+  /// A string variable to hold my initial quantity
   String initialQuantity;
+
+  /// A string variable to hold my current quantity
   String currentQuantity;
 
+
+  /// Creating a method to map my JSON values to the model details accordingly
   factory AvailableProduct.fromJson(Map<String, dynamic> json) {
     return AvailableProduct(
       productName: json["productName"].toString(),
@@ -18,42 +37,5 @@ class AvailableProduct {
       currentQuantity: json["currentQty"].toString(),
     );
   }
-
-  //AvailableProduct();
-
-  /*AvailableProduct.map(dynamic obj) {
-    this.productName = obj["productName"];
-    this.costPrice = obj["costPrice"];
-    this.sellingPrice = obj["sellingPrice"];
-    this.initialQuantity = obj["initialQty"];
-    this.currentQuantity = obj["currentQty"];
-  }*/
-
- /* String get productName => productName;
-  double get costPrice => costPrice;
-  double get sellingPrice => sellingPrice;
-  double get initialQuantity => initialQuantity;
-  double get currentQuantity => currentQuantity;*/
-
- /* Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
-    map["productName"] = productName;
-    map["costPrice"] = costPrice;
-    map["sellingPrice"] = sellingPrice;
-    map["initialQty"] = initialQuantity;
-    map["currentQty"] = currentQuantity;
-
-    return map;
-  }*/
-
-  /*Map<String, dynamic> toJson() =>
-      {
-        "productName" : productName,
-        "costPrice" : costPrice,
-        "sellingPrice" : sellingPrice,
-        "initialQty" : initialQuantity,
-        "currentQty" : currentQuantity,
-      };
-*/
 
 }

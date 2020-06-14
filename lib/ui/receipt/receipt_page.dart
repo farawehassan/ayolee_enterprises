@@ -8,9 +8,12 @@ import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:intl/intl.dart';
 
+/// A StatefulWidget class that displays receipt of items recorded
 class Receipt extends StatefulWidget {
+
   static const String id = 'receipt_page';
 
+  /// Passing the products recorded in this class constructor
   final List<Map> sentProducts;
 
   Receipt({@required this.sentProducts});
@@ -21,45 +24,61 @@ class Receipt extends StatefulWidget {
 
 class _ReceiptState extends State<Receipt> {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
+  /// Variable holding the company's name
   String companyName = "Ayo-Lee Enterprises";
 
+  /// Variable holding the company's address
   String address = "14, Leigh street Off Ojuelegba Road Surulere Lagos";
 
+  /// Variable holding the company's phone number
   String phoneNumber = "0802912565, 07033757855";
 
+  /// Variable holding the company's email
   String email = "farawebola@gmail.com";
 
+  /// Variable holding today's datetime
   DateTime dateTime = DateTime.now();
 
+  /// Variable holding the buyer's name
   String buyersName;
 
+  /// Variable holding the total price
   double totalPrice = 0.0;
 
+  /// A List to hold the widget [TableRow] for my products
   List<TableRow> items = [];
 
+  /// A List to hold the Map of [receivedProducts]
   List<Map> receivedProducts = [];
 
+  /// Instantiating a class of the [DailyReportsData]
   DailyReportsData dailyReportsData = new DailyReportsData();
 
-  double quantity, unitPrice, total;
-
+  /// A Map to hold the details of a sales record
   Map products = {};
 
+  /// A List to hold the Map of the data above
   List<Map> productsList = [];
 
-  String getFormattedTime(String dateTime) {
+  /// Converting [dateTime] in string format to return a formatted time
+  /// of hrs, minutes and am/pm
+  String _getFormattedTime(String dateTime) {
     return DateFormat('h:mm a').format(DateTime.parse(dateTime)).toString();
   }
 
-  FlutterMoneyFormatter money(double value){
+  /// Convert a double [value] to naira
+  FlutterMoneyFormatter _money(double value){
     FlutterMoneyFormatter val;
     val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
     return val;
   }
 
-  void availableProductNames() {
+  /// Function to fetch all the available product's names from the database to
+  /// [availableProducts]
+  void _availableProductNames() {
     Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
     productNames.then((value) {
       for (int i = 0; i < value.length; i++) {
@@ -72,16 +91,26 @@ class _ReceiptState extends State<Receipt> {
     });
   }
 
-  void addProducts() {
+  /// This adds the product details [sentProducts] to [receivedProducts] if it's
+  /// not empty and calculate the total price [totalPrice]
+  void _addProducts() {
     for (var product in widget.sentProducts) {
-      if (product.isNotEmpty && product.containsKey('qty') && product.containsKey('product') && product.containsKey('unitPrice') && product.containsKey('totalPrice'))  {
+      if (product.isNotEmpty
+          && product.containsKey('qty')
+          && product.containsKey('product')
+          && product.containsKey('unitPrice')
+          && product.containsKey('totalPrice')
+      )  {
         receivedProducts.add(product);
         totalPrice += double.parse(product['totalPrice']);
       }
     }
   }
 
-  Widget dataTable() {
+  /// Creating a [DataTable] widget from a List of Map [receivedProducts]
+  /// using QTY, PRODUCT, UNIT, TOTAL, PAYMENT, TIME as DataColumn and
+  /// the values of each DataColumn in the [receivedProducts] as DataRows
+  Widget _dataTable() {
     return DataTable(
       columnSpacing: 1.0,
       columns: [
@@ -124,21 +153,23 @@ class _ReceiptState extends State<Receipt> {
             Text(product['product'].toString()),
           ),
           DataCell(
-            Text(money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
+            Text(_money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
           ),
           DataCell(
-            Text(money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
+            Text(_money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
           ),
         ]);
       }).toList(),
     );
   }
 
+  /// Calls [_addProducts()] and [_availableProductNames()]
+  /// before the class builds its widgets
   @override
   void initState() {
     super.initState();
-    addProducts();
-    availableProductNames();
+    _addProducts();
+    _availableProductNames();
   }
 
   @override
@@ -262,7 +293,7 @@ class _ReceiptState extends State<Receipt> {
                                                     onPressed: () {
                                                       Navigator.of(context)
                                                           .pop(); // To close the dialog
-                                                      saveProduct('Iya Bimbo');
+                                                      _saveProduct('Iya Bimbo');
                                                     },
                                                     textColor: Colors.blueAccent,
                                                     child: Text('Iya Bimbo'),
@@ -275,7 +306,7 @@ class _ReceiptState extends State<Receipt> {
                                                     onPressed: () {
                                                       Navigator.of(context)
                                                           .pop(); // To close the dialog
-                                                      saveProduct('Transfer');
+                                                      _saveProduct('Transfer');
                                                     },
                                                     textColor:
                                                         Colors.blueAccent,
@@ -289,7 +320,7 @@ class _ReceiptState extends State<Receipt> {
                                                     onPressed: () {
                                                       Navigator.of(context)
                                                           .pop(); // To close the dialog
-                                                      saveProduct('Cash');
+                                                      _saveProduct('Cash');
                                                     },
                                                     textColor:
                                                     Colors.blueAccent,
@@ -419,7 +450,7 @@ class _ReceiptState extends State<Receipt> {
                     ),
                     Container(
                       child: Text(
-                        "Date: ${getFormattedTime(dateTime.toString())}",
+                        "Date: ${_getFormattedTime(dateTime.toString())}",
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
                         ),
@@ -433,7 +464,7 @@ class _ReceiptState extends State<Receipt> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   verticalDirection: VerticalDirection.down,
-                  children: <Widget>[dataTable()],
+                  children: <Widget>[_dataTable()],
                 ),
               ),
               Container(
@@ -447,7 +478,7 @@ class _ReceiptState extends State<Receipt> {
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      '${money(totalPrice).output.symbolOnLeft.toString()}',
+                      '${_money(totalPrice).output.symbolOnLeft.toString()}',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -460,7 +491,8 @@ class _ReceiptState extends State<Receipt> {
     );
   }
 
-  void showMessage(String message){
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
     Fluttertoast.showToast(
         msg: "$message",
         toastLength: Toast.LENGTH_SHORT,
@@ -468,30 +500,40 @@ class _ReceiptState extends State<Receipt> {
         textColor: Colors.black);
   }
 
-  void saveProduct(String paymentMode){
-    for (var product in receivedProducts) {
-      try {
-        saveNewDailyReport(
-            double.parse(
-                product[
-                'qty']),
-            product[
-            'product'],
-            double.parse(product[
-            'unitPrice']),
-            double.parse(product[
-            'totalPrice']),
-            paymentMode);
-      } catch (e) {
-        showMessage(e.toString());
-        print(e);
+  /// This function calls [saveNewDailyReport()] with the details in
+  /// [receivedProducts]
+  void _saveProduct(String paymentMode){
+    if(receivedProducts.length > 0 && receivedProducts.isNotEmpty){
+      for (var product in receivedProducts) {
+        try {
+          _saveNewDailyReport(
+              double.parse(
+                  product[
+                  'qty']),
+              product[
+              'product'],
+              double.parse(product[
+              'unitPrice']),
+              double.parse(product[
+              'totalPrice']),
+              paymentMode);
+        } catch (e) {
+          _showMessage(e.toString());
+          print(e);
+        }
       }
+      _showMessage("Items saved");
+      Navigator.pop(context);
     }
-    showMessage("Items saved");
-    Navigator.pop(context);
+    else {
+      _showMessage("Empty receipt");
+      Navigator.pop(context);
+    }
   }
 
-  void saveNewDailyReport(double qty, String productName, double unitPrice,
+  /// Function that adds new report to the database by calling
+  /// [addNewDailyReport] in the [RestDataSource] class
+  void _saveNewDailyReport(double qty, String productName, double unitPrice,
       double total, String paymentMode) {
     try {
       var dailyReport = DailyReportsData();
@@ -514,11 +556,7 @@ class _ReceiptState extends State<Receipt> {
       }
     } catch (e) {
       print(e);
-      Fluttertoast.showToast(
-          msg: "Error in saving data",
-          toastLength: Toast.LENGTH_SHORT,
-          backgroundColor: Colors.white,
-          textColor: Colors.black);
+      _showMessage("Error in saving data");
     }
   }
 }

@@ -6,12 +6,13 @@ import 'package:ayolee_stores/bloc/monthly_report_charts.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:ayolee_stores/model/daily_reportsDB.dart';
 
-// ignore: must_be_immutable
+/// A StatefulWidget class that displays a Month's Reports details
 class MonthReport extends StatefulWidget {
 
   MonthReport({@required this.month});
 
   static const String id = 'month_reports';
+
   final String month;
 
   @override
@@ -20,28 +21,45 @@ class MonthReport extends StatefulWidget {
 
 class _MonthReportState extends State<MonthReport> {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
-  double totalSalesPrice = 0.0;
+  /// Variable to hold the total SalesMade in [_Widget.month] report
+  double _totalSalesPrice = 0.0;
 
-  double availableCash = 0.0;
+  /// Variable to hold the total availableCash of [_Widget.month] report
+  double _availableCash = 0.0;
 
-  double totalTransfer = 0.0;
+  /// Variable to hold the total totalTransfer of [_Widget.month] report
+  double _totalTransfer = 0.0;
 
+  /// A TextEditingController to control the searchText on the AppBar
   final TextEditingController _filter = new TextEditingController();
+
+  /// Variable of String to hold the searchText on the AppBar
   String _searchText = "";
-  List<Map> sales = new List();
-  List<Map> filteredSales= new List();
+
+  /// Variable of List<Map> to hold the details of all the sales
+  List<Map> _sales = new List();
+
+  /// Variable of List<Map> to hold the details of all filtered sales
+  List<Map> _filteredSales= new List();
+
+  /// Variable to hold an Icon Widget of Search
   Icon _searchIcon = new Icon(Icons.search);
+
+  /// Variable to hold a Widget of Text for the appBarText
   Widget _appBarTitle = new Text('Sales Report');
 
+  /// Checking if the filter controller is empty to reset the
+  /// _searchText on the appBar to "" and the filteredSales to Sales
   _MonthReportState(){
     _filter.addListener(() {
       if (_filter.text.isEmpty) {
         if (!mounted) return;
         setState(() {
           _searchText = "";
-          filteredSales = sales;
+          _filteredSales = _sales;
         });
       }
       else {
@@ -53,6 +71,16 @@ class _MonthReportState extends State<MonthReport> {
     });
   }
 
+  /// Getting [_Widget.month] reports from the dailyReportsDatabase based on time
+  /// Sets the details of the month and [_filteredSales] to [_sales]
+  ///
+  /// Increments [_availableCash] with the value of report's totalPrice,
+  /// If the payment's mode of a report is cash
+  ///
+  /// Increments [_totalTransfer] with the value of report's totalPrice,
+  /// If the payment's mode of a report is transfer
+  ///
+  /// sets [_totalSalesPrice] to [_availableCash] + [_totalTransfer]
   void _getSales() async {
     List<Map> tempList = new List();
     Future<List<DailyReportsData>> dailySales = futureValue.getMonthReports(widget.month);
@@ -61,22 +89,26 @@ class _MonthReportState extends State<MonthReport> {
       for (int i = 0; i < value.length; i++){
         details = {'qty':'${value[i].quantity}', 'productName': '${value[i].productName}','unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].time}'};
         if(value[i].paymentMode == 'Cash'){
-          availableCash += double.parse(value[i].totalPrice);
+          _availableCash += double.parse(value[i].totalPrice);
         }
         else if(value[i].paymentMode == 'Transfer'){
-          totalTransfer += double.parse(value[i].totalPrice);
+          _totalTransfer += double.parse(value[i].totalPrice);
         }
         tempList.add(details);
       }
-      totalSalesPrice = availableCash + totalTransfer;
+      _totalSalesPrice = _availableCash + _totalTransfer;
     });
     if (!mounted) return;
     setState(() {
-      sales = tempList;
-      filteredSales = sales;
+      _sales = tempList;
+      _filteredSales = _sales;
     });
   }
 
+  /// Function to change icons on the appBar when the searchIcon or closeIcon
+  /// is pressed then sets the TextController to [_filter] and hintText of
+  /// 'Search...' if it was the searchIcon or else it resets the AppBar to its
+  /// normal state
   void _searchPressed() {
     if (!mounted) return;
     setState(() {
@@ -93,12 +125,14 @@ class _MonthReportState extends State<MonthReport> {
       else {
         this._searchIcon = new Icon(Icons.search);
         this._appBarTitle = new Text('Sales Report');
-        filteredSales = sales;
+        _filteredSales = _sales;
         _filter.clear();
       }
     });
   }
 
+  /// A function to build the AppBar of the page by calling
+  /// [_searchPressed()] when the icon is pressed
   Widget _buildBar(BuildContext context) {
     DateTime now = DateTime.now();
     String formattedDate = '${widget.month}, ${DateFormat('yyyy').format(now)}';
@@ -128,15 +162,15 @@ class _MonthReportState extends State<MonthReport> {
   Widget _buildList() {
     if (_searchText.isNotEmpty) {
       List<Map> tempList = new List();
-      for (int i = 0; i < filteredSales.length; i++) {
-        if (getFormattedTime(filteredSales[i]['time']).toLowerCase().contains(_searchText.toLowerCase())) {
-          tempList.add(filteredSales[i]);
+      for (int i = 0; i < _filteredSales.length; i++) {
+        if (_getFormattedTime(_filteredSales[i]['time']).toLowerCase().contains(_searchText.toLowerCase())) {
+          tempList.add(_filteredSales[i]);
         }
       }
-      filteredSales = tempList;
+      _filteredSales = tempList;
     }
-    if(filteredSales.length > 0 && filteredSales.isNotEmpty){
-      return dataTable(filteredSales);
+    if(_filteredSales.length > 0 && _filteredSales.isNotEmpty){
+      return _dataTable(_filteredSales);
     }
     else{
       Container(
@@ -147,17 +181,24 @@ class _MonthReportState extends State<MonthReport> {
     return Container();
   }
 
-  FlutterMoneyFormatter money(double value){
+  /// Convert a double [value] to naira
+  FlutterMoneyFormatter _money(double value){
     FlutterMoneyFormatter val;
     val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
     return val;
   }
 
-  String getFormattedTime(String dateTime) {
+  /// Converting [dateTime] in string format to return a formatted time
+  /// of hrs, minutes and am/pm
+  String _getFormattedTime(String dateTime) {
     return DateFormat('EEE, MMM d, h:mm a').format(DateTime.parse(dateTime)).toString();
   }
 
-  SingleChildScrollView dataTable(List<Map> salesList){
+  /// Creating a [DataTable] widget from a List of Map [salesList]
+  /// using QTY, PRODUCT, UNIT, TOTAL, PAYMENT, TIME as DataColumn and
+  /// the values of each DataColumn in the [salesList] as DataRows and
+  /// a container to show the [__totalSalesPrice]
+  SingleChildScrollView _dataTable(List<Map> salesList){
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -181,16 +222,16 @@ class _MonthReportState extends State<MonthReport> {
                     Text(report['productName'].toString()),
                   ),
                   DataCell(
-                    Text(money(double.parse(report['unitPrice'])).output.symbolOnLeft),
+                    Text(_money(double.parse(report['unitPrice'])).output.symbolOnLeft),
                   ),
                   DataCell(
-                    Text(money(double.parse(report['totalPrice'])).output.symbolOnLeft),
+                    Text(_money(double.parse(report['totalPrice'])).output.symbolOnLeft),
                   ),
                   DataCell(
                     Text(report['paymentMode'].toString()),
                   ),
                   DataCell(
-                    Text(getFormattedTime(report['time'])),
+                    Text(_getFormattedTime(report['time'])),
                   ),
                 ]
             )).toList(),
@@ -206,7 +247,7 @@ class _MonthReportState extends State<MonthReport> {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  '${money(totalSalesPrice).output.symbolOnLeft}',
+                  '${_money(_totalSalesPrice).output.symbolOnLeft}',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],
@@ -217,12 +258,15 @@ class _MonthReportState extends State<MonthReport> {
     );
   }
 
+  /// Calls [_getSales()] before the class builds its widgets
   @override
   void initState() {
     _getSales();
     super.initState();
   }
 
+  /// Building a Scaffold Widget to display [_buildList()]
+  /// and a [_MonthlyReportCharts]
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -11,7 +11,7 @@ import 'package:ayolee_stores/bloc/future_values.dart';
 import 'daily_report_list.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
-// ignore: must_be_immutable
+/// A StatefulWidget class that displays the Today's Reports details
 class DailyReports extends StatefulWidget {
 
   static const String id = 'daily_reports';
@@ -22,35 +22,46 @@ class DailyReports extends StatefulWidget {
 
 class _DailyReportsState extends State<DailyReports> {
 
+  /// Instantiating a class of the [DailyReportValue]
   var reportValue = DailyReportValue();
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
-  double totalSalesPrice = 0.0;
+  /// Variable to hold the total availableCash of today's report
+  double _availableCash = 0.0;
 
-  double availableCash = 0.0;
+  /// Variable to hold the total totalTransfer of today's report
+  double _totalTransfer = 0.0;
 
-  double totalTransfer = 0.0;
+  /// Variable to hold the total ProfitMade in today's report
+  double _totalProfitMade = 0.0;
 
-  double totalProfitMade = 0.0;
+  /// Variable to hold the name of the user logged in
+  String _username;
 
-  String username;
-
-  void getCurrentUser() async {
+  /// Setting the current user's name logged in to [_username]
+  void _getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
-      username = user.name;
+      _username = user.name;
     }).catchError((Object error) {
       print(error.toString());
     });
   }
 
-  FlutterMoneyFormatter money(double value){
+  /// Convert a double [value] to naira
+  FlutterMoneyFormatter _money(double value){
     FlutterMoneyFormatter val;
     val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
     return val;
   }
 
-  void calculateProfit(DailyReportsData data) async {
+  /// Calculating profit of a particular DailyReportsData [data],
+  /// if the data's payment mode is not 'Iya Bimbo'
+  ///  profitMade = data's quantity * (data's unitPrice - data's costPrice)
+  ///
+  /// Increment [_totalProfitMade] with the result of profitMade
+  void _calculateProfit(DailyReportsData data) async {
     double profitMade = 0.0;
     Future<List<AvailableProduct>> products = futureValue.getProductFromDB();
     await products.then((value) {
@@ -58,52 +69,60 @@ class _DailyReportsState extends State<DailyReports> {
       for (int i = 0; i < value.length; i++){
         if(value[i].productName == data.productName){
           if(data.paymentMode != 'Iya Bimbo'){
-            double profit = double.parse(data.unitPrice) - double.parse(value[i].costPrice);
-            profitMade += (double.parse(data.quantity) * profit);
-            print(profit);
+            profitMade += (double.parse(data.quantity)
+                *
+                (double.parse(data.unitPrice) - double.parse(value[i].costPrice))
+            );
           }
-          print(profitMade);
         }
       }
       if (!mounted) return;
       setState(() {
-        totalProfitMade += profitMade;
+        _totalProfitMade += profitMade;
       });
     });
   }
 
-  void getReports() async {
+  /// Getting today's reports from the dailyReportsDatabase based on time
+  /// Calls [_calculateProfit(report)] on every report that is today
+  ///
+  /// Increments [_availableCash] with the value of report's totalPrice,
+  /// If the payment's mode of a report is cash
+  ///
+  /// Increments [_totalTransfer] with the value of report's totalPrice,
+  /// If the payment's mode of a report is transfer
+  void _getReports() async {
     Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
     await report.then((value) {
       if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           if(reportValue.checkIfToday(value[i].time)){
-            calculateProfit(value[i]);
+            _calculateProfit(value[i]);
             if(value[i].paymentMode == 'Cash'){
-              availableCash += double.parse(value[i].totalPrice);
+              _availableCash += double.parse(value[i].totalPrice);
             }
             else if(value[i].paymentMode == 'Transfer'){
-              totalTransfer += double.parse(value[i].totalPrice);
+              _totalTransfer += double.parse(value[i].totalPrice);
             }
           }
         }
-        totalSalesPrice = availableCash + totalTransfer;
       });
-
-      print(availableCash);
-      print(totalTransfer);
-      print(totalSalesPrice);
-      print(totalProfitMade);
     });
   }
 
+  /// Calls [_getCurrentUser()] and [_getReports()]
+  /// before the class builds its widgets
   @override
   void initState() {
     super.initState();
-    getReports();
+    _getCurrentUser();
+    _getReports();
   }
 
+  /// Building a Scaffold Widget to display today's report, [DailyChart],
+  /// [_availableCash], [_totalTransfer], totalCash and [_totalProfitMade] if
+  /// the user is an Admin 'Farawe'
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
@@ -143,13 +162,13 @@ class _DailyReportsState extends State<DailyReports> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    titleText('Available Cash: ${money(availableCash).output.symbolOnLeft}'),
+                    titleText('Available Cash: ${_money(_availableCash).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    titleText('Transfered Cash: ${money(totalTransfer).output.symbolOnLeft}'),
+                    titleText('Transfered Cash: ${_money(_totalTransfer).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    titleText('Total Cash: ${money(availableCash + totalTransfer).output.symbolOnLeft}'),
+                    titleText('Total Cash: ${_money(_availableCash + _totalTransfer).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    username == 'Farawe' ? titleText('Profit made: ${money(totalProfitMade).output.symbolOnLeft}') : Container(),
+                    _username == 'Farawe' ? titleText('Profit made: ${_money(_totalProfitMade).output.symbolOnLeft}') : Container(),
                   ],
                 ),
               ),

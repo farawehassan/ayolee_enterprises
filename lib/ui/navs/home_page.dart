@@ -3,6 +3,7 @@ import 'package:ayolee_stores/database/user_db_helper.dart';
 import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:ayolee_stores/ui/receipt/receipt_page.dart';
 import 'package:ayolee_stores/utils/constants.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ayolee_stores/ui/welcome_screen.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
@@ -14,6 +15,7 @@ import 'available_drinks.dart';
 import 'daily/daily_reports.dart';
 import 'monthly/reports_page.dart';
 
+/// A StatefulWidget class that displays the sales record
 class MyHomePage extends StatefulWidget {
 
   static const String id = 'home_page';
@@ -24,62 +26,81 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
-  double quantity;
-  String selectedProduct;
-  double unitPrice;
-  double totalPrice;
+  /// Variable to hold the quantity of an item recorded
+  double _quantity;
+
+  /// Variable to hold the name of an item recorded
+  String _selectedProduct;
+
+  /// Variable to hold the unitPrice of an item recorded
+  double _unitPrice;
+
+  /// Variable to hold the totalPrice of an item recorded
+  double _totalPrice;
 
   int increment = 0;
-  List<Map> detailsList = [];
-  Map details = {};
+
+  /// A Map to hold the details of a sales record
+  Map _details = {};
+
+  /// A List to hold the Map of the data above
+  List<Map> _detailsList = [];
+
+  /// A List to hold the names of all the availableProducts in the database
   List<String> availableProducts = [];
-  List<Row> rows = [];
 
-  String username;
+  /// A List to hold all the sales records in a row
+  List<Row> _rows = [];
 
-  void getCurrentUser() async {
+  /// Variable to hold the name of the user logged in
+  String _username;
+
+  /// Setting the current user's name logged in to [_username]
+  void _getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
-      username = user.name;
+      _username = user.name;
     }).catchError((Object error) {
       print(error.toString());
     });
   }
 
-  void availableProductNames() {
+  /// Function to fetch all the available product's names from the database to
+  /// [availableProducts]
+  void _availableProductNames() {
     Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
     productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         availableProducts.add(value[i].productName);
       }
     });
-    print(availableProducts);
   }
 
+  /// Calls [_getCurrentUser()] before the class builds its widgets
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
-    //availableProductNames();
-    //details = {'qty':'$quantity','product':selectedProduct,'unitPrice':'$unitPrice','totalPrice':'$totalPrice'};
+    _getCurrentUser();
   }
 
-  void addRow() {
+  /// Function to add a new row to record sales details:
+  /// [_quantity], [_selectedProduct], [_unitPrice] and [_totalPrice]
+  void _addRow() {
     availableProducts.clear();
-    availableProductNames();
+    _availableProductNames();
 
-    print(detailsList);
     final TextEditingController qtyController = TextEditingController();
     final TextEditingController priceController = TextEditingController();
     final TextEditingController productController = TextEditingController();
     final TextEditingController totalPriceController = TextEditingController();
 
     setState(() {
-      details = {'qty':'$quantity','product':selectedProduct,'unitPrice':'$unitPrice','totalPrice':'$totalPrice'};
+      _details = {'qty':'$_quantity','product':_selectedProduct,'unitPrice':'$_unitPrice','totalPrice':'$_totalPrice'};
       increment ++;
 
-      rows.add(Row(
+      _rows.add(Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Flexible(
@@ -90,13 +111,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: qtyController,
                 onChanged: (value) {
                   setState(() {
-                    quantity = double.parse(value);
-                    details['qty'] = '$quantity';
+                    _quantity = double.parse(value);
+                    _details['qty'] = '$_quantity';
                     if(priceController.text != null){
-                      totalPrice = double.parse(priceController.text) * double.parse(qtyController.text);
-                      //total = totalPrice;
-                      totalPriceController.text = totalPrice.toString();
-                      details['totalPrice'] = '$totalPrice';
+                      _totalPrice = double.parse(priceController.text) * double.parse(qtyController.text);
+                      totalPriceController.text = _totalPrice.toString();
+                      _details['totalPrice'] = '$_totalPrice';
                     }
                   });
                 },
@@ -125,14 +145,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 onSuggestionSelected: (suggestion) {
                   productController.text = suggestion;
-                  selectedProduct = productController.text;
-                  details['product'] = '$selectedProduct';
+                  _selectedProduct = productController.text;
+                  _details['product'] = '$_selectedProduct';
                   print(suggestion);
                 },
                 onSaved: (value) {
                   print(value);
-                  selectedProduct = value;
-                  details['product'] = '$selectedProduct';
+                  _selectedProduct = value;
+                  _details['product'] = '$_selectedProduct';
                 },
               ),
             ),
@@ -146,12 +166,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   setState(() {
-                    unitPrice = double.parse(value);
-                    details['unitPrice'] = '$unitPrice';
-                    print(unitPrice);
-                    totalPrice = double.parse(value) * double.parse(qtyController.text);
-                    totalPriceController.text = totalPrice.toString();
-                    details['totalPrice'] = '$totalPrice';
+                    _unitPrice = double.parse(value);
+                    _details['unitPrice'] = '$_unitPrice';
+                    print(_unitPrice);
+                    _totalPrice = double.parse(value) * double.parse(qtyController.text);
+                    totalPriceController.text = _totalPrice.toString();
+                    _details['totalPrice'] = '$_totalPrice';
                   });
                 },
                 decoration: kTextFieldDecoration.copyWith(hintText: '0.0'),
@@ -170,17 +190,17 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ));
 
-      print(details);
+      print(_details);
 
     });
 
-    if(details['qty'].toString().isNotEmpty && details['product'].toString().isNotEmpty && details['unitPrice'].toString().isNotEmpty && details['totalPrice'].toString().isNotEmpty){
+    if(_details['qty'].toString().isNotEmpty && _details['product'].toString().isNotEmpty && _details['unitPrice'].toString().isNotEmpty && _details['totalPrice'].toString().isNotEmpty){
       try {
-        detailsList.add(details);
-        details.clear();
+        _detailsList.add(_details);
+        _details.clear();
         qtyController.clear();
         priceController.clear();
-        print(detailsList);
+        print(_detailsList);
       } catch (e) {
         print(e);
         Fluttertoast.showToast(
@@ -192,26 +212,33 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void deleteItem(index){
+  /// Function to delete a row from the record sales at a particular [index]
+  void _deleteItem(index){
     setState((){
       print(index);
-      rows.removeAt(index);
+      _rows.removeAt(index);
       try {
-        print(detailsList[index]);
-        detailsList.removeAt(index);
+        print(_detailsList[index]);
+        _detailsList.removeAt(index);
       } catch (e) {
         print(e);
       }
     });
   }
 
-  void undoDeletion(index, item){
+  /// Function to undo deletion of a row from the record sales by replacing
+  /// [item] at a particular [index]
+  /*void _undoDeletion(index, item){
     setState((){
-      rows.insert(index, item);
-      detailsList.insert(index, item);
+      _rows.insert(index, item);
+      _detailsList.insert(index, item);
     });
-  }
+  }*/
 
+  /// Building a Scaffold Widget to display an AppBar that sends [_detailsList]
+  /// when the send icon is pressed, a listView of dismissible widget
+  /// of [_rows], a floatingActionButton to add a new row when pressed by
+  /// calling [_addRow()] and a drawer to show other screens and details when pressed
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -224,11 +251,11 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.white,
             ),
             onPressed: () {
-              if (detailsList.isNotEmpty) {
+              if (_detailsList.isNotEmpty) {
                 try {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Receipt(sentProducts: detailsList)),
+                    MaterialPageRoute(builder: (context) => Receipt(sentProducts: _detailsList)),
                   );
                 } catch (e) {
                   print(e);
@@ -271,21 +298,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.all(8.0),
                 child: ListView(
                   shrinkWrap: true,
-                  children: rows.map((data) {
-                    int index = rows.indexOf(data);
+                  children: _rows.map((data) {
+                    int index = _rows.indexOf(data);
                     return Dismissible(
-                      key: new ObjectKey(rows[index]),
+                      key: new ObjectKey(_rows[index]),
                       direction: DismissDirection.endToStart,
                       onDismissed: (direction) {
                         setState(() {
-                          deleteItem(index);
+                          _deleteItem(index);
                           increment--;
                         });
                       },
                       background: Container(color: Colors.red),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: rows[index],
+                        child: _rows[index],
                       ),
                     );
                   }).toList(),
@@ -296,168 +323,209 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       drawer: Drawer(
-        child: ListView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            GestureDetector(
-              onTap: (){
-                showProfile();
-              },
-              child: UserAccountsDrawerHeader(
-                accountName: Text("Ayolee Enterprises"),
-                accountEmail: Text("farawebola@gmail.com"),
-                currentAccountPicture: Hero(
-                  tag: 'displayPicture',
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage('Assets/images/mum.JPG'),
-                    backgroundColor: Colors.blue,
-                  ),
-                ),
-                onDetailsPressed: (){
-                  showProfile();
-                },
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.create),
-              title: Text('Sales Record'),
-              onTap: (){
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.book),
-              title: Text('Available Drinks'),
-              onTap: (){
-                Navigator.pushNamed(context, Products.id);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.assignment_returned),
-              title: Text('Daily Reports'),
-              onTap: (){
-                Navigator.pushNamed(context, DailyReports.id);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.assignment_returned),
-              title: Text('Monthly Report'),
-              onTap: (){
-                Navigator.pushNamed(context, Reports.id);
-              },
-            ),
-            ListTile(
-              title: Text('Sign Out'),
-              onTap: (){
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => Dialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
+            Expanded(
+              child: ListView(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: (){
+                      _showProfile();
+                    },
+                    child: UserAccountsDrawerHeader(
+                      accountName: Text("Ayolee Stores"),
+                      accountEmail: Text("farawebola@gmail.com"),
+                      currentAccountPicture: Hero(
+                        tag: 'displayPicture',
+                        child: CircleAvatar(
+                          backgroundImage: AssetImage('Assets/images/mum.JPG'),
+                          backgroundColor: Colors.blue,
+                        ),
+                      ),
+                      onDetailsPressed: (){
+                        _showProfile();
+                      },
                     ),
-                    elevation: 0.0,
-                    backgroundColor: Colors.white,
-                    child: Container(
-                      height: 150.0,
-                      padding: const EdgeInsets.all(16.0),
-                      child:  Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 16.0),
-                              child: Text(
-                                "Are you sure you want to sign out",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.bold,
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.create),
+                    title: Text('Sales Record'),
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.book),
+                    title: Text('Available Drinks'),
+                    onTap: (){
+                      Navigator.pushNamed(context, Products.id);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.assignment_returned),
+                    title: Text('Daily Reports'),
+                    onTap: (){
+                      Navigator.pushNamed(context, DailyReports.id);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.assignment_returned),
+                    title: Text('Monthly Report'),
+                    onTap: (){
+                      Navigator.pushNamed(context, Reports.id);
+                    },
+                  ),
+                  ListTile(
+                    title: Text('Sign Out'),
+                    onTap: (){
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => Dialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          elevation: 0.0,
+                          backgroundColor: Colors.white,
+                          child: Container(
+                            height: 150.0,
+                            padding: const EdgeInsets.all(16.0),
+                            child:  Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 16.0),
+                                    child: Text(
+                                      "Are you sure you want to sign out",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                SizedBox(
+                                  height: 24.0,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: <Widget>[
+                                    Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: FlatButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(); // To close the dialog
+                                        },
+                                        textColor: Colors.blueAccent,
+                                        child: Text('No'),
+                                      ),
+                                    ),
+                                    Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: FlatButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(); // To close the dialog
+                                          _logout();
+                                        },
+                                        textColor: Colors.blueAccent,
+                                        child: Text('Yes'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          SizedBox(
-                            height: 24.0,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: <Widget>[
-                              Align(
-                                alignment: Alignment.bottomLeft,
-                                child: FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // To close the dialog
-                                  },
-                                  textColor: Colors.blueAccent,
-                                  child: Text('No'),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.bottomRight,
-                                child: FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // To close the dialog
-                                    logout();
-                                  },
-                                  textColor: Colors.blueAccent,
-                                  child: Text('Yes'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              children: <Widget>[
+                Container(
+                  height: 1.0,
+                  color: Colors.grey[400],
+                ),
+                FlatButton(
+                  onPressed: (){
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'Ayo-Lee Stores',
+                      applicationIcon: AnimatedContainer(
+                        width: 40.0,
+                        height: 40.0,
+                        duration: Duration(milliseconds: 750),
+                        curve: Curves.fastOutSlowIn,
+                        child: Image(
+                          image: AssetImage('Assets/images/ayole-logo.png'),
+                        ),
+                      ),
+                      applicationVersion: '1.0.0',
+                      applicationLegalese: 'Developed by Farawe Taiwo Hassan',
+                    );
+                  },
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "About",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: addRow,
+        onPressed: _addRow,
         tooltip: 'Relax',
         child: Icon(Icons.add),
       ),
     );
   }
 
-  void showProfile(){
-    if(username == 'Farawe'){
+  /// Function to show profile of the account if the user is an Admin 'Farawe'
+  void _showProfile(){
+    if(_username == 'Farawe'){
       Navigator.pushNamed(context, Profile.id);
     }else{
       Navigator.of(context).pop();
     }
   }
 
-  void showNullMessage(){
-    Fluttertoast.showToast(
-        msg: "No available drinks",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black);
-  }
-
-  void logout() async {
+  /// Function to logout your account
+  void _logout() async {
     var db = new DatabaseHelper();
     await db.deleteUsers();
-    getBoolValuesSF();
+    _getBoolValuesSF();
   }
 
-  getBoolValuesSF() async {
+  /// Function to get the 'loggedIn' in your SharedPreferences
+  _getBoolValuesSF() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool boolValue = prefs.getBool('loggedIn') ?? true;
     if(boolValue == true){
-      addBoolToSF();
+      _addBoolToSF();
     }
   }
 
-  addBoolToSF() async {
+  /// Function to set the 'loggedIn' in your SharedPreferences to false
+  _addBoolToSF() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('loggedIn', false);
     Navigator.of(context).pushReplacementNamed(WelcomeScreen.id);

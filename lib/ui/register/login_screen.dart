@@ -10,6 +10,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'login_screen_presenter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// A StatefulWidget class that displays the login screen of the app
 class LoginScreen extends StatefulWidget {
   static const String id = 'login_screen';
 
@@ -22,32 +23,47 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin
     implements LoginScreenContract {
 
+  /// A [GlobalKey] to hold the Scaffold state of my build widget
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  /// An variable to hold an instance of [LoginScreenPresenter]
   LoginScreenPresenter _presenter;
 
+  /// Instantiating the [LoginScreenPresenter] class to handle the login requests
   _LoginScreenState() {
     _presenter = new LoginScreenPresenter(this);
   }
 
+  /// Creating [FocusNode] for login details
   final FocusNode myFocusNodeEmailLogin = FocusNode();
   final FocusNode myFocusNodePasswordLogin = FocusNode();
   final FocusNode myFocusNodePassword = FocusNode();
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
 
+  /// A [TextEditingController] to control the input text for the user's number
   TextEditingController loginEmailController = new TextEditingController();
+
+  /// A [TextEditingController] to control the input text for the user's password
   TextEditingController loginPasswordController = new TextEditingController();
 
+  /// A string variable to hold the user's number
   String _phoneNumber;
-  String _pin;
-  bool showSpinner = false;
 
+  /// A string variable to hold the user's pin
+  String _pin;
+
+  /// A boolean variable to hold the [inAsyncCall] value in my
+  /// [ModalProgressHUD] widget
+  bool _showSpinner = false;
+
+  /// A boolean variable to hold whether the password should be shown or hidden
   bool _obscureTextLogin = true;
 
   Color left = Colors.black;
   Color right = Colors.white;
 
+  /// Setting device orientation to portraitUp or portraitDown only for this page
   @override
   void initState() {
     super.initState();
@@ -62,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     return new Scaffold(
       key: _scaffoldKey,
       body: ModalProgressHUD(
-        inAsyncCall: showSpinner,
+        inAsyncCall: _showSpinner,
         child: SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
@@ -146,6 +162,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 
+  /// My [FocusNode] used with [SingleTickerProviderStateMixin] is disposed here
   @override
   void dispose() {
     myFocusNodePassword.dispose();
@@ -154,7 +171,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
-  void showInSnackBar(String value) {
+  /// Function to display a snackbar with the value [value]
+  void _showInSnackBar(String value) {
     FocusScope.of(context).requestFocus(new FocusNode());
     _scaffoldKey.currentState?.removeCurrentSnackBar();
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
@@ -171,6 +189,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     ));
   }
 
+  /// A function to return a container for the login information
   Widget _buildSignIn(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(top: 23.0),
@@ -267,7 +286,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ),
               Container(
                 margin: EdgeInsets.only(top: 170.0),
-               decoration: new BoxDecoration(
+                decoration: new BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
@@ -381,17 +400,23 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 
+  /// A function to toggle if to show the password or not by
+  /// changing [_obscureTextLogin] value
   void _toggleLogin() {
     setState(() {
       _obscureTextLogin = !_obscureTextLogin;
     });
   }
 
+  /// A function to do the login process by calling the [doLogin] function in
+  /// the [LoginScreenPresenter] class with the [_phoneNumber] and [_pin]
   void _submit() {
-    setState(() => showSpinner = true);
+    setState(() => _showSpinner = true);
     _presenter.doLogin(_phoneNumber, _pin);
   }
 
+  /// This function adds a true boolean value to the device [SharedPreferences]
+  /// and clears both [loginEmailController] and [loginPasswordController] controllers
   addBoolToSF(bool state) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('loggedIn', state);
@@ -402,17 +427,25 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     loginPasswordController.clear();
   }
 
+  /// This function calls [_showInSnackBar()] to show a snackbar
+  /// with details [errorTxt], then sets [_showSpinner] to false to stop syncing
+  /// [ModalProgressHUD] and clears the [loginPasswordController] controller
   @override
   void onLoginError(String errorTxt) {
-    showInSnackBar(errorTxt);
-    setState(() => showSpinner = false);
+    _showInSnackBar(errorTxt);
+    setState(() => _showSpinner = false);
     loginPasswordController.clear();
   }
 
+  /// This function calls [_showInSnackBar()] to show a snackbar with Login
+  /// Successfully as its details, then sets [_showSpinner] to false
+  /// to stop syncing [ModalProgressHUD] and
+  /// clears both [loginEmailController] and [loginPasswordController] controllers
+  /// It also saves the user's details in the database with the help of [DatabaseHelper]
   @override
   void onLoginSuccess(User user) async {
-    showInSnackBar('Login Successfully');
-    setState(() => showSpinner = false);
+    _showInSnackBar('Login Successfully');
+    setState(() => _showSpinner = false);
     loginEmailController.clear();
     loginPasswordController.clear();
     var db = new DatabaseHelper();

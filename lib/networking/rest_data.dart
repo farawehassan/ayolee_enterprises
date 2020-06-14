@@ -6,11 +6,16 @@ import 'package:ayolee_stores/model/daily_reportsDB.dart';
 import 'package:ayolee_stores/model/user.dart';
 import 'network_util.dart';
 
+/// A [RestDataSource] class to do all the send request to the back end
+/// and handle the result
 class RestDataSource {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
+  /// Instantiating a class of the [NetworkHelper]
   NetworkHelper _netUtil = new NetworkHelper();
+
   static final BASE_URL = "https://mob-ap.herokuapp.com";
   static final LOGIN_URL = BASE_URL + "/authentication/signIn";
   static final SIGN_UP_URL = BASE_URL + "/authentication/signUp";
@@ -20,7 +25,8 @@ class RestDataSource {
   static final ADD_REPORT_URL = BASE_URL + "/report/create";
   static final FETCH_REPORT_URL = BASE_URL + "/report/fetchAll";
 
-  // A function that verifies login details from the server POST.
+  /// A function that verifies login details from the server POST.
+  /// with [phoneNumber] and [pin]
   Future<User> login(String phoneNumber, String pin) {
     return _netUtil.postLogin(LOGIN_URL, body: {
       "email": phoneNumber,
@@ -34,7 +40,8 @@ class RestDataSource {
     });
   }
 
-  // A function that creates a new user POST.
+  /// A function that creates a new user POST.
+  /// with [CreateUser] model
   Future<String> signUp(CreateUser createUser) {
     return _netUtil.post(SIGN_UP_URL, body: {
       "name": createUser.name,
@@ -51,7 +58,8 @@ class RestDataSource {
     });
   }
 
-  // A function that adds new product to the server POST.
+  /// A function that adds new product to the server POST
+  /// with [AvailableProduct] model
   Future<String> addProduct(AvailableProduct product) async{
     Map<String, String> header;
     Future<User> user = futureValue.getCurrentUser();
@@ -77,7 +85,8 @@ class RestDataSource {
     });
   }
 
-  // A function that updates the current quantity of the product that is sold POST.
+  /// A function that updates the current quantity of the product that is sold POST.
+  ///  with [productName] and [currentQuantity]
   Future<String> sellProduct(String productName, String currentQuantity) async{
     Map<String, String> header;
     Future<User> user = futureValue.getCurrentUser();
@@ -100,7 +109,8 @@ class RestDataSource {
     });
   }
 
-  // A function that updates product details PUT.
+  /// A function that updates product details PUT.
+  /// with [AvailableProduct] model and [name]
   Future<String> updateProduct(AvailableProduct product, String name) async{
     Map<String, String> header;
     Future<User> user = futureValue.getCurrentUser();
@@ -127,7 +137,8 @@ class RestDataSource {
     });
   }
 
-  // A function that fetches all products from the server into a List<AvailableProduct> GET.
+  /// A function that fetches all products from the server
+  /// into a List of [AvailableProduct] GET.
   Future<List<AvailableProduct>> fetchAllProducts() async {
     List<AvailableProduct> products;
     Map<String, String> header;
@@ -143,10 +154,13 @@ class RestDataSource {
         products = rest.map<AvailableProduct>((json) => AvailableProduct.fromJson(json)).toList();
         return products;
       }
+    }).catchError((e){
+      throw new Exception(e);
     });
   }
 
-  // A function that adds new daily reports to the server POST.
+  /// A function that adds new daily reports to the server POST.
+  /// with [DailyReportsData] model
   Future<String> addNewDailyReport(DailyReportsData reportsData) async{
     Map<String, String> header;
     Future<User> user = futureValue.getCurrentUser();
@@ -167,13 +181,13 @@ class RestDataSource {
       if(res["error"] == true){
         throw new Exception(res["meesage"]);
       }else{
-        print(res["meesage"]);
         return res["meesage"];
       }
     });
   }
 
-  // A function that fetches all reports from the server into a List<DailyReportsData> GET.
+  /// A function that fetches all reports from the server
+  /// into a List of [DailyReportsData] GET.
   Future<List<DailyReportsData>> fetchAllReports() async {
     List<DailyReportsData> reports;
     Map<String, String> header;
@@ -192,7 +206,7 @@ class RestDataSource {
     });
   }
 
-  // A function that fetches all reports from the server into a List<DailyReportsData> GET.
+  /// A function that fetches deletes a report from the server using the [id]
   Future<String> deleteReport(String id) async {
     Map<String, String> header;
     Future<User> user = futureValue.getCurrentUser();

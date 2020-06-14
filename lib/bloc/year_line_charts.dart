@@ -4,13 +4,7 @@ import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter/material.dart';
 import 'future_values.dart';
 
-class Sales {
-  final String year;
-  final int sales;
-
-  Sales(this.year, this.sales);
-}
-
+/// A StatefulWidget class creating a point line chart for my yearly report records
 class PointsLineChart extends StatefulWidget {
 
   static const String id = 'point_line_chart';
@@ -22,19 +16,24 @@ class PointsLineChart extends StatefulWidget {
 
 class _PointsLineChartState extends State<PointsLineChart> {
 
+  /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
 
-  bool animate;
-
+  /// A variable holding the list total sales from my [LinearSales] model
   List<double> details = [];
+
+  /// A variable holding my total sales value so far
   double totalSales = 0;
 
+  /// Convert a double [value] to naira
   FlutterMoneyFormatter money(double value){
     FlutterMoneyFormatter val;
     val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
     return val;
   }
 
+  /// This function calls [getYearReports()] method from my [futureValue] class
+  /// It adds every total sales gotten to [details] and sum them to [totalSales]
   void getReports() async {
     Future<List<LinearSales>> report = futureValue.getYearReports();
     await report.then((value) {
@@ -48,6 +47,8 @@ class _PointsLineChartState extends State<PointsLineChart> {
     });
   }
 
+  /// Function to build my line chart if details is not empty and it's length is
+  /// > 0 using flutter_sparkline package
   Widget _buildLineChart(){
     if(details.length > 0 && details.isNotEmpty){
       return Sparkline(
@@ -73,6 +74,7 @@ class _PointsLineChartState extends State<PointsLineChart> {
     );
   }
 
+  /// It calls [getReports()] while initializing my state
   @override
   void initState() {
     super.initState();
