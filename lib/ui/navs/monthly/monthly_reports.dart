@@ -71,6 +71,26 @@ class _MonthReportState extends State<MonthReport> {
     });
   }
 
+  void _resetTotalDetails(){
+    if (!mounted) return;
+    setState(() {
+      _totalSalesPrice = 0;
+      _availableCash = 0;
+      _totalTransfer = 0;
+
+      for (int i = 0; i < _filteredSales.length; i++){
+        if(_filteredSales[i]['paymentMode'] == 'Cash'){
+          _availableCash += double.parse(_filteredSales[i]['totalPrice']);
+        }
+        else if(_filteredSales[i]['paymentMode'] == 'Transfer'){
+          _totalTransfer += double.parse(_filteredSales[i]['totalPrice']);
+        }
+      }
+      _totalSalesPrice = _availableCash + _totalTransfer;
+
+    });
+  }
+
   /// Getting [_Widget.month] reports from the dailyReportsDatabase based on time
   /// Sets the details of the month and [_filteredSales] to [_sales]
   ///
@@ -170,6 +190,7 @@ class _MonthReportState extends State<MonthReport> {
       _filteredSales = tempList;
     }
     if(_filteredSales.length > 0 && _filteredSales.isNotEmpty){
+      _resetTotalDetails();
       return _dataTable(_filteredSales);
     }
     else{
