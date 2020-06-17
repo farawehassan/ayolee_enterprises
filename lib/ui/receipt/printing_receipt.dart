@@ -104,7 +104,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
     final Image image = decodeImage(bytes);
     ticket.image(image);
 
-    ticket.text('AYO-LEE ENTERPRISES',
+    ticket.text('AYO-LEE STORES',
         styles: PosStyles(
           align: PosTextAlign.center,
           height: PosTextSize.size2,

@@ -28,7 +28,7 @@ class _ReceiptState extends State<Receipt> {
   var futureValue = FutureValues();
 
   /// Variable holding the company's name
-  String companyName = "Ayo-Lee Enterprises";
+  String companyName = "Ayo-Lee Stores";
 
   /// Variable holding the company's address
   String address = "14, Leigh street Off Ojuelegba Road Surulere Lagos";
@@ -57,7 +57,7 @@ class _ReceiptState extends State<Receipt> {
   /// Instantiating a class of the [DailyReportsData]
   DailyReportsData dailyReportsData = new DailyReportsData();
 
-  /// A Map to hold the details of a sales record
+  /// A Map to hold the product's name to its current quantity
   Map products = {};
 
   /// A List to hold the Map of the data above
@@ -534,29 +534,33 @@ class _ReceiptState extends State<Receipt> {
   /// Function that adds new report to the database by calling
   /// [addNewDailyReport] in the [RestDataSource] class
   void _saveNewDailyReport(double qty, String productName, double unitPrice,
-      double total, String paymentMode) {
+      double total, String paymentMode) async {
+    var api = RestDataSource();
+    var dailyReport = DailyReportsData();
+    dailyReport.quantity = qty.toString();
+    dailyReport.productName = productName.toString();
+    dailyReport.unitPrice = unitPrice.toString();
+    dailyReport.totalPrice = total.toString();
+    dailyReport.paymentMode = paymentMode;
+    dailyReport.time = DateTime.now().toString();
     try {
-      var dailyReport = DailyReportsData();
-      dailyReport.quantity = qty.toString();
-      dailyReport.productName = productName.toString();
-      dailyReport.unitPrice = unitPrice.toString();
-      dailyReport.totalPrice = total.toString();
-      dailyReport.paymentMode = paymentMode;
-      dailyReport.time = DateTime.now().toString();
-      print(dailyReport.time);
-
-      var api = RestDataSource();
-      api.addNewDailyReport(dailyReport);
       for (int i = 0; i < productsList.length; i++){
         if(productsList[i].containsKey(productName)){
           print(productsList[i]);
           print(productsList[i][productName]);
-          api.sellProduct(productName, (productsList[i][productName] - qty).toString());
+          Future<String> message = api.sellProduct(productName, (productsList[i][productName] - qty).toString());
+          await message.then((value){
+            api.addNewDailyReport(dailyReport);
+          }).catchError((e){
+            _showMessage("Error in saving $productName");
+            print(e);
+          });
         }
       }
     } catch (e) {
       print(e);
-      _showMessage("Error in saving data");
+      _showMessage("Error in saving $productName");
     }
+
   }
 }
