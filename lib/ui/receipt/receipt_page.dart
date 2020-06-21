@@ -76,13 +76,12 @@ class _ReceiptState extends State<Receipt> {
     return val;
   }
 
-  /// Function to fetch all the available product's names from the database to
-  /// [availableProducts]
+  /// Function to fetch all the available product's names and current quantity
+  /// from the database to [productsList]
   void _availableProductNames() {
     Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
     productNames.then((value) {
       for (int i = 0; i < value.length; i++) {
-        print(value[i].productName);
         String name = value[i].productName;
         double qty = double.parse(value[i].currentQuantity);
         products = {name: qty};
@@ -492,8 +491,8 @@ class _ReceiptState extends State<Receipt> {
   }
 
   /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
+  void _showMessage(String message) async {
+    await Fluttertoast.showToast(
         msg: "$message",
         toastLength: Toast.LENGTH_SHORT,
         backgroundColor: Colors.white,
@@ -549,11 +548,17 @@ class _ReceiptState extends State<Receipt> {
           print(productsList[i]);
           print(productsList[i][productName]);
           Future<String> message = api.sellProduct(productName, (productsList[i][productName] - qty).toString());
-          await message.then((value){
-            api.addNewDailyReport(dailyReport);
+          await message.then((value) async{
+            Future<String> save = api.addNewDailyReport(dailyReport);
+            await save.then((value){
+              print("${productsList[i][productName]} saved");
+            }).catchError((e){
+              print(e);
+              throw ("Error in saving $productName");
+            });
           }).catchError((e){
-            _showMessage("Error in saving $productName");
             print(e);
+            throw ("Error in deducting $productName");
           });
         }
       }
@@ -563,4 +568,5 @@ class _ReceiptState extends State<Receipt> {
     }
 
   }
+
 }

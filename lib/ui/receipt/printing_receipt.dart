@@ -95,7 +95,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
 
   /// Function to build a ticket of [receivedProducts] using the
   /// package [esc_pos_printer]
-  Future<Ticket> showReceipt() async{
+  Future<Ticket> _showReceipt() async{
     Ticket ticket = Ticket(PaperSize.mm58);
 
     // Print image
@@ -288,11 +288,11 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                                                   child: FlatButton(
                                                     onPressed: () {
                                                       Navigator.of(context).pop(); // To close the dialog
-                                                      showReceipt().then((ticketValue){
+                                                      _showReceipt().then((ticketValue){
                                                         printerManager.printTicket(ticketValue).then((result) {
                                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text(result.msg)));
                                                           if(result.msg == "Success"){
-                                                            saveProduct("Iya Bimbo");
+                                                            _saveProduct("Iya Bimbo");
                                                           }
                                                         }).catchError((error){
                                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
@@ -308,11 +308,11 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                                                   child: FlatButton(
                                                     onPressed: () {
                                                       Navigator.of(context).pop(); // To close the dialog
-                                                      showReceipt().then((ticketValue){
+                                                      _showReceipt().then((ticketValue){
                                                         printerManager.printTicket(ticketValue).then((result) {
                                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text(result.msg)));
                                                           if(result.msg == "Success"){
-                                                            saveProduct("Transfer");
+                                                            _saveProduct("Transfer");
                                                           }
                                                         }).catchError((error){
                                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
@@ -328,11 +328,11 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                                                   child: FlatButton(
                                                     onPressed: () {
                                                       Navigator.of(context).pop(); // To close the dialog
-                                                      showReceipt().then((ticketValue){
+                                                      _showReceipt().then((ticketValue){
                                                         printerManager.printTicket(ticketValue).then((result) {
                                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text(result.msg)));
                                                           if(result.msg == "Success"){
-                                                            saveProduct("Cash");
+                                                            _saveProduct("Cash");
                                                           }
                                                         }).catchError((error){
                                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
@@ -375,7 +375,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
             _devices = scannedDevices;
           });
           if(_devices.isEmpty){
-            showMessage('No Available Printer');
+            _showMessage('No Available Printer');
           }
         });
       },child: Icon(Icons.search),),
@@ -383,7 +383,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
   }
 
   /// Using flutter toast to display a toast message [message]
-  void showMessage(String message){
+  void _showMessage(String message){
     Fluttertoast.showToast(
         msg: "$message",
         toastLength: Toast.LENGTH_SHORT,
@@ -393,10 +393,10 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
 
   /// This function calls [saveNewDailyReport()] with the details in
   /// [receivedProducts]
-  void saveProduct(String paymentMode){
+  void _saveProduct(String paymentMode){
     for (var product in receivedProducts) {
       try {
-        saveNewDailyReport(
+        _saveNewDailyReport(
             double.parse(
                 product[
                 'qty']),
@@ -408,44 +408,51 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
             'totalPrice']),
             paymentMode);
       } catch (e) {
-        showMessage(e.toString());
+        _showMessage(e.toString());
         print(e);
       }
     }
-    showMessage("Items saved");
+    _showMessage("Items saved");
     Navigator.pushReplacementNamed(context, MyHomePage.id);
   }
 
   /// Function that adds new report to the database by calling
   /// [addNewDailyReport] in the [RestDataSource] class
-  void saveNewDailyReport(double qty, String productName, double unitPrice,
-      double total, String paymentMode) {
+  void _saveNewDailyReport(double qty, String productName, double unitPrice,
+      double total, String paymentMode) async {
+    var api = RestDataSource();
+    var dailyReport = DailyReportsData();
+    dailyReport.quantity = qty.toString();
+    dailyReport.productName = productName.toString();
+    dailyReport.unitPrice = unitPrice.toString();
+    dailyReport.totalPrice = total.toString();
+    dailyReport.paymentMode = paymentMode;
+    dailyReport.time = DateTime.now().toString();
     try {
-      var dailyReport = DailyReportsData();
-      dailyReport.quantity = qty.toString();
-      dailyReport.productName = productName.toString();
-      dailyReport.unitPrice = unitPrice.toString();
-      dailyReport.totalPrice = total.toString();
-      dailyReport.paymentMode = paymentMode;
-      dailyReport.time = DateTime.now().toString();
-      print(dailyReport.time);
-
-      var api = RestDataSource();
-      api.addNewDailyReport(dailyReport);
       for (int i = 0; i < productsList.length; i++){
         if(productsList[i].containsKey(productName)){
           print(productsList[i]);
           print(productsList[i][productName]);
-          api.sellProduct(productName, (productsList[i][productName] - qty).toString());
+          Future<String> message = api.sellProduct(productName, (productsList[i][productName] - qty).toString());
+          await message.then((value) async{
+            Future<String> save = api.addNewDailyReport(dailyReport);
+            await save.then((value){
+              print("${productsList[i][productName]} saved");
+            }).catchError((e){
+              print(e);
+              throw ("Error in saving $productName");
+            });
+          }).catchError((e){
+            print(e);
+            throw ("Error in deducting $productName");
+          });
         }
       }
     } catch (e) {
       print(e);
-      Fluttertoast.showToast(
-          msg: "Error in saving data",
-          toastLength: Toast.LENGTH_SHORT,
-          backgroundColor: Colors.white,
-          textColor: Colors.black);
+      _showMessage("Error in saving $productName");
     }
+
   }
+
 }

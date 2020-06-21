@@ -1,6 +1,7 @@
 import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:folding_cell/folding_cell.dart';
@@ -550,7 +551,7 @@ class _ProductsState extends State<Products> {
                       'Current quantity: $cq',
                       style: TextStyle(
                         color: Colors.black,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
@@ -747,21 +748,28 @@ class _ProductsState extends State<Products> {
   /// Function to check whether a product exists or not
   /// It returns true if it does and false if it does not
   Future<bool> _checkIfProductExists(String name) async {
-    bool response;
+    bool response = false;
     Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
     await productNames.then((value) {
+      print(name);
       for (int i = 0; i < value.length; i++){
          if(name == value[i].productName){
+           _updateProduct(
+               name,
+               value[i].productName,
+               _initialQuantity + double.parse(value[i].initialQuantity),
+               _costPrice,
+               _sellingPrice,
+               _initialQuantity
+           );
            response = true;
-         }
-         else{
-           response = false;
          }
       }
     }).catchError((onError){
        _showMessage( "Error in fetching data");
-       response = false;
+       throw (onError);
     });
+    print(response);
     return response;
   }
 
@@ -772,18 +780,8 @@ class _ProductsState extends State<Products> {
     var product = AvailableProduct();
 
     Future<bool> exists = _checkIfProductExists(_capitalize(_productName));
-    await exists.then((value) {
-      if (value == true){
-        _updateProduct(
-          _capitalize(_productName),
-          _capitalize(_productName),
-          _initialQuantity,
-          _costPrice,
-          _sellingPrice,
-          _initialQuantity
-        );
-      }
-      else {
+    await exists.then((value) async {
+      if(value == false) {
         try {
           product.productName = _capitalize(_productName);
           product.costPrice = _costPrice.toString();
@@ -797,10 +795,12 @@ class _ProductsState extends State<Products> {
             _showMessage("${error.toString()}");
           });
         } catch (e) {
+          print(e);
           _showMessage( "Error in adding data");
         }
       }
     }).catchError((onError){
+      print(onError.toString());
       _showMessage( "Error in fetching data");
     });
 

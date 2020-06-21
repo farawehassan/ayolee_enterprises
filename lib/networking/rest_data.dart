@@ -49,7 +49,6 @@ class RestDataSource {
       "password": createUser.pin,
       "password_confirmation": createUser.confirmPin
     }).then((dynamic res) {
-      print(res.toString());
       if(res["error"] == true){
         throw new Exception(res["meesage"]);
       }else{
@@ -66,7 +65,6 @@ class RestDataSource {
     await user.then((value) {
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
-    print(header.toString());
 
     return _netUtil.post(ADD_PRODUCT_URL, headers: header, body: {
       "productName": product.productName,
@@ -93,7 +91,6 @@ class RestDataSource {
     await user.then((value) {
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
-    print(header.toString());
 
     return _netUtil.post(SELl_PRODUCT_URL, headers: header, body: {
       "productName": productName,
@@ -117,7 +114,6 @@ class RestDataSource {
     await user.then((value) {
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
-    print(header.toString());
     final UPDATE_PRODUCT_URL = BASE_URL + "/product/edit/" + "$name";
 
     return _netUtil.put(UPDATE_PRODUCT_URL, headers: header, body: {
@@ -167,7 +163,6 @@ class RestDataSource {
     await user.then((value) {
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
-    print(header.toString());
 
     return _netUtil.post(ADD_REPORT_URL, headers: header, body: {
       "productName": reportsData.productName,
@@ -213,7 +208,6 @@ class RestDataSource {
     await user.then((value) {
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
-    print(header.toString());
     final DELETE_REPORT_URL = BASE_URL + "/report/delete/" + "$id";
     return _netUtil.delete(DELETE_REPORT_URL, headers: header).then((dynamic res) {
       if(res["error"] == true){

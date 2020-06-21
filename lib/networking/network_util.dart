@@ -12,9 +12,6 @@ class NetworkHelper{
   NetworkHelper.internal();
   factory NetworkHelper() => _instance;
 
-  /// A variable set for timeout as 30 secs while making a request
-  int timeout = 30;
-
   /// An object for decoding json values
   final JsonDecoder _decoder = new JsonDecoder();
 
@@ -24,7 +21,6 @@ class NetworkHelper{
     try {
       return http
           .post(url, body: body, headers: headers, encoding: encoding)
-          .timeout(Duration(seconds: timeout))
           .then((http.Response response) {
         final String res = response.body;
         final int statusCode = response.statusCode;
@@ -35,8 +31,6 @@ class NetworkHelper{
         }
         return _decoder.convert(res);
       });
-    } on TimeoutException catch (e) {
-      throw new ErrorDescription("Timeout Error: $e");
     } on SocketException catch (e) {
       throw new ErrorDescription("$e");
     } catch (e) {
@@ -51,7 +45,6 @@ class NetworkHelper{
       return
         http
           .get(url, headers: headers)
-          .timeout(Duration(seconds: timeout))
           .then((http.Response response) {
         final String res = response.body;
         final int statusCode = response.statusCode;
@@ -62,8 +55,6 @@ class NetworkHelper{
       }).catchError((e) {
           throw new ErrorDescription("$e");
         });
-    } on TimeoutException catch (e) {
-      throw new ErrorDescription("Timeout Error: $e");
     } on SocketException catch (e) {
       throw new ErrorDescription("$e");
     } catch (e) {
@@ -77,7 +68,6 @@ class NetworkHelper{
     try {
       return http
           .post(url, body: body, headers: headers, encoding: encoding)
-          .timeout(Duration(seconds: timeout))
           .then((http.Response response) {
         final String res = response.body;
         final int statusCode = response.statusCode;
@@ -87,8 +77,6 @@ class NetworkHelper{
         }
         return _decoder.convert(res);
       });
-    } on TimeoutException catch (e) {
-      throw new ErrorDescription("Timeout Error: $e");
     } on SocketException catch (e) {
       throw new ErrorDescription("$e");
     } catch (e) {
@@ -102,7 +90,6 @@ class NetworkHelper{
     try {
       return http
           .put(url, body: body, headers: headers, encoding: encoding)
-          .timeout(Duration(seconds: timeout))
           .then((http.Response response) {
         final String res = response.body;
         final int statusCode = response.statusCode;
@@ -112,8 +99,6 @@ class NetworkHelper{
         }
         return _decoder.convert(res);
       });
-    } on TimeoutException catch (e) {
-      throw new ErrorDescription("Timeout Error: $e");
     } on SocketException catch (e) {
       throw new ErrorDescription("$e");
     } catch (e) {
@@ -127,7 +112,6 @@ class NetworkHelper{
     try {
       return http
           .delete(url, headers: headers)
-          .timeout(Duration(seconds: timeout))
           .then((http.Response response) {
         final String res = response.body;
         final int statusCode = response.statusCode;
@@ -137,8 +121,6 @@ class NetworkHelper{
         }
         return _decoder.convert(res);
       });
-    } on TimeoutException catch (e) {
-      throw new ErrorDescription("Timeout Error: $e");
     } on SocketException catch (e) {
       throw new ErrorDescription("$e");
     } catch (e) {

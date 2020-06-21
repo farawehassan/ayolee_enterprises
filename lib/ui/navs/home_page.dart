@@ -41,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Variable to hold the totalPrice of an item recorded
   double _totalPrice;
 
+  /// A variable holding the number of rows
   int increment = 0;
 
   /// A Map to hold the details of a sales record
@@ -48,6 +49,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// A List to hold the Map of the data above
   List<Map> _detailsList = [];
+
+  /// A Map to hold the product's name to its current quantity
+  Map products = {};
+
+  /// A List to hold the Map of the data above
+  List<Map> productsList = [];
 
   /// A List to hold the names of all the availableProducts in the database
   List<String> availableProducts = [];
@@ -74,6 +81,8 @@ class _MyHomePageState extends State<MyHomePage> {
     productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         availableProducts.add(value[i].productName);
+        products = {value[i].productName: double.parse(value[i].currentQuantity)};
+        productsList.add(products);
       }
     });
   }
@@ -89,6 +98,8 @@ class _MyHomePageState extends State<MyHomePage> {
   /// [_quantity], [_selectedProduct], [_unitPrice] and [_totalPrice]
   void _addRow() {
     availableProducts.clear();
+    products.clear();
+    productsList.clear();
     _availableProductNames();
 
     final TextEditingController qtyController = TextEditingController();
@@ -203,13 +214,10 @@ class _MyHomePageState extends State<MyHomePage> {
         print(_detailsList);
       } catch (e) {
         print(e);
-        Fluttertoast.showToast(
-            msg: "Error in records",
-            toastLength: Toast.LENGTH_SHORT,
-            backgroundColor: Colors.white,
-            textColor: Colors.black);
+        _showMessage("Error in records");
       }
     }
+
   }
 
   /// Function to delete a row from the record sales at a particular [index]
@@ -235,6 +243,42 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }*/
 
+  /// Function to check whether a product's quantity is not more than the
+  /// buyer's quantity
+  /// It returns false if it does and true if it does not
+  bool _checkProductQuantity(String name, double qty) {
+    bool response = false;
+    for (int i = 0; i < productsList.length; i++){
+      if(productsList[i].containsKey(name) && productsList[i][name] >= qty){
+        response = true;
+      }
+    }
+    print(response);
+    return response;
+  }
+
+  /// Function to check whether a product's quantity is not more than the
+  /// buyer's quantity by calling [_checkProductQuantity()]
+  /// It returns true if it does and false if it does not
+  bool _checkQuantity() {
+    bool response = false;
+    try {
+      for(int i = 0; i < _detailsList.length; i++){
+        print(_detailsList[i]['product']);
+        print(_detailsList[i]['qty']);
+        if (_checkProductQuantity(_detailsList[i]['product'], double.parse(_detailsList[i]['qty'])) == false){
+          response = true;
+        }
+      }
+    } catch (e) {
+      print(e);
+      _showMessage("Error in fetching sales");
+      response = true;
+    }
+    print(response);
+    return response;
+  }
+
   /// Building a Scaffold Widget to display an AppBar that sends [_detailsList]
   /// when the send icon is pressed, a listView of dismissible widget
   /// of [_rows], a floatingActionButton to add a new row when pressed by
@@ -251,7 +295,7 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.white,
             ),
             onPressed: () {
-              if (_detailsList.isNotEmpty) {
+              if (_detailsList.isNotEmpty && _checkQuantity() == false){
                 try {
                   Navigator.push(
                     context,
@@ -259,19 +303,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 } catch (e) {
                   print(e);
-                  Fluttertoast.showToast(
-                      msg: "Error in records",
-                      toastLength: Toast.LENGTH_SHORT,
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black);
+                  _showMessage("Error in records");
                 }
               }
               else{
-                Fluttertoast.showToast(
-                    msg: "No records",
-                    toastLength: Toast.LENGTH_SHORT,
-                    backgroundColor: Colors.white,
-                    textColor: Colors.black);
+                _showMessage("Error in records or no records");
               }
             },
           ),
@@ -497,6 +533,15 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black);
   }
 
   /// Function to show profile of the account if the user is an Admin 'Farawe'
