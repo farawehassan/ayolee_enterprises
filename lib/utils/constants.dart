@@ -1,3 +1,5 @@
+import 'package:ayolee_stores/model/available_productDB.dart';
+import 'package:ayolee_stores/ui/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
@@ -7,8 +9,17 @@ class Constants{
 
   static const String Create = 'Create a worker';
 
-  /// List of string to hold the menu options names
-  static const List<String> choices = <String>[
+  static const String ShowAll = 'Display all products';
+  static const String ShowAvailable = 'Display available products';
+
+  /// List of string to hold the menu options in [Products]
+  static const List<String> showProductChoices = <String>[
+    ShowAll,
+    ShowAvailable
+  ];
+
+  /// List of string to hold the menu options in [Profile]
+  static const List<String> profileChoices = <String>[
     Create,
   ];
 

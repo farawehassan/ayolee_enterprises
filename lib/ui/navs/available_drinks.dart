@@ -23,6 +23,10 @@ class _ProductsState extends State<Products> {
   /// Instantiating a class of the [AvailableProduct]
   AvailableProduct product = new AvailableProduct();
 
+  /// Boolean variable holding false to display only available products and can
+  /// be set to true to display all products
+  bool showAllProducts = false;
+
   /// Variable of String to hold the productName when you're adding a new product
   String _productName;
 
@@ -132,7 +136,9 @@ class _ProductsState extends State<Products> {
   /// products to [_productLength]
   void _getNames() async {
     List<AvailableProduct> tempList = new List();
-    Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
+    Future<List<AvailableProduct>> productNames = showAllProducts
+        ? futureValue.getProductFromDB()
+        : futureValue.getProductsFromDB();
     await productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         tempList.add(value[i]);
@@ -189,8 +195,37 @@ class _ProductsState extends State<Products> {
           icon: _searchIcon,
           onPressed: _searchPressed,
         ),
+        PopupMenuButton<String>(
+            onSelected: choiceAction,
+            itemBuilder: (BuildContext context) {
+              return Constants.showProductChoices.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            }
+        )
       ],
     );
+  }
+
+  /// A function to set actions for the options menu with the value [choice]
+  void choiceAction(String choice){
+    if(choice == Constants.ShowAll){
+      if (!mounted) return;
+      setState(() {
+        showAllProducts = true;
+        _refresh();
+      });
+    }
+    else if(choice == Constants.ShowAvailable){
+      if (!mounted) return;
+      setState(() {
+        showAllProducts = false;
+        _refresh();
+      });
+    }
   }
 
   /// A function to build the list of the available products by using a
@@ -250,7 +285,9 @@ class _ProductsState extends State<Products> {
   /// [_getNames()] method but this is from the RefreshIndicator
   Future<Null> _refresh() {
     List<AvailableProduct> tempList = new List();
-    Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
+    Future<List<AvailableProduct>> productNames = showAllProducts
+        ? futureValue.getProductFromDB()
+        : futureValue.getProductsFromDB();
     return productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         tempList.add(value[i]);

@@ -393,42 +393,50 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
 
   /// This function calls [saveNewDailyReport()] with the details in
   /// [receivedProducts]
-  void _saveProduct(String paymentMode){
-    for (var product in receivedProducts) {
-      try {
-        _saveNewDailyReport(
-            double.parse(
-                product[
-                'qty']),
-            product[
-            'product'],
-            double.parse(product[
-            'unitPrice']),
-            double.parse(product[
-            'totalPrice']),
-            paymentMode);
-      } catch (e) {
-        _showMessage(e.toString());
-        print(e);
+  void _saveProduct(String paymentMode) async {
+    if(receivedProducts.length > 0 && receivedProducts.isNotEmpty){
+      for (var product in receivedProducts) {
+        try {
+          await _saveNewDailyReport(
+              double.parse(
+                  product[
+                  'qty']),
+              product[
+              'product'],
+              double.parse(product[
+              'unitPrice']),
+              double.parse(product[
+              'totalPrice']),
+              paymentMode)
+              .then((value){
+            _showMessage("${product['product']} was saved successfully");
+          });
+        } catch (e) {
+          _showMessage(e.toString());
+          print(e);
+        }
       }
+      Navigator.pop(context);
     }
-    _showMessage("Items saved");
-    Navigator.pushReplacementNamed(context, MyHomePage.id);
+    else {
+      _showMessage("Empty receipt");
+      Navigator.pop(context);
+    }
   }
 
   /// Function that adds new report to the database by calling
   /// [addNewDailyReport] in the [RestDataSource] class
-  void _saveNewDailyReport(double qty, String productName, double unitPrice,
+  Future<void> _saveNewDailyReport(double qty, String productName, double unitPrice,
       double total, String paymentMode) async {
-    var api = RestDataSource();
-    var dailyReport = DailyReportsData();
-    dailyReport.quantity = qty.toString();
-    dailyReport.productName = productName.toString();
-    dailyReport.unitPrice = unitPrice.toString();
-    dailyReport.totalPrice = total.toString();
-    dailyReport.paymentMode = paymentMode;
-    dailyReport.time = DateTime.now().toString();
     try {
+      var api = RestDataSource();
+      var dailyReport = DailyReportsData();
+      dailyReport.quantity = qty.toString();
+      dailyReport.productName = productName.toString();
+      dailyReport.unitPrice = unitPrice.toString();
+      dailyReport.totalPrice = total.toString();
+      dailyReport.paymentMode = paymentMode;
+      dailyReport.time = DateTime.now().toString();
       for (int i = 0; i < productsList.length; i++){
         if(productsList[i].containsKey(productName)){
           print(productsList[i]);
@@ -450,9 +458,8 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
       }
     } catch (e) {
       print(e);
-      _showMessage("Error in saving $productName");
+      throw ("Error in saving $productName");
     }
-
   }
 
 }
