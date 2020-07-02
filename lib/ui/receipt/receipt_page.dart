@@ -517,7 +517,7 @@ class _ReceiptState extends State<Receipt> {
               'totalPrice']),
               paymentMode)
               .then((value){
-            _showMessage("${product['product']} was saved successfully");
+            _showMessage("${product['product']} was sold successfully");
             });
         } catch (e) {
           _showMessage(e.toString());
@@ -545,28 +545,29 @@ class _ReceiptState extends State<Receipt> {
       dailyReport.totalPrice = total.toString();
       dailyReport.paymentMode = paymentMode;
       dailyReport.time = DateTime.now().toString();
-      for (int i = 0; i < productsList.length; i++){
-        if(productsList[i].containsKey(productName)){
-          print(productsList[i]);
-          print(productsList[i][productName]);
-          Future<String> message = api.sellProduct(productName, (productsList[i][productName] - qty).toString());
-          await message.then((value) async{
-            Future<String> save = api.addNewDailyReport(dailyReport);
-            await save.then((value){
+
+      await api.addNewDailyReport(dailyReport).then((value) {
+        for (int i = 0; i < productsList.length; i++) {
+          if (productsList[i].containsKey(productName)) {
+            print(productsList[i]);
+            print(productsList[i][productName]);
+            api.sellProduct(
+                productName, (productsList[i][productName] - qty).toString())
+                .then((value) {
               print("${productsList[i][productName]} saved");
-            }).catchError((e){
+            }).catchError((e) {
               print(e);
-              throw ("Error in saving $productName");
+              throw ("Error in deducting $productName");
             });
-          }).catchError((e){
-            print(e);
-            throw ("Error in deducting $productName");
-          });
+          }
         }
-      }
+      }).catchError((e) {
+        print(e);
+        throw ("Error in saving $productName");
+      });
     } catch (e) {
       print(e);
-      throw ("Error in saving $productName");
+      throw ("Error in retrieving $productName");
     }
   }
 

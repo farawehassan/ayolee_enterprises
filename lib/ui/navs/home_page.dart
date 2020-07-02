@@ -370,7 +370,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       _showProfile();
                     },
                     child: UserAccountsDrawerHeader(
-                      accountName: Text("Ayolee Stores"),
+                      accountName: Text("Ayo-Lee Stores"),
                       accountEmail: Text("farawebola@gmail.com"),
                       currentAccountPicture: Hero(
                         tag: 'displayPicture',

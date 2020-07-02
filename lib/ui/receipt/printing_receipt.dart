@@ -3,7 +3,6 @@ import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:ayolee_stores/model/daily_reportsDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
-import 'package:ayolee_stores/ui/navs/home_page.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -409,7 +408,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
               'totalPrice']),
               paymentMode)
               .then((value){
-            _showMessage("${product['product']} was saved successfully");
+            _showMessage("${product['product']} was sold successfully");
           });
         } catch (e) {
           _showMessage(e.toString());
@@ -437,28 +436,29 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
       dailyReport.totalPrice = total.toString();
       dailyReport.paymentMode = paymentMode;
       dailyReport.time = DateTime.now().toString();
-      for (int i = 0; i < productsList.length; i++){
-        if(productsList[i].containsKey(productName)){
-          print(productsList[i]);
-          print(productsList[i][productName]);
-          Future<String> message = api.sellProduct(productName, (productsList[i][productName] - qty).toString());
-          await message.then((value) async{
-            Future<String> save = api.addNewDailyReport(dailyReport);
-            await save.then((value){
+
+      await api.addNewDailyReport(dailyReport).then((value) {
+        for (int i = 0; i < productsList.length; i++) {
+          if (productsList[i].containsKey(productName)) {
+            print(productsList[i]);
+            print(productsList[i][productName]);
+            api.sellProduct(
+                productName, (productsList[i][productName] - qty).toString())
+                .then((value) {
               print("${productsList[i][productName]} saved");
-            }).catchError((e){
+            }).catchError((e) {
               print(e);
-              throw ("Error in saving $productName");
+              throw ("Error in deducting $productName");
             });
-          }).catchError((e){
-            print(e);
-            throw ("Error in deducting $productName");
-          });
+          }
         }
-      }
+      }).catchError((e) {
+        print(e);
+        throw ("Error in saving $productName");
+      });
     } catch (e) {
       print(e);
-      throw ("Error in saving $productName");
+      throw ("Error in retrieving $productName");
     }
   }
 

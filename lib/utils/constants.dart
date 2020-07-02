@@ -1,4 +1,3 @@
-import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:ayolee_stores/ui/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
@@ -11,11 +10,13 @@ class Constants{
 
   static const String ShowAll = 'Display all products';
   static const String ShowAvailable = 'Display available products';
+  static const String ShowFinished = 'Display finished products';
 
   /// List of string to hold the menu options in [Products]
   static const List<String> showProductChoices = <String>[
     ShowAll,
-    ShowAvailable
+    ShowAvailable,
+    ShowFinished
   ];
 
   /// List of string to hold the menu options in [Profile]

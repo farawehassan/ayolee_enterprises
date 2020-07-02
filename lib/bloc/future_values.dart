@@ -46,6 +46,25 @@ class FutureValues{
     return products;
   }
 
+  /// Method to get all the products from the database in the server that its
+  /// [currentQuantity] is = 0 with the help of [RestDataSource]
+  /// It returns a list of [AvailableProduct]
+  Future<List<AvailableProduct>> getFinishedProductFromDB() async {
+    var data = RestDataSource();
+    List<AvailableProduct> products = new List();
+    Future<List<AvailableProduct>> availableProduct = data.fetchAllProducts();
+    await availableProduct.then((value){
+      for(int i = 0; i < value.length; i++){
+        if(double.parse(value[i].currentQuantity) == 0.0){
+          products.add(value[i]);
+        }
+      }
+    }).catchError((e){
+      throw e;
+    });
+    return products;
+  }
+
   /// Method to get all the reports from the database in the server with
   /// the help of [RestDataSource]
   /// It returns a list of [DailyReportsData]

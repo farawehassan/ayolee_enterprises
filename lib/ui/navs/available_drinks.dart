@@ -23,9 +23,9 @@ class _ProductsState extends State<Products> {
   /// Instantiating a class of the [AvailableProduct]
   AvailableProduct product = new AvailableProduct();
 
-  /// Boolean variable holding false to display only available products and can
-  /// be set to true to display all products
-  bool showAllProducts = false;
+  /// int variable holding 1 to display all products, 2 for available products
+  /// and 3 for finished products
+  int productsToShow = 2;
 
   /// Variable of String to hold the productName when you're adding a new product
   String _productName;
@@ -136,9 +136,17 @@ class _ProductsState extends State<Products> {
   /// products to [_productLength]
   void _getNames() async {
     List<AvailableProduct> tempList = new List();
-    Future<List<AvailableProduct>> productNames = showAllProducts
-        ? futureValue.getProductFromDB()
-        : futureValue.getProductsFromDB();
+
+    Future<List<AvailableProduct>> productNames;
+
+    if(productsToShow == 1){
+      productNames = futureValue.getProductFromDB();
+    } else if(productsToShow == 2){
+      productNames = futureValue.getProductsFromDB();
+    } else if(productsToShow == 3){
+      productNames = futureValue.getFinishedProductFromDB();
+    }
+
     await productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         tempList.add(value[i]);
@@ -150,6 +158,7 @@ class _ProductsState extends State<Products> {
           backgroundColor: Colors.white,
           textColor: Colors.black);
     });
+
     if (!mounted) return;
     setState(() {
       _productLength = tempList.length;
@@ -215,14 +224,21 @@ class _ProductsState extends State<Products> {
     if(choice == Constants.ShowAll){
       if (!mounted) return;
       setState(() {
-        showAllProducts = true;
+        productsToShow = 1;
         _refresh();
       });
     }
     else if(choice == Constants.ShowAvailable){
       if (!mounted) return;
       setState(() {
-        showAllProducts = false;
+        productsToShow = 2;
+        _refresh();
+      });
+    }
+    else if(choice == Constants.ShowFinished){
+      if (!mounted) return;
+      setState(() {
+        productsToShow = 3;
         _refresh();
       });
     }
@@ -285,9 +301,15 @@ class _ProductsState extends State<Products> {
   /// [_getNames()] method but this is from the RefreshIndicator
   Future<Null> _refresh() {
     List<AvailableProduct> tempList = new List();
-    Future<List<AvailableProduct>> productNames = showAllProducts
-        ? futureValue.getProductFromDB()
-        : futureValue.getProductsFromDB();
+
+    Future<List<AvailableProduct>> productNames;
+    if(productsToShow == 1){
+      productNames = futureValue.getProductFromDB();
+    } else if(productsToShow == 2){
+      productNames = futureValue.getProductsFromDB();
+    } else if(productsToShow == 3){
+      productNames = futureValue.getFinishedProductFromDB();
+    }
     return productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         tempList.add(value[i]);
