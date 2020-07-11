@@ -1,8 +1,8 @@
-import 'package:ayolee_stores/model/available_productDB.dart';
-import 'package:ayolee_stores/model/daily_reportsDB.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:flutter/material.dart';
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
@@ -47,12 +47,12 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
   int _dataLength;
 
   /// Variable to hold the name of the user logged in
-  String username;
+  String userType;
 
   /// Setting the current user's name logged in to [_username]
   void getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
-      username = user.name;
+      userType = user.type;
     }).catchError((Object error) {
       print(error.toString());
     });
@@ -70,13 +70,16 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
   /// It also calls the function [getColors()]
   void getReports() async {
     print(widget.month);
-    Future<List<DailyReportsData>> report = futureValue.getMonthReports(widget.month);
+    Future<List<Reports>> report = futureValue.getMonthReports(widget.month);
     await report.then((value) {
       if (!mounted) return;
       setState(() {
         _dataLength = value.length;
         for(int i = 0; i < value.length; i++){
-          calculateProfit(value[i]);
+          if(value[i].paymentMode != 'Iya Bimbo'){
+            totalProfitMade += double.parse(value[i].quantity) *
+                (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
+          }
           if(data.containsKey(value[i].productName)){
             data[value[i].productName] = (double.parse(data[value[i].productName]) + double.parse(value[i].quantity)).toString();
           }else{
@@ -85,34 +88,9 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
         }
         print(data);
       });
-    });
-    getColors();
-  }
-
-  /// Method to calculate profit made of a report by deducting the report's
-  /// [unitPrice] from the product's [costPrice] and multiplying the value by the
-  /// report's [quantity]
-  /// It is done if the report's [paymentMode] is not 'Iya Bimbo'
-  /// or else it returns 0
-  void calculateProfit(DailyReportsData data) async {
-    double profitMade = 0.0;
-    Future<List<AvailableProduct>> products = futureValue.getProductFromDB();
-    await products.then((value) {
-      print(value);
-      for (int i = 0; i < value.length; i++){
-        if(value[i].productName == data.productName){
-          if(data.paymentMode != 'Iya Bimbo'){
-            double profit = double.parse(data.unitPrice) - double.parse(value[i].costPrice);
-            profitMade += (double.parse(data.quantity) * profit);
-            print(profit);
-          }
-          print(profitMade);
-        }
-      }
-      if (!mounted) return;
-      setState(() {
-        totalProfitMade += profitMade;
-      });
+      getColors();
+    }).catchError((onError){
+      _showMessage(onError);
     });
   }
 
@@ -176,7 +154,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     );
   }
 
-  /// It doesn't show user's [totalProfitMade] if the [username] is not 'Farawe'
+  /// It doesn't show user's [totalProfitMade] if the [userType] is not 'Admin'
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -186,7 +164,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
         children: <Widget>[
           Center(child: _buildChart()),
           SizedBox(height: 15.0,width: 15.0,),
-          username == 'Farawe' ? Center(
+          userType == 'Admin' ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -214,6 +192,16 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
           ) : Container(),
         ],
       ),
+    );
+  }
+
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
     );
   }
 

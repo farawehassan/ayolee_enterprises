@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
-import 'package:ayolee_stores/model/daily_reportsDB.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
 
 /// A StatefulWidget class creating a pie chart for my daily report records
@@ -40,13 +41,13 @@ class _DailyChartState extends State<DailyChart> {
   /// its quantity accordingly
   /// It also calls the function [getColors()]
   void getReports() async {
-    Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
+    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
     await report.then((value) {
       if (!mounted) return;
       setState(() {
         _dataLength = 0;
         for(int i = 0; i < value.length; i++){
-          if(reportValue.checkIfToday(value[i].time)){
+          if(reportValue.checkIfToday(value[i].createdAt)){
             _dataLength += 1;
             if(data.containsKey(value[i].productName)){
               data[value[i].productName] = (double.parse(data[value[i].productName]) + double.parse(value[i].quantity)).toString();
@@ -57,9 +58,11 @@ class _DailyChartState extends State<DailyChart> {
         }
         print(data);
       });
+      print(_dataLength);
+      getColors();
+    }).catchError((onError){
+      _showMessage(onError);
     });
-    print(_dataLength);
-    getColors();
   }
 
   /// Function to get the amount of colors needed for the pie chart and map
@@ -127,6 +130,16 @@ class _DailyChartState extends State<DailyChart> {
       child: Center(
         child: _buildChart(),
       ),
+    );
+  }
+
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
     );
   }
 

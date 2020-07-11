@@ -43,12 +43,13 @@ class DatabaseHelper {
     // When creating the db, create the table
     await db.execute(
         "CREATE TABLE $USER_TABLE("
-            "id TINYINT PRIMARY KEY NOT NULL,"
+            "id TEXT PRIMARY KEY NOT NULL,"
             "name TEXT NOT NULL,"
-            "email TEXT NOT NULL,"
+            "phone TEXT NOT NULL,"
             "type TEXT NOT NULL,"
-            "created_at TEXT NOT NULL,"
-            "token TEXT NOT NULL)");
+            "createdAt TEXT NOT NULL,"
+            "token TEXT NOT NULL)"
+    );
     print("Created tables");
   }
 
@@ -66,12 +67,12 @@ class DatabaseHelper {
     User userVal;
     for(int i = 0; i < users.length; i++){
       User user = new User(
-        users[0]['id'],
-        users[0]['name'],
-        users[0]['email'],
-        users[0]['type'],
-        users[0]['created_at'],
-        users[0]['token']
+          users[0]['id'],
+          users[0]['name'],
+          users[0]['phone'],
+          users[0]['type'],
+          users[0]['createdAt'],
+          users[0]['token']
       );
       userVal = user;
     }
@@ -93,5 +94,6 @@ class DatabaseHelper {
     var res = await dbClient.query(USER_TABLE);
     return res.length > 0? true: false;
   }
+
 
 }

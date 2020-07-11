@@ -1,8 +1,8 @@
-import 'package:ayolee_stores/model/available_productDB.dart';
-import 'package:ayolee_stores/model/daily_reportsDB.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/bloc/daily_report_chart.dart';
@@ -38,12 +38,12 @@ class _DailyReportsState extends State<DailyReports> {
   double _totalProfitMade = 0.0;
 
   /// Variable to hold the name of the user logged in
-  String _username;
+  String _userType;
 
-  /// Setting the current user's name logged in to [_username]
+  /// Setting the current user's name logged in to [_userType]
   void _getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
-      _username = user.name;
+      _userType = user.type;
     }).catchError((Object error) {
       print(error.toString());
     });
@@ -61,26 +61,13 @@ class _DailyReportsState extends State<DailyReports> {
   ///  profitMade = data's quantity * (data's unitPrice - data's costPrice)
   ///
   /// Increment [_totalProfitMade] with the result of profitMade
-  void _calculateProfit(DailyReportsData data) async {
-    double profitMade = 0.0;
-    Future<List<AvailableProduct>> products = futureValue.getProductFromDB();
-    await products.then((value) {
-      print(value);
-      for (int i = 0; i < value.length; i++){
-        if(value[i].productName == data.productName){
-          if(data.paymentMode != 'Iya Bimbo'){
-            profitMade += (double.parse(data.quantity)
-                *
-                (double.parse(data.unitPrice) - double.parse(value[i].costPrice))
-            );
-          }
-        }
-      }
+  void _calculateProfit(Reports data) async {
+    if(data.paymentMode != 'Iya Bimbo'){
       if (!mounted) return;
       setState(() {
-        _totalProfitMade += profitMade;
+        _totalProfitMade += double.parse(data.quantity) * (double.parse(data.unitPrice) - double.parse(data.costPrice));
       });
-    });
+    }
   }
 
   /// Getting today's reports from the dailyReportsDatabase based on time
@@ -92,12 +79,12 @@ class _DailyReportsState extends State<DailyReports> {
   /// Increments [_totalTransfer] with the value of report's totalPrice,
   /// If the payment's mode of a report is transfer
   void _getReports() async {
-    Future<List<DailyReportsData>> report = futureValue.getDailyReportsFromDB();
+    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
     await report.then((value) {
       if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
-          if(reportValue.checkIfToday(value[i].time)){
+          if(reportValue.checkIfToday(value[i].createdAt)){
             _calculateProfit(value[i]);
             if(value[i].paymentMode == 'Cash'){
               _availableCash += double.parse(value[i].totalPrice);
@@ -108,6 +95,9 @@ class _DailyReportsState extends State<DailyReports> {
           }
         }
       });
+    }).catchError((error){
+      print(error);
+      _showMessage(error.toString());
     });
   }
 
@@ -122,7 +112,7 @@ class _DailyReportsState extends State<DailyReports> {
 
   /// Building a Scaffold Widget to display today's report, [DailyChart],
   /// [_availableCash], [_totalTransfer], totalCash and [_totalProfitMade] if
-  /// the user is an Admin 'Farawe'
+  /// the user is an Admin
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
@@ -164,11 +154,11 @@ class _DailyReportsState extends State<DailyReports> {
                   children: <Widget>[
                     titleText('Available Cash: ${_money(_availableCash).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    titleText('Transfered Cash: ${_money(_totalTransfer).output.symbolOnLeft}'),
+                    titleText('Transferred Cash: ${_money(_totalTransfer).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
                     titleText('Total Cash: ${_money(_availableCash + _totalTransfer).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    _username == 'Farawe' ? titleText('Profit made: ${_money(_totalProfitMade).output.symbolOnLeft}') : Container(),
+                    _userType == 'Admin' ? titleText('Profit made: ${_money(_totalProfitMade).output.symbolOnLeft}') : Container(),
                   ],
                 ),
               ),
@@ -176,6 +166,16 @@ class _DailyReportsState extends State<DailyReports> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
     );
   }
 

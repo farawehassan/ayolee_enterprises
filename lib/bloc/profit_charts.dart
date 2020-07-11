@@ -1,5 +1,6 @@
 import 'package:ayolee_stores/model/linear_sales.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'future_values.dart';
 
@@ -43,8 +44,10 @@ class _ProfitChartsState extends State<ProfitCharts> {
           profitMade.add(value[i].profit);
         }
       });
+      getQuarterlyMonth();
+    }).catchError((onError){
+      _showMessage(onError);
     });
-    getQuarterlyMonth();
   }
 
   /// Function to set all the month's profit made and
@@ -137,6 +140,16 @@ class _ProfitChartsState extends State<ProfitCharts> {
           child: _buildChart(),
         ),
       ],
+    );
+  }
+
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
     );
   }
 

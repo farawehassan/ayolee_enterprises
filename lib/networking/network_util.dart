@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,7 +16,7 @@ class NetworkHelper{
 
   /// A function to do the login request with the url and headers
   /// then sends back a json decoded result
-  Future<dynamic> postLogin(String url, {Map headers, body, encoding}) {
+  Future<dynamic> postLogin (String url, {Map headers, body, encoding}) async {
     try {
       return http
           .post(url, body: body, headers: headers, encoding: encoding)
@@ -31,10 +30,9 @@ class NetworkHelper{
         }
         return _decoder.convert(res);
       });
-    } on SocketException catch (e) {
-      throw new ErrorDescription("$e");
     } catch (e) {
-      throw new ErrorDescription("$e");
+      print(e);
+      throw new ErrorDescription (e.toString());
     }
   }
 
@@ -44,21 +42,18 @@ class NetworkHelper{
     try {
       return
         http
-          .get(url, headers: headers)
-          .then((http.Response response) {
-        final String res = response.body;
-        final int statusCode = response.statusCode;
-        if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("Error while fetching data");
-        }
-        return _decoder.convert(res);
-      }).catchError((e) {
-          throw new ErrorDescription("$e");
+            .get(url, headers: headers)
+            .then((http.Response response) {
+          final String res = response.body;
+          final int statusCode = response.statusCode;
+          if (statusCode < 200 || statusCode > 400 || json == null) {
+            throw new Exception("Error while fetching data");
+          }
+          return _decoder.convert(res);
         });
-    } on SocketException catch (e) {
-      throw new ErrorDescription("$e");
     } catch (e) {
-      throw new ErrorDescription("$e");
+      print(e);
+      throw new ErrorDescription(e.toString());
     }
   }
 
@@ -73,14 +68,13 @@ class NetworkHelper{
         final int statusCode = response.statusCode;
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("$statusCode , $res");
+          throw new Exception("$statusCode ,${_decoder.convert(res)["message"]}");
         }
         return _decoder.convert(res);
       });
-    } on SocketException catch (e) {
-      throw new ErrorDescription("$e");
     } catch (e) {
-      throw new ErrorDescription("$e");
+      print(e);
+      throw new ErrorDescription(e.toString());
     }
   }
 
@@ -95,14 +89,13 @@ class NetworkHelper{
         final int statusCode = response.statusCode;
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("$statusCode , $res");
+          throw new Exception("$statusCode , ${_decoder.convert(res)["message"]}");
         }
         return _decoder.convert(res);
       });
-    } on SocketException catch (e) {
-      throw new ErrorDescription("$e");
     } catch (e) {
-      throw new ErrorDescription("$e");
+      print(e);
+      throw new ErrorDescription(e.toString());
     }
   }
 
@@ -117,14 +110,13 @@ class NetworkHelper{
         final int statusCode = response.statusCode;
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("$statusCode , $res");
+          throw new Exception("$statusCode , ${_decoder.convert(res)["message"]}");
         }
         return _decoder.convert(res);
       });
-    } on SocketException catch (e) {
-      throw new ErrorDescription("$e");
     } catch (e) {
-      throw new ErrorDescription("$e");
+      print(e);
+      throw new ErrorDescription(e.toString());
     }
   }
 

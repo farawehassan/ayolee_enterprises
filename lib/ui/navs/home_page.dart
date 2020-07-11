@@ -1,6 +1,7 @@
 import 'package:ayolee_stores/bloc/product_suggestions.dart';
 import 'package:ayolee_stores/database/user_db_helper.dart';
-import 'package:ayolee_stores/model/available_productDB.dart';
+import 'package:ayolee_stores/model/productDB.dart';
+import 'package:ayolee_stores/ui/navs/other/other_reports.dart';
 import 'package:ayolee_stores/ui/receipt/receipt_page.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../profile_page.dart';
 import 'available_drinks.dart';
 import 'daily/daily_reports.dart';
-import 'monthly/reports_page.dart';
 
 /// A StatefulWidget class that displays the sales record
 class MyHomePage extends StatefulWidget {
@@ -35,6 +35,9 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Variable to hold the name of an item recorded
   String _selectedProduct;
 
+  /// Variable to hold the costPrice of an item recorded
+  double _costPrice;
+
   /// Variable to hold the unitPrice of an item recorded
   double _unitPrice;
 
@@ -53,8 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
   /// A Map to hold the product's name to its current quantity
   Map products = {};
 
-  /// A List to hold the Map of the data above
-  List<Map> productsList = [];
+  /// A Map to hold the product's name to its cost price
+  var productCost = Map();
 
   /// A List to hold the names of all the availableProducts in the database
   List<String> availableProducts = [];
@@ -62,13 +65,13 @@ class _MyHomePageState extends State<MyHomePage> {
   /// A List to hold all the sales records in a row
   List<Row> _rows = [];
 
-  /// Variable to hold the name of the user logged in
-  String _username;
+  /// Variable to hold the type of the user logged in
+  String _userType;
 
-  /// Setting the current user's name logged in to [_username]
+  /// Setting the current user's name logged in to [_userType]
   void _getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
-      _username = user.name;
+      _userType = user.type;
     }).catchError((Object error) {
       print(error.toString());
     });
@@ -77,13 +80,16 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Function to fetch all the available product's names from the database to
   /// [availableProducts]
   void _availableProductNames() {
-    Future<List<AvailableProduct>> productNames = futureValue.getProductsFromDB();
+    Future<List<Product>> productNames = futureValue.getAvailableProductsFromDB();
     productNames.then((value) {
       for (int i = 0; i < value.length; i++){
         availableProducts.add(value[i].productName);
-        products = {value[i].productName: double.parse(value[i].currentQuantity)};
-        productsList.add(products);
+        products[value[i].productName] = double.parse(value[i].currentQuantity);
+        productCost[value[i].productName] = double.parse(value[i].costPrice);
       }
+    }).catchError((error){
+      print(error);
+      _showMessage(error.toString());
     });
   }
 
@@ -95,11 +101,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// Function to add a new row to record sales details:
-  /// [_quantity], [_selectedProduct], [_unitPrice] and [_totalPrice]
+  /// [_quantity], [_selectedProduct], [_costPrice], [_unitPrice] and [_totalPrice]
   void _addRow() {
     availableProducts.clear();
     products.clear();
-    productsList.clear();
+    productCost.clear();
     _availableProductNames();
 
     final TextEditingController qtyController = TextEditingController();
@@ -108,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final TextEditingController totalPriceController = TextEditingController();
 
     setState(() {
-      _details = {'qty':'$_quantity','product':_selectedProduct,'unitPrice':'$_unitPrice','totalPrice':'$_totalPrice'};
+      _details = {'qty':'$_quantity','product':_selectedProduct,'costPrice':'$_costPrice','unitPrice':'$_unitPrice','totalPrice':'$_totalPrice'};
       increment ++;
 
       _rows.add(Row(
@@ -121,6 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 keyboardType: TextInputType.number,
                 controller: qtyController,
                 onChanged: (value) {
+                  if (!mounted) return;
                   setState(() {
                     _quantity = double.parse(value);
                     _details['qty'] = '$_quantity';
@@ -158,12 +165,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   productController.text = suggestion;
                   _selectedProduct = productController.text;
                   _details['product'] = '$_selectedProduct';
-                  print(suggestion);
+                  if (!mounted) return;
+                  setState(() {
+                    _costPrice = productCost[_selectedProduct];
+                    _details['costPrice'] = '$_costPrice';
+                    print(_costPrice);
+                  });
                 },
                 onSaved: (value) {
-                  print(value);
                   _selectedProduct = value;
                   _details['product'] = '$_selectedProduct';
+                  if (!mounted) return;
+                  setState(() {
+                    _costPrice = productCost[_selectedProduct];
+                    _details['costPrice'] = '$_costPrice';
+                  });
                 },
               ),
             ),
@@ -176,10 +192,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: priceController,
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
+                  if (!mounted) return;
                   setState(() {
                     _unitPrice = double.parse(value);
                     _details['unitPrice'] = '$_unitPrice';
-                    print(_unitPrice);
                     _totalPrice = double.parse(value) * double.parse(qtyController.text);
                     totalPriceController.text = _totalPrice.toString();
                     _details['totalPrice'] = '$_totalPrice';
@@ -205,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     });
 
-    if(_details['qty'].toString().isNotEmpty && _details['product'].toString().isNotEmpty && _details['unitPrice'].toString().isNotEmpty && _details['totalPrice'].toString().isNotEmpty){
+    if(_details['qty'].toString().isNotEmpty && _details['product'].toString().isNotEmpty && _details['costPrice'].toString().isNotEmpty && _details['unitPrice'].toString().isNotEmpty && _details['totalPrice'].toString().isNotEmpty){
       try {
         _detailsList.add(_details);
         _details.clear();
@@ -248,12 +264,9 @@ class _MyHomePageState extends State<MyHomePage> {
   /// It returns false if it does and true if it does not
   bool _checkProductQuantity(String name, double qty) {
     bool response = false;
-    for (int i = 0; i < productsList.length; i++){
-      if(productsList[i].containsKey(name) && productsList[i][name] >= qty){
-        response = true;
-      }
+    if(products.containsKey(name) && products[name] >= qty){
+      response = true;
     }
-    print(response);
     return response;
   }
 
@@ -264,8 +277,6 @@ class _MyHomePageState extends State<MyHomePage> {
     bool response = false;
     try {
       for(int i = 0; i < _detailsList.length; i++){
-        print(_detailsList[i]['product']);
-        print(_detailsList[i]['qty']);
         if (_checkProductQuantity(_detailsList[i]['product'], double.parse(_detailsList[i]['qty'])) == false){
           response = true;
         }
@@ -407,9 +418,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   ListTile(
                     leading: Icon(Icons.assignment_returned),
-                    title: Text('Monthly Report'),
+                    title: Text('Other Reports'),
                     onTap: (){
-                      Navigator.pushNamed(context, Reports.id);
+                      Navigator.pushNamed(context, OtherReports.id);
                     },
                   ),
                   ListTile(
@@ -423,7 +434,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           elevation: 0.0,
-                          backgroundColor: Colors.white,
                           child: Container(
                             height: 150.0,
                             padding: const EdgeInsets.all(16.0),
@@ -439,7 +449,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                     child: Text(
                                       "Are you sure you want to sign out",
                                       style: TextStyle(
-                                        color: Colors.black,
                                         fontSize: 15.0,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -515,7 +524,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text(
                       "About",
                       style: TextStyle(
-                        color: Colors.black,
                         fontSize: 16.0,
                         fontWeight: FontWeight.normal,
                       ),
@@ -529,8 +537,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addRow,
+        backgroundColor: Colors.blue,
         tooltip: 'Relax',
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,),
       ),
     );
   }
@@ -544,9 +553,9 @@ class _MyHomePageState extends State<MyHomePage> {
         textColor: Colors.black);
   }
 
-  /// Function to show profile of the account if the user is an Admin 'Farawe'
+  /// Function to show profile of the account if the user is an Admin 'Admin'
   void _showProfile(){
-    if(_username == 'Farawe'){
+    if(_userType == 'Admin'){
       Navigator.pushNamed(context, Profile.id);
     }else{
       Navigator.of(context).pop();

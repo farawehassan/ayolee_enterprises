@@ -1,5 +1,4 @@
 import 'package:ayolee_stores/bloc/future_values.dart';
-import 'package:ayolee_stores/model/linear_sales.dart';
 import 'package:ayolee_stores/model/store_details.dart';
 import 'package:ayolee_stores/ui/register/create_worker.dart';
 import 'package:ayolee_stores/utils/constants.dart';
@@ -9,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:ayolee_stores/bloc/year_line_charts.dart';
 import 'package:ayolee_stores/bloc/profit_charts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 /// A StatefulWidget class that displays the business's profile
 /// only the admin can have access to this page
@@ -47,43 +47,39 @@ class _ProfileState extends State<Profile> {
   /// A function to set the values [_cpNetWorth], [_spNetWorth], [_numberOfItems],
   /// from the [StoreDetails] model fetching from the database
   void _getStoreValues() async {
-    Future<StoreDetails> details = futureValue.availableProducts();
+    Future<StoreDetails> details = futureValue.getStoreDetails();
     await details.then((value) {
       if (!mounted) return;
       setState(() {
         _cpNetWorth = _money(value.cpNetWorth).output.symbolOnLeft;
         _spNetWorth = _money(value.spNetWorth).output.symbolOnLeft;
-        _numberOfItems = value.numberOfItems;
+        _numberOfItems = value.totalItems;
+        _totalProfit = value.totalProfitMade;
       });
+    }).catchError((onError){
+      _showMessage(onError);
     });
   }
 
-  /// A function to calculate and set the value for [_totalProfit]
-  /// from the [LinearSales] model fetching from the database
-  void _getReports() async {
-    Future<List<LinearSales>> report = futureValue.getYearReports();
-    await report.then((value) {
-      if (!mounted) return;
-      setState(() {
-        for(int i = 0; i < value.length; i++){
-          _totalProfit += value[i].profit;
-        }
-      });
-    });
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
+    );
   }
 
-  /// Calling [_getStoreValues()] and [_getReports()] before the page loads
+  /// Calling [_getStoreValues()] and before the page loads
   @override
   void initState() {
     super.initState();
     _getStoreValues();
-    _getReports();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFf2f4fb),
       appBar: AppBar(
         title: Text('Ayo-Lee Stores'),
         actions: <Widget>[
@@ -106,7 +102,6 @@ class _ProfileState extends State<Profile> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Material(
-              color: Color(0xFFF9FBFD),
               elevation: 14.0,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(40),
@@ -215,7 +210,6 @@ class _ProfileState extends State<Profile> {
               child: Material(
                 elevation: 14.0,
                 borderRadius: BorderRadius.circular(24.0),
-                shadowColor: Color(0xFFF9FBFD),
                 child:  Container(
                   decoration: BoxDecoration(
                     gradient: new LinearGradient(
@@ -337,5 +331,6 @@ class _ProfileState extends State<Profile> {
       Navigator.pushNamed(context, CreateWorker.id);
     }
   }
+
 }
 

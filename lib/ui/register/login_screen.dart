@@ -232,7 +232,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                             hintText: "Phone Number",
                             hintStyle: TextStyle(
-                              fontSize: 17.0
+                              fontSize: 17.0,
+                              color: Colors.black54,
                             ),
                           ),
                         ),
@@ -262,7 +263,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                             hintText: "Pin",
                             hintStyle: TextStyle(
-                              fontSize: 17.0
+                              fontSize: 17.0,
+                              color: Colors.black54,
                             ),
                             suffixIcon: GestureDetector(
                               onTap: _toggleLogin,

@@ -1,7 +1,9 @@
 import 'package:ayolee_stores/model/linear_sales.dart';
+import 'package:ayolee_stores/model/store_details.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'future_values.dart';
 
 /// A StatefulWidget class creating a point line chart for my yearly report records
@@ -32,18 +34,34 @@ class _PointsLineChartState extends State<PointsLineChart> {
     return val;
   }
 
+  /// A function to set the value for [totalSales]
+  /// from the [StoreDetails] model fetching from the database
+  void _getStoreValues() async {
+    Future<StoreDetails> details = futureValue.getStoreDetails();
+    await details.then((value) {
+      if (!mounted) return;
+      setState(() {
+        totalSales = value.totalSalesMade;
+      });
+    }).catchError((onError){
+      _showMessage(onError);
+    });
+  }
+
   /// This function calls [getYearReports()] method from my [futureValue] class
   /// It adds every total sales gotten to [details] and sum them to [totalSales]
   void getReports() async {
+    _getStoreValues();
     Future<List<LinearSales>> report = futureValue.getYearReports();
     await report.then((value) {
       if (!mounted) return;
       setState(() {
         for(int i = 0; i < value.length; i++){
           details.add(value[i].sales);
-          totalSales += value[i].sales;
         }
       });
+    }).catchError((onError){
+      _showMessage(onError);
     });
   }
 
@@ -104,8 +122,18 @@ class _PointsLineChartState extends State<PointsLineChart> {
         ],
       ),
     );
-
   }
+
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
+    );
+  }
+
 }
 
 

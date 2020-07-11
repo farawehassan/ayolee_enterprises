@@ -106,7 +106,7 @@ class DailyReportList extends StatelessWidget {
                   builder: (context, snapshot){
                     if(snapshot.hasData){
                       for (int i = 0; i < snapshot.data.length; i++){
-                        _data = {'qty':'${snapshot.data[i].quantity}', 'productName': '${snapshot.data[i].productName}','unitPrice':'${snapshot.data[i].unitPrice}','totalPrice':'${snapshot.data[i].totalPrice}', 'paymentMode':'${snapshot.data[i].paymentMode}', 'time':'${snapshot.data[i].time}'};
+                        _data = {'qty':'${snapshot.data[i].quantity}', 'productName': '${snapshot.data[i].productName}','unitPrice':'${snapshot.data[i].unitPrice}','totalPrice':'${snapshot.data[i].totalPrice}', 'paymentMode':'${snapshot.data[i].paymentMode}', 'time':'${snapshot.data[i].createdAt}'};
                         _reports.add(_data);
                       }
                       return _dataTable(_reports);

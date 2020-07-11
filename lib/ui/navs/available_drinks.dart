@@ -1,4 +1,4 @@
-import 'package:ayolee_stores/model/available_productDB.dart';
+import 'package:ayolee_stores/model/productDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +21,7 @@ class Products extends StatefulWidget {
 class _ProductsState extends State<Products> {
 
   /// Instantiating a class of the [AvailableProduct]
-  AvailableProduct product = new AvailableProduct();
+  Product product = new Product();
 
   /// int variable holding 1 to display all products, 2 for available products
   /// and 3 for finished products
@@ -55,13 +55,13 @@ class _ProductsState extends State<Products> {
   /// Variable of String to hold the searchText on the AppBar
   String _searchText = "";
 
-  /// Variable of List<[AvailableProduct]> to hold
+  /// Variable of List<[Product]> to hold
   /// the details of all the availableProduct
-  List<AvailableProduct> _names = new List();
+  List<Product> _names = new List();
 
-  /// Variable of List<[AvailableProduct]> to hold
+  /// Variable of List<[Product]> to hold
   /// the details of all filtered availableProduct
-  List<AvailableProduct> _filteredNames = new List();
+  List<Product> _filteredNames = new List();
 
   /// Variable to hold an Icon Widget of Search
   Icon _searchIcon = new Icon(Icons.search);
@@ -135,35 +135,43 @@ class _ProductsState extends State<Products> {
   /// setting the details and [_filteredNames] to [_names] plus the numbers of
   /// products to [_productLength]
   void _getNames() async {
-    List<AvailableProduct> tempList = new List();
+    List<Product> tempList = new List();
 
-    Future<List<AvailableProduct>> productNames;
+    Future<List<Product>> productNames;
 
     if(productsToShow == 1){
-      productNames = futureValue.getProductFromDB();
+      productNames = futureValue.getAllProductsFromDB();
     } else if(productsToShow == 2){
-      productNames = futureValue.getProductsFromDB();
+      productNames = futureValue.getAvailableProductsFromDB();
     } else if(productsToShow == 3){
       productNames = futureValue.getFinishedProductFromDB();
     }
 
     await productNames.then((value) {
-      for (int i = 0; i < value.length; i++){
-        tempList.add(value[i]);
+      print(value);
+      if(value.length != 0){
+        print(value.length);
+        for (int i = 0; i < value.length; i++){
+          tempList.add(value[i]);
+        }
+        if (!mounted) return;
+        setState(() {
+          _productLength = tempList.length;
+          _names = tempList;
+          _filteredNames = _names;
+        });
+      } else if(value.length == 0 || value.isEmpty){
+        print(value.length);
+        if (!mounted) return;
+        setState(() {
+          _productLength = 0;
+          _names = [];
+          _filteredNames = _names;
+        });
       }
-    }).catchError((onError){
-      return Fluttertoast.showToast(
-          msg: "Error in fetching data",
-          toastLength: Toast.LENGTH_SHORT,
-          backgroundColor: Colors.white,
-          textColor: Colors.black);
-    });
-
-    if (!mounted) return;
-    setState(() {
-      _productLength = tempList.length;
-      _names = tempList;
-      _filteredNames = _names;
+    }).catchError((error){
+      print(error);
+      _showMessage(error.toString());
     });
   }
 
@@ -249,9 +257,10 @@ class _ProductsState extends State<Products> {
   /// [_buildInnerTopWidget()] and [_buildInnerBottomWidget()]
   Widget _buildList() {
     if (_searchText.isNotEmpty) {
-      List<AvailableProduct> tempList = new List();
+      List<Product> tempList = new List();
       for (int i = 0; i < _filteredNames.length; i++) {
-        if (_filteredNames[i].productName.toLowerCase().contains(_searchText.toLowerCase())) {
+        if (_filteredNames[i].productName.toLowerCase()
+            .contains(_searchText.toLowerCase())) {
           tempList.add(_filteredNames[i]);
         }
       }
@@ -267,6 +276,7 @@ class _ProductsState extends State<Products> {
               innerTopWidget: _buildInnerTopWidget(
                   _filteredNames[index].productName),
               innerBottomWidget: _buildInnerBottomWidget(
+                  _filteredNames[index].id,
                   _filteredNames[index].productName,
                   double.parse(_filteredNames[index].initialQuantity),
                   double.parse(_filteredNames[index].currentQuantity),
@@ -284,14 +294,14 @@ class _ProductsState extends State<Products> {
     else if(_productLength == 0){
       return Container(
         alignment: AlignmentDirectional.center,
-        child: Center(child: Text("No available products")),
+        child: Center(child: Text("No products")),
       );
     }
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
         ),
       ),
     );
@@ -300,13 +310,13 @@ class _ProductsState extends State<Products> {
   /// Function to refresh details of the Available products similar to the
   /// [_getNames()] method but this is from the RefreshIndicator
   Future<Null> _refresh() {
-    List<AvailableProduct> tempList = new List();
+    List<Product> tempList = new List();
 
-    Future<List<AvailableProduct>> productNames;
+    Future<List<Product>> productNames;
     if(productsToShow == 1){
-      productNames = futureValue.getProductFromDB();
+      productNames = futureValue.getAllProductsFromDB();
     } else if(productsToShow == 2){
-      productNames = futureValue.getProductsFromDB();
+      productNames = futureValue.getAvailableProductsFromDB();
     } else if(productsToShow == 3){
       productNames = futureValue.getFinishedProductFromDB();
     }
@@ -343,6 +353,7 @@ class _ProductsState extends State<Products> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
         onPressed: () {
           showDialog(
             context: context,
@@ -351,7 +362,6 @@ class _ProductsState extends State<Products> {
                 borderRadius: BorderRadius.circular(16.0),
               ),
               elevation: 0.0,
-              backgroundColor: Colors.white,
               child: Container(
                 height: 340.0,
                 padding: const EdgeInsets.all(16.0),
@@ -506,7 +516,6 @@ class _ProductsState extends State<Products> {
           foldingCellState?.toggleFold();
         },
         child: Card(
-          color: Colors.white,
           margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
           child: Padding(
             padding: EdgeInsets.all(8.0),
@@ -526,7 +535,6 @@ class _ProductsState extends State<Products> {
                 Text(
                   productName,
                   style: TextStyle(
-                    color: Colors.black,
                     fontWeight: FontWeight.w600,
                     fontSize: 20.0,
                   ),
@@ -543,13 +551,11 @@ class _ProductsState extends State<Products> {
   /// displaying the [productName] at the top when the FrontWidget is pressed
   Widget _buildInnerTopWidget(String productName) {
     return Container(
-      color: Colors.white,
       alignment: Alignment.center,
       margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
       child: Text(
         productName,
         style: TextStyle(
-          color: Colors.black,
           fontWeight: FontWeight.w600,
           fontSize: 20.0,
         ),
@@ -562,7 +568,7 @@ class _ProductsState extends State<Products> {
   /// displaying the details of the product [name], [iq], [cq], [cp], [sp]
   /// and also update the productDetails by calling [_updateProduct()]
   /// when the info icon is pressed and the form is filled
-  Widget _buildInnerBottomWidget(
+  Widget _buildInnerBottomWidget(String id,
       String name, double iq, double cq, double cp, double sp) {
     final controllerProduct = TextEditingController();
     final controllerQty = TextEditingController();
@@ -581,7 +587,6 @@ class _ProductsState extends State<Products> {
           foldingCellState?.toggleFold();
         },
         child: Card(
-          color: Colors.white,
           margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
           child: Padding(
             padding: EdgeInsets.all(8.0),
@@ -602,21 +607,18 @@ class _ProductsState extends State<Products> {
                     Text(
                       'Initial quantity: $iq',
                       style: TextStyle(
-                        color: Colors.black,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
                     Text(
                       'Current quantity: $cq',
                       style: TextStyle(
-                        color: Colors.black,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       'Quantity Sold: ${iq - cq}',
                       style: TextStyle(
-                        color: Colors.black,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -640,7 +642,6 @@ class _ProductsState extends State<Products> {
                           borderRadius: BorderRadius.circular(16.0),
                         ),
                         elevation: 0.0,
-                        backgroundColor: Colors.white,
                         child: Container(
                           height: 320.0,
                           padding: const EdgeInsets.all(16.0),
@@ -759,13 +760,15 @@ class _ProductsState extends State<Products> {
                                           double currentQty =  double.parse(controllerQty.text) + cq;
 
                                           _updateProduct(
-                                            name.toString(),
-                                            controllerProduct.text.toString(),
-                                            initialQty,
-                                            double.parse(controllerCp.text),
-                                            double.parse(controllerSp.text),
-                                            currentQty
+                                              id,
+                                              name.toString(),
+                                              controllerProduct.text.toString(),
+                                              initialQty,
+                                              double.parse(controllerCp.text),
+                                              double.parse(controllerSp.text),
+                                              currentQty
                                           );
+
 
                                           _refreshData();
 
@@ -808,25 +811,25 @@ class _ProductsState extends State<Products> {
   /// It returns true if it does and false if it does not
   Future<bool> _checkIfProductExists(String name) async {
     bool response = false;
-    Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
+    Future<List<Product>> productNames = futureValue.getAllProductsFromDB();
     await productNames.then((value) {
       print(name);
       for (int i = 0; i < value.length; i++){
-         if(name == value[i].productName){
-           _updateProduct(
-               name,
-               value[i].productName,
-               _initialQuantity + double.parse(value[i].initialQuantity),
-               _costPrice,
-               _sellingPrice,
-               _initialQuantity
-           );
-           response = true;
-         }
+        if(name == value[i].productName){
+          _updateProduct(
+            value[i].id,
+            name,
+            value[i].productName,
+            _initialQuantity + double.parse(value[i].initialQuantity),
+            _costPrice,
+            _sellingPrice,
+            double.parse(value[i].currentQuantity) + _initialQuantity,
+          );
+          response = true;
+        }
       }
     }).catchError((onError){
-       _showMessage( "Error in fetching data");
-       throw (onError);
+      throw (onError.toString());
     });
     print(response);
     return response;
@@ -836,7 +839,7 @@ class _ProductsState extends State<Products> {
   /// [addProduct] in the [RestDataSource] class
   void _saveNewProduct() async {
     var api = new RestDataSource();
-    var product = AvailableProduct();
+    var product = Product();
 
     Future<bool> exists = _checkIfProductExists(_capitalize(_productName));
     await exists.then((value) async {
@@ -847,29 +850,31 @@ class _ProductsState extends State<Products> {
           product.sellingPrice = _sellingPrice.toString();
           product.initialQuantity = _initialQuantity.toString();
           product.currentQuantity = _initialQuantity.toString();
+          product.createdAt = DateTime.now().toString();
 
           api.addProduct(product).then((value) {
             _showMessage("${product.productName} was added");
-          }).catchError((Object error) {
-            _showMessage("${error.toString()}");
+          }).catchError((error) {
+            print(error);
+            _showMessage(error.toString());
           });
         } catch (e) {
           print(e);
-          _showMessage( "Error in adding data");
+          _showMessage(e.toString());
         }
       }
     }).catchError((onError){
       print(onError.toString());
-      _showMessage( "Error in fetching data");
+      _showMessage(onError.toString());
     });
 
   }
 
   /// Function to update the details of a product in the database by calling
   /// [updateProduct] in the [RestDataSource] class
-  void _updateProduct(String name, String updateName, double initialQty, double cp, double sp, double currentQty,){
+  void _updateProduct(String id, String name, String updateName, double initialQty, double cp, double sp, double currentQty,){
     var api = new RestDataSource();
-    var product = AvailableProduct();
+    var product = Product();
 
     try {
       if(updateName == ""){
@@ -882,9 +887,12 @@ class _ProductsState extends State<Products> {
       product.initialQuantity = initialQty.toString();
       product.currentQuantity = currentQty.toString();
 
-      api.updateProduct(product, name);
-
-      _showMessage( "$name is updated");
+      api.updateProduct(product, id).then((value){
+        _showMessage( "$name is updated");
+      }).catchError((error) {
+        print(error);
+        _showMessage(error.toString());
+      });
     } catch (e) {
       print(e);
       _showMessage( "Error in adding data");

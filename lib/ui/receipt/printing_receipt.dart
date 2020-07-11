@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:ayolee_stores/bloc/future_values.dart';
-import 'package:ayolee_stores/model/available_productDB.dart';
-import 'package:ayolee_stores/model/daily_reportsDB.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -11,7 +10,7 @@ import 'package:image/image.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:esc_pos_printer/esc_pos_printer.dart';
 
-///
+/// A StatefulWidget class that prints receipt of items recorded
 class PrintingReceipt extends StatefulWidget {
 
   static const String id = 'printing_receipt';
@@ -61,28 +60,11 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
     }
   }
 
-  /// Function to fetch all the available product's names from the database to
-  /// [availableProducts]
-  void _availableProductNames() {
-    Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
-    productNames.then((value) {
-      for (int i = 0; i < value.length; i++) {
-        print(value[i].productName);
-        String name = value[i].productName;
-        double qty = double.parse(value[i].currentQuantity);
-        products = {name: qty};
-        productsList.add(products);
-      }
-    });
-  }
-
-  /// Calls [_addProducts()] and [_availableProductNames()]
-  /// before the class builds its widgets
+  /// Calls [_addProducts()] before the class builds its widgets
   @override
   void initState() {
     super.initState();
     _addProducts();
-    _availableProductNames();
   }
 
   /// Convert a double [value] to naira
@@ -195,7 +177,6 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   elevation: 0.0,
-                  backgroundColor: Colors.white,
                   child: Container(
                     height: 200.0,
                     padding: const EdgeInsets.all(16.0),
@@ -210,7 +191,6 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                             child: Text(
                               "Are you sure the product you want to print is confirmed?",
                               style: TextStyle(
-                                color: Colors.black,
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -250,7 +230,6 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                                         BorderRadius.circular(16.0),
                                       ),
                                       elevation: 0.0,
-                                      backgroundColor: Colors.white,
                                       child: Container(
                                         height: 150.0,
                                         padding: const EdgeInsets.all(16.0),
@@ -268,7 +247,6 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                                                 child: Text(
                                                   "Select payment mode",
                                                   style: TextStyle(
-                                                    color: Colors.black,
                                                     fontSize: 15.0,
                                                     fontWeight: FontWeight.bold,
                                                   ),
@@ -403,6 +381,8 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
               product[
               'product'],
               double.parse(product[
+              'costPrice']),
+              double.parse(product[
               'unitPrice']),
               double.parse(product[
               'totalPrice']),
@@ -411,8 +391,8 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
             _showMessage("${product['product']} was sold successfully");
           });
         } catch (e) {
-          _showMessage(e.toString());
           print(e);
+          _showMessage(e.toString());
         }
       }
       Navigator.pop(context);
@@ -425,40 +405,28 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
 
   /// Function that adds new report to the database by calling
   /// [addNewDailyReport] in the [RestDataSource] class
-  Future<void> _saveNewDailyReport(double qty, String productName, double unitPrice,
+  Future<void> _saveNewDailyReport(double qty, String productName, double costPrice, double unitPrice,
       double total, String paymentMode) async {
     try {
       var api = RestDataSource();
-      var dailyReport = DailyReportsData();
+      var dailyReport = Reports();
       dailyReport.quantity = qty.toString();
       dailyReport.productName = productName.toString();
+      dailyReport.costPrice = costPrice.toString();
       dailyReport.unitPrice = unitPrice.toString();
       dailyReport.totalPrice = total.toString();
       dailyReport.paymentMode = paymentMode;
-      dailyReport.time = DateTime.now().toString();
+      dailyReport.createdAt = DateTime.now().toString();
 
       await api.addNewDailyReport(dailyReport).then((value) {
-        for (int i = 0; i < productsList.length; i++) {
-          if (productsList[i].containsKey(productName)) {
-            print(productsList[i]);
-            print(productsList[i][productName]);
-            api.sellProduct(
-                productName, (productsList[i][productName] - qty).toString())
-                .then((value) {
-              print("${productsList[i][productName]} saved");
-            }).catchError((e) {
-              print(e);
-              throw ("Error in deducting $productName");
-            });
-          }
-        }
+        print('$productName saved successfully');
       }).catchError((e) {
         print(e);
-        throw ("Error in saving $productName");
+        throw (e);
       });
     } catch (e) {
       print(e);
-      throw ("Error in retrieving $productName");
+      throw (e);
     }
   }
 

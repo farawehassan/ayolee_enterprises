@@ -36,7 +36,6 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
       elevation: 14.0,
       borderRadius: BorderRadius.circular(24.0),
       shadowColor: Color(0x802196F3),

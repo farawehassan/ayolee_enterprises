@@ -1,10 +1,9 @@
 import 'package:ayolee_stores/bloc/future_values.dart';
-import 'package:ayolee_stores/model/daily_reportsDB.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
 import 'package:ayolee_stores/ui/receipt/printing_receipt.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ayolee_stores/model/available_productDB.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:intl/intl.dart';
 
@@ -54,8 +53,8 @@ class _ReceiptState extends State<Receipt> {
   /// A List to hold the Map of [receivedProducts]
   List<Map> receivedProducts = [];
 
-  /// Instantiating a class of the [DailyReportsData]
-  DailyReportsData dailyReportsData = new DailyReportsData();
+  /// Instantiating a class of the [Reports]
+  Reports dailyReportsData = new Reports();
 
   /// A Map to hold the product's name to its current quantity
   Map products = {};
@@ -76,27 +75,15 @@ class _ReceiptState extends State<Receipt> {
     return val;
   }
 
-  /// Function to fetch all the available product's names and current quantity
-  /// from the database to [productsList]
-  void _availableProductNames() {
-    Future<List<AvailableProduct>> productNames = futureValue.getProductFromDB();
-    productNames.then((value) {
-      for (int i = 0; i < value.length; i++) {
-        String name = value[i].productName;
-        double qty = double.parse(value[i].currentQuantity);
-        products = {name: qty};
-        productsList.add(products);
-      }
-    });
-  }
-
   /// This adds the product details [sentProducts] to [receivedProducts] if it's
   /// not empty and calculate the total price [totalPrice]
   void _addProducts() {
     for (var product in widget.sentProducts) {
+      print(product);
       if (product.isNotEmpty
           && product.containsKey('qty')
           && product.containsKey('product')
+          && product.containsKey('costPrice')
           && product.containsKey('unitPrice')
           && product.containsKey('totalPrice')
       )  {
@@ -162,13 +149,11 @@ class _ReceiptState extends State<Receipt> {
     );
   }
 
-  /// Calls [_addProducts()] and [_availableProductNames()]
-  /// before the class builds its widgets
+  /// Calls [_addProducts()] before the class builds its widgets
   @override
   void initState() {
     super.initState();
     _addProducts();
-    _availableProductNames();
   }
 
   @override
@@ -195,7 +180,6 @@ class _ReceiptState extends State<Receipt> {
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   elevation: 0.0,
-                  backgroundColor: Colors.white,
                   child: Container(
                     height: 200.0,
                     padding: const EdgeInsets.all(16.0),
@@ -210,7 +194,6 @@ class _ReceiptState extends State<Receipt> {
                             child: Text(
                               "Are you sure the product you want to save is confirmed?",
                               style: TextStyle(
-                                color: Colors.black,
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -250,7 +233,6 @@ class _ReceiptState extends State<Receipt> {
                                             BorderRadius.circular(16.0),
                                       ),
                                       elevation: 0.0,
-                                      backgroundColor: Colors.white,
                                       child: Container(
                                         height: 150.0,
                                         padding: const EdgeInsets.all(16.0),
@@ -268,7 +250,6 @@ class _ReceiptState extends State<Receipt> {
                                                 child: Text(
                                                   "Select payment mode",
                                                   style: TextStyle(
-                                                    color: Colors.black,
                                                     fontSize: 15.0,
                                                     fontWeight: FontWeight.bold,
                                                   ),
@@ -512,16 +493,18 @@ class _ReceiptState extends State<Receipt> {
               product[
               'product'],
               double.parse(product[
+              'costPrice']),
+              double.parse(product[
               'unitPrice']),
               double.parse(product[
               'totalPrice']),
               paymentMode)
               .then((value){
             _showMessage("${product['product']} was sold successfully");
-            });
+          });
         } catch (e) {
-          _showMessage(e.toString());
           print(e);
+          _showMessage(e.toString());
         }
       }
       Navigator.pop(context);
@@ -534,40 +517,28 @@ class _ReceiptState extends State<Receipt> {
 
   /// Function that adds new report to the database by calling
   /// [addNewDailyReport] in the [RestDataSource] class
-  Future<void> _saveNewDailyReport(double qty, String productName, double unitPrice,
+  Future<void> _saveNewDailyReport(double qty, String productName, double costPrice, double unitPrice,
       double total, String paymentMode) async {
     try {
       var api = RestDataSource();
-      var dailyReport = DailyReportsData();
+      var dailyReport = Reports();
       dailyReport.quantity = qty.toString();
       dailyReport.productName = productName.toString();
+      dailyReport.costPrice = costPrice.toString();
       dailyReport.unitPrice = unitPrice.toString();
       dailyReport.totalPrice = total.toString();
       dailyReport.paymentMode = paymentMode;
-      dailyReport.time = DateTime.now().toString();
+      dailyReport.createdAt = DateTime.now().toString();
 
       await api.addNewDailyReport(dailyReport).then((value) {
-        for (int i = 0; i < productsList.length; i++) {
-          if (productsList[i].containsKey(productName)) {
-            print(productsList[i]);
-            print(productsList[i][productName]);
-            api.sellProduct(
-                productName, (productsList[i][productName] - qty).toString())
-                .then((value) {
-              print("${productsList[i][productName]} saved");
-            }).catchError((e) {
-              print(e);
-              throw ("Error in deducting $productName");
-            });
-          }
-        }
+        print('$productName saved successfully');
       }).catchError((e) {
         print(e);
-        throw ("Error in saving $productName");
+        throw (e);
       });
     } catch (e) {
       print(e);
-      throw ("Error in retrieving $productName");
+      throw (e);
     }
   }
 

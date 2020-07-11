@@ -1,7 +1,9 @@
 import 'package:ayolee_stores/ui/navs/daily/daily_report_list.dart';
 import 'package:ayolee_stores/ui/navs/daily/daily_reports.dart';
-import 'package:ayolee_stores/ui/navs/monthly/monthly_reports.dart';
-import 'package:ayolee_stores/ui/navs/monthly/reports_page.dart';
+import 'package:ayolee_stores/ui/navs/other/monthly/monthly_reports.dart';
+import 'package:ayolee_stores/ui/navs/other/monthly/reports_page.dart';
+import 'package:ayolee_stores/ui/navs/other/other_reports.dart';
+import 'package:ayolee_stores/ui/navs/other/products_sold.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -35,12 +37,12 @@ class MyApp extends StatelessWidget {
       title: 'Ayo-Lee Stores',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        cursorColor:  Colors.blue,
+        primarySwatch:  Colors.blue,
       ),
       darkTheme: ThemeData(
           brightness: Brightness.dark,
-          //primarySwatch: Colors.blue
       ),
       initialRoute: Splash.id,
       routes: {
@@ -51,7 +53,9 @@ class MyApp extends StatelessWidget {
         LoginScreen.id: (context) => LoginScreen(),
         DailyReports.id: (context) => DailyReports(),
         DailyReportList.id: (context) => DailyReportList(),
-        Reports.id: (context) => Reports(),
+        OtherReports.id: (context) => OtherReports(),
+        ReportPage.id: (context) => ReportPage(),
+        ProductsSold.id: (context) => ProductsSold(),
         // ignore: missing_required_param
         MonthReport.id: (context) => MonthReport(),
         Profile.id: (context) => Profile(),

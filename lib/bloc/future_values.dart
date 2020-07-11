@@ -1,6 +1,6 @@
 import 'package:ayolee_stores/database/user_db_helper.dart';
-import 'package:ayolee_stores/model/daily_reportsDB.dart';
-import 'package:ayolee_stores/model/available_productDB.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
+import 'package:ayolee_stores/model/productDB.dart';
 import 'package:ayolee_stores/model/store_details.dart';
 import 'package:ayolee_stores/model/user.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
@@ -20,20 +20,20 @@ class FutureValues{
 
   /// Method to get all the products from the database in the server with
   /// the help of [RestDataSource]
-  /// It returns a list of [AvailableProduct]
-  Future<List<AvailableProduct>> getProductFromDB() async {
+  /// It returns a list of [Product]
+  Future<List<Product>> getAllProductsFromDB() {
     var data = RestDataSource();
-    Future<List<AvailableProduct>> availableProduct = data.fetchAllProducts();
-    return availableProduct;
+    Future<List<Product>> product = data.fetchAllProducts();
+    print(product);
+    return product;
   }
 
   /// Method to get all the products from the database in the server that its
   /// [currentQuantity] is not 0 with the help of [RestDataSource]
-  /// It returns a list of [AvailableProduct]
-  Future<List<AvailableProduct>> getProductsFromDB() async {
-    var data = RestDataSource();
-    List<AvailableProduct> products = new List();
-    Future<List<AvailableProduct>> availableProduct = data.fetchAllProducts();
+  /// It returns a list of [Product]
+  Future<List<Product>> getAvailableProductsFromDB() async {
+    List<Product> products = new List();
+    Future<List<Product>> availableProduct = getAllProductsFromDB();
     await availableProduct.then((value){
       for(int i = 0; i < value.length; i++){
         if(double.parse(value[i].currentQuantity) != 0.0){
@@ -43,17 +43,17 @@ class FutureValues{
     }).catchError((e){
       throw e;
     });
+    print(products);
     return products;
   }
 
   /// Method to get all the products from the database in the server that its
   /// [currentQuantity] is = 0 with the help of [RestDataSource]
-  /// It returns a list of [AvailableProduct]
-  Future<List<AvailableProduct>> getFinishedProductFromDB() async {
-    var data = RestDataSource();
-    List<AvailableProduct> products = new List();
-    Future<List<AvailableProduct>> availableProduct = data.fetchAllProducts();
-    await availableProduct.then((value){
+  /// It returns a list of [Product]
+  Future<List<Product>> getFinishedProductFromDB() async {
+    List<Product> products = new List();
+    Future<List<Product>> finishedProduct = getAllProductsFromDB();
+    await finishedProduct.then((value){
       for(int i = 0; i < value.length; i++){
         if(double.parse(value[i].currentQuantity) == 0.0){
           products.add(value[i]);
@@ -62,70 +62,123 @@ class FutureValues{
     }).catchError((e){
       throw e;
     });
+    print(products);
     return products;
   }
 
   /// Method to get all the reports from the database in the server with
   /// the help of [RestDataSource]
-  /// It returns a list of [DailyReportsData]
-  Future<List<DailyReportsData>> getDailyReportsFromDB() async {
+  /// It returns a list of [Reports]
+  Future<List<Reports>> getAllReportsFromDB() {
     var data = RestDataSource();
-    Future<List<DailyReportsData>> dailyReportData = data.fetchAllReports();
+    Future<List<Reports>> dailyReportData = data.fetchAllReports();
     return dailyReportData;
   }
 
   /// Method to get today's reports from [DailyReportValue] based on time by
   /// calling the [getTodayReport]
-  /// It returns a list of [DailyReportsData]
-  Future<List<DailyReportsData>> getTodayReports() async {
+  /// It returns a list of [Reports]
+  Future<List<Reports>> getTodayReports() {
     var reportValue = DailyReportValue();
-    Future<List<DailyReportsData>> todayReport = reportValue.getTodayReport();
+    Future<List<Reports>> todayReport = reportValue.getTodayReport();
     return todayReport;
   }
 
+
   /// Method to get all the store details such as:
-  ///   cost price net worth [cpNetWorth] += [costPrice] * [currentQuantity]
-  ///   selling price net worth [spNetWorth] += [costPrice] * [currentQuantity]
-  ///   number of product items [numberOfItems] += [currentQuantity]
+  ///  cost price net worth, selling price net worth, number of product items,
+  ///  total sales made, totalProfitMade
   /// It returns a model of [StoreDetails]
-  Future<StoreDetails> availableProducts() async {
-    StoreDetails storeDetails = new StoreDetails();
-    double cpNetWorth = 0;
-    double spNetWorth = 0;
-    double numberOfItems = 0;
-    Future<List<AvailableProduct>> productNames = getProductsFromDB();
-    await productNames.then((value) {
-      for (int i = 0; i < value.length; i++){
-        cpNetWorth += (double.parse(value[i].costPrice) * double.parse(value[i].currentQuantity));
-        spNetWorth += (double.parse(value[i].sellingPrice) * double.parse(value[i].currentQuantity));
-        numberOfItems +=  double.parse(value[i].currentQuantity);
-      }
-    });
-    storeDetails.cpNetWorth = cpNetWorth;
-    storeDetails.spNetWorth = spNetWorth;
-    storeDetails.numberOfItems = numberOfItems;
+  Future<StoreDetails> getStoreDetails() async {
+    var data = RestDataSource();
+    Future<StoreDetails> storeDetails = data.fetchStoreDetails();
     return storeDetails;
   }
 
-  /// Method to calculate profit made of a report by deducting the report's
-  /// [unitPrice] from the product's [costPrice] and multiplying the value by the
-  /// report's [quantity]
-  /// It is done if the report's [paymentMode] is not 'Iya Bimbo'
-  /// or else it returns 0
-  Future<double> calculateProfit(DailyReportsData data) async {
-    double profitMade = 0.0;
-    Future<List<AvailableProduct>> products = getProductFromDB();
-    await products.then((value) {
-      for (int i = 0; i < value.length; i++){
-        if(value[i].productName == data.productName){
-          if(data.paymentMode != 'Iya Bimbo'){
-            double profit = double.parse(data.unitPrice) - double.parse(value[i].costPrice);
-            profitMade += (double.parse(data.quantity) * profit);
-          }
-        }
+  /// Method to get report of a [month] using the class [DailyReportValue]
+  /// /// It returns a list of [Reports]
+  Future<List<Reports>> getMonthReports(String month) {
+    var reportValue = DailyReportValue();
+
+    switch(month) {
+      case 'Jan': {
+        Future<List<Reports>> monthReport = reportValue.getJanReport();
+        return monthReport;
       }
-    });
-    return profitMade;
+      break;
+
+      case 'Feb': {
+        Future<List<Reports>> monthReport = reportValue.getFebReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Mar': {
+        Future<List<Reports>> monthReport = reportValue.getMarReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Apr': {
+        Future<List<Reports>> monthReport = reportValue.getAprReport();
+        return monthReport;
+      }
+      break;
+
+      case 'May': {
+        Future<List<Reports>> monthReport = reportValue.getMayReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Jun': {
+        Future<List<Reports>> monthReport = reportValue.getJunReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Jul': {
+        Future<List<Reports>> monthReport = reportValue.getJulReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Aug': {
+        Future<List<Reports>> monthReport = reportValue.getAugReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Sep': {
+        Future<List<Reports>> monthReport = reportValue.getSepReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Oct': {
+        Future<List<Reports>> monthReport = reportValue.getOctReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Nov': {
+        Future<List<Reports>> monthReport = reportValue.getNovReport();
+        return monthReport;
+      }
+      break;
+
+      case 'Dec': {
+        Future<List<Reports>> monthReport = reportValue.getDecReport();
+        return monthReport;
+      }
+      break;
+
+      default: {
+        return null;
+      }
+      break;
+    }
+
   }
 
   /// Method to get report of a year by accumulating the report of each month
@@ -137,17 +190,15 @@ class FutureValues{
     List<LinearSales> sales = new List();
     var reportValue = DailyReportValue();
 
-    Future<List<DailyReportsData>> janReport = reportValue.getJanReport();
+    Future<List<Reports>> janReport = reportValue.getJanReport();
     await janReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -155,19 +206,19 @@ class FutureValues{
       linearSales.sales = totalSales;
       linearSales.profit = totalProfitMade;
       sales.add(linearSales);
+    }).catchError((onError){
+      throw (onError);
     });
 
-    Future<List<DailyReportsData>> febReport = reportValue.getFebReport();
+    Future<List<Reports>> febReport = reportValue.getFebReport();
     await febReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -177,17 +228,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> marReport = reportValue.getMarReport();
+    Future<List<Reports>> marReport = reportValue.getMarReport();
     await marReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -197,17 +246,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> aprReport = reportValue.getAprReport();
+    Future<List<Reports>> aprReport = reportValue.getAprReport();
     await aprReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -217,17 +264,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> mayReport = reportValue.getMayReport();
+    Future<List<Reports>> mayReport = reportValue.getMayReport();
     await mayReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -237,17 +282,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> junReport = reportValue.getJunReport();
+    Future<List<Reports>> junReport = reportValue.getJunReport();
     await junReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -257,17 +300,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> julReport = reportValue.getJulReport();
+    Future<List<Reports>> julReport = reportValue.getJulReport();
     await julReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -277,17 +318,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> augReport = reportValue.getAugReport();
+    Future<List<Reports>> augReport = reportValue.getAugReport();
     await augReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -297,17 +336,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> sepReport = reportValue.getSepReport();
+    Future<List<Reports>> sepReport = reportValue.getSepReport();
     await sepReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -317,17 +354,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> octReport = reportValue.getOctReport();
+    Future<List<Reports>> octReport = reportValue.getOctReport();
     await octReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -337,17 +372,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> novReport = reportValue.getNovReport();
+    Future<List<Reports>> novReport = reportValue.getNovReport();
     await novReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -357,17 +390,15 @@ class FutureValues{
       sales.add(linearSales);
     });
 
-    Future<List<DailyReportsData>> decReport = reportValue.getDecReport();
+    Future<List<Reports>> decReport = reportValue.getDecReport();
     await decReport.then((value) async {
       LinearSales linearSales = new LinearSales();
       double totalProfitMade = 0.0;
       double totalSales = 0;
       for(int i = 0; i < value.length; i++){
-        Future<double> profit = calculateProfit(value[i]);
-        await profit.then((profitValue){
-          totalProfitMade += profitValue;
-        });
         if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
           totalSales += double.parse(value[i].totalPrice);
         }
       }
@@ -378,92 +409,6 @@ class FutureValues{
     });
 
     return sales;
-
-  }
-
-  /// Method to get report of a [month] using the class [DailyReportValue]
-  /// /// It returns a list of [DailyReportsData]
-  Future<List<DailyReportsData>> getMonthReports(String month) {
-    var reportValue = DailyReportValue();
-
-    switch(month) {
-      case 'Jan': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getJanReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Feb': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getFebReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Mar': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getMarReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Apr': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getAprReport();
-        return monthReport;
-      }
-      break;
-
-      case 'May': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getMayReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Jun': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getJunReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Jul': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getJulReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Aug': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getAugReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Sep': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getSepReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Oct': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getOctReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Nov': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getNovReport();
-        return monthReport;
-      }
-      break;
-
-      case 'Dec': {
-        Future<List<DailyReportsData>> monthReport = reportValue.getDecReport();
-        return monthReport;
-      }
-      break;
-
-      default: {
-        return null;
-      }
-      break;
-    }
 
   }
 

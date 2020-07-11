@@ -5,7 +5,7 @@ import 'monthly_reports.dart';
 
 /// A StatelessWidget class that displays all the months in a year
 // ignore: must_be_immutable
-class Reports extends StatelessWidget {
+class ReportPage extends StatelessWidget {
 
   static const String id = 'reports_page';
   var futureValue = FutureValues();

@@ -1,10 +1,11 @@
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:ayolee_stores/bloc/monthly_report_charts.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
-import 'package:ayolee_stores/model/daily_reportsDB.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
 
 /// A StatefulWidget class that displays a Month's Reports details
 class MonthReport extends StatefulWidget {
@@ -103,12 +104,11 @@ class _MonthReportState extends State<MonthReport> {
   /// sets [_totalSalesPrice] to [_availableCash] + [_totalTransfer]
   void _getSales() async {
     List<Map> tempList = new List();
-    Future<List<DailyReportsData>> dailySales = futureValue.getMonthReports(widget.month);
+    Future<List<Reports>> dailySales = futureValue.getMonthReports(widget.month);
     await dailySales.then((value) {
       Map details = {};
       for (int i = 0; i < value.length; i++){
-        details = {'qty':'${value[i].quantity}', 'productName': '${value[i].productName}','unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].time}'};
-        if(value[i].paymentMode == 'Cash'){
+        details = {'qty':'${value[i].quantity}', 'productName': '${value[i].productName}','unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};        if(value[i].paymentMode == 'Cash'){
           _availableCash += double.parse(value[i].totalPrice);
         }
         else if(value[i].paymentMode == 'Transfer'){
@@ -117,6 +117,9 @@ class _MonthReportState extends State<MonthReport> {
         tempList.add(details);
       }
       _totalSalesPrice = _availableCash + _totalTransfer;
+    }).catchError((onError){
+      print(onError.toString());
+      _showMessage(onError.toString());
     });
     if (!mounted) return;
     setState(() {
@@ -309,6 +312,16 @@ class _MonthReportState extends State<MonthReport> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Using flutter toast to display a toast message [message]
+  void _showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
     );
   }
 
