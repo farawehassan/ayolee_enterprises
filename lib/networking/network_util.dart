@@ -26,7 +26,7 @@ class NetworkHelper{
         var result = _decoder.convert(res);
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new ErrorDescription("${result['message']}");
+          throw new Exception("${result['message']}");
         }
         return _decoder.convert(res);
       });
