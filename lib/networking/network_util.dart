@@ -26,7 +26,7 @@ class NetworkHelper{
         var result = _decoder.convert(res);
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("${result['message']}");
+          throw new ErrorDescription("${result['message']}");
         }
         return _decoder.convert(res);
       });
@@ -47,7 +47,7 @@ class NetworkHelper{
           final String res = response.body;
           final int statusCode = response.statusCode;
           if (statusCode < 200 || statusCode > 400 || json == null) {
-            throw new Exception("Error while fetching data");
+            throw new ErrorDescription("Error while fetching data");
           }
           return _decoder.convert(res);
         });
@@ -68,7 +68,7 @@ class NetworkHelper{
         final int statusCode = response.statusCode;
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("$statusCode ,${_decoder.convert(res)["message"]}");
+          throw new ErrorDescription("$statusCode ,${_decoder.convert(res)["message"]}");
         }
         return _decoder.convert(res);
       });
@@ -89,7 +89,7 @@ class NetworkHelper{
         final int statusCode = response.statusCode;
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("$statusCode , ${_decoder.convert(res)["message"]}");
+          throw new ErrorDescription("$statusCode , ${_decoder.convert(res)["message"]}");
         }
         return _decoder.convert(res);
       });
@@ -110,7 +110,7 @@ class NetworkHelper{
         final int statusCode = response.statusCode;
 
         if (statusCode < 200 || statusCode > 400 || json == null) {
-          throw new Exception("$statusCode , ${_decoder.convert(res)["message"]}");
+          throw new ErrorDescription("$statusCode , ${_decoder.convert(res)["message"]}");
         }
         return _decoder.convert(res);
       });
