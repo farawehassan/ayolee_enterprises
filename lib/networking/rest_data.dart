@@ -43,7 +43,7 @@ class RestDataSource {
     }).then((dynamic res) {
       if(res["error"] == true){
         print(res["error"]);
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       } else {
         print(res["error"]);
         return User.map(res["data"]);
@@ -68,7 +68,7 @@ class RestDataSource {
       "confirmPassword": createUser.confirmPin
     }).then((dynamic res) {
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         return res["message"];
       }
@@ -88,7 +88,7 @@ class RestDataSource {
     Future<User> user = futureValue.getCurrentUser();
     await user.then((value) {
       if(value.token == null){
-        throw new Exception("No user logged in");
+        throw ("No user logged in");
       }
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
@@ -103,7 +103,7 @@ class RestDataSource {
     }).then((dynamic res) {
       print(res.toString());
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         return res["message"];
       }
@@ -126,7 +126,7 @@ class RestDataSource {
     Future<User> user = futureValue.getCurrentUser();
     await user.then((value) {
       if(value.token == null){
-        throw new Exception("No user logged in");
+        throw ("No user logged in");
       }
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
@@ -142,7 +142,7 @@ class RestDataSource {
     }).then((dynamic res) {
       print(res.toString());
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         print(res["message"]);
         return res["message"];
@@ -170,7 +170,7 @@ class RestDataSource {
     final FETCH_URL = FETCH_PRODUCT_URL + "$id";
     return _netUtil.get(FETCH_URL, headers: header).then((dynamic res) {
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         return Product.fromJson(res["data"]);
       }
@@ -191,13 +191,13 @@ class RestDataSource {
     Future<User> user = futureValue.getCurrentUser();
     await user.then((value) {
       if(value.token == null){
-        throw new Exception("No user logged in");
+        throw ("No user logged in");
       }
       header = {"Authorization": "Bearer ${value.token}"};
     });
     return _netUtil.get(FETCH_PRODUCTS_URL, headers: header).then((dynamic res) {
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         var rest = res["data"] as List;
         products = rest.map<Product>((json) => Product.fromJson(json)).toList();
@@ -219,7 +219,7 @@ class RestDataSource {
     Future<User> user = futureValue.getCurrentUser();
     await user.then((value) {
       if(value.token == null){
-        throw new Exception("No user logged in");
+        throw ("No user logged in");
       }
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
@@ -235,7 +235,7 @@ class RestDataSource {
     }).then((dynamic res) {
       print(res.toString());
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         return res["message"];
       }
@@ -256,13 +256,13 @@ class RestDataSource {
     Future<User> user = futureValue.getCurrentUser();
     await user.then((value) {
       if(value.token == null){
-        throw new Exception("No user logged in");
+        throw ("No user logged in");
       }
       header = {"Authorization": "Bearer ${value.token}"};
     });
     return _netUtil.get(FETCH_REPORT_URL, headers: header).then((dynamic res) {
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         var result = res["data"] as List;
         reports = result.map<Reports>((json) => Reports.fromJson(json)).toList();
@@ -283,7 +283,7 @@ class RestDataSource {
     Future<User> user = futureValue.getCurrentUser();
     await user.then((value) {
       if(value.token == null){
-        throw new Exception("No user logged in");
+        throw ("No user logged in");
       }
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
@@ -311,13 +311,13 @@ class RestDataSource {
     Future<User> user = futureValue.getCurrentUser();
     await user.then((value) {
       if(value.token == null){
-        throw new Exception("No user logged in");
+        throw ("No user logged in");
       }
       header = {"Authorization": "Bearer ${value.token}"};
     });
     return _netUtil.get(FETCH_STORE_URL, headers: header).then((dynamic res) {
       if(res["error"] == true){
-        throw new Exception(res["message"]);
+        throw (res["message"]);
       }else{
         return StoreDetails.fromJson(res["data"]);
       }
