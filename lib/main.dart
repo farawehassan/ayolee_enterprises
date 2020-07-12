@@ -4,6 +4,7 @@ import 'package:ayolee_stores/ui/navs/other/monthly/monthly_reports.dart';
 import 'package:ayolee_stores/ui/navs/other/monthly/reports_page.dart';
 import 'package:ayolee_stores/ui/navs/other/other_reports.dart';
 import 'package:ayolee_stores/ui/navs/other/products_sold.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -33,34 +34,36 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Ayo-Lee Stores',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        cursorColor:  Colors.blue,
-        primarySwatch:  Colors.blue,
-      ),
-      darkTheme: ThemeData(
-          brightness: Brightness.dark,
-      ),
-      initialRoute: Splash.id,
-      routes: {
-        Splash.id: (context) => Splash(),
-        MyHomePage.id: (context) => MyHomePage(),
-        Products.id: (context) => Products(),
-        WelcomeScreen.id: (context) => WelcomeScreen(),
-        LoginScreen.id: (context) => LoginScreen(),
-        DailyReports.id: (context) => DailyReports(),
-        DailyReportList.id: (context) => DailyReportList(),
-        OtherReports.id: (context) => OtherReports(),
-        ReportPage.id: (context) => ReportPage(),
-        ProductsSold.id: (context) => ProductsSold(),
-        // ignore: missing_required_param
-        MonthReport.id: (context) => MonthReport(),
-        Profile.id: (context) => Profile(),
-        CreateWorker.id: (context) => CreateWorker(),
-      },
-    );
+    return DynamicTheme(
+        defaultBrightness: Brightness.light,
+        data: (brightness) => ThemeData(
+              brightness: brightness,
+              cursorColor: Colors.blue,
+              primarySwatch: Colors.blue,
+            ),
+        themedWidgetBuilder: (context, theme) {
+          return MaterialApp(
+            title: 'Ayo-Lee Stores',
+            debugShowCheckedModeBanner: false,
+            theme: theme,
+            initialRoute: Splash.id,
+            routes: {
+              Splash.id: (context) => Splash(),
+              MyHomePage.id: (context) => MyHomePage(),
+              Products.id: (context) => Products(),
+              WelcomeScreen.id: (context) => WelcomeScreen(),
+              LoginScreen.id: (context) => LoginScreen(),
+              DailyReports.id: (context) => DailyReports(),
+              DailyReportList.id: (context) => DailyReportList(),
+              OtherReports.id: (context) => OtherReports(),
+              ReportPage.id: (context) => ReportPage(),
+              ProductsSold.id: (context) => ProductsSold(),
+              // ignore: missing_required_param
+              MonthReport.id: (context) => MonthReport(),
+              Profile.id: (context) => Profile(),
+              CreateWorker.id: (context) => CreateWorker(),
+            },
+          );
+        });
   }
 }

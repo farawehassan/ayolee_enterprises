@@ -394,6 +394,7 @@ class _ProductsState extends State<Products> {
                           onSaved: (value) {
                             this._productName = value;
                           },
+                          cursorColor: Colors.blue,
                           decoration: kAddProductDecoration.copyWith(
                               hintText: "Product name"),
                         ),
@@ -410,6 +411,7 @@ class _ProductsState extends State<Products> {
                           onSaved: (value) {
                             this._initialQuantity = double.parse(value);
                           },
+                          cursorColor: Colors.blue,
                           decoration:
                               kAddProductDecoration.copyWith(hintText: "Qty"),
                         ),
@@ -429,6 +431,7 @@ class _ProductsState extends State<Products> {
                               onSaved: (value) {
                                 this._costPrice = double.parse(value);
                               },
+                              cursorColor: Colors.blue,
                               decoration: kAddProductDecoration.copyWith(
                                   hintText: "CP"),
                             ),
@@ -448,6 +451,7 @@ class _ProductsState extends State<Products> {
                               onSaved: (value) {
                                 this._sellingPrice = double.parse(value);
                               },
+                              cursorColor: Colors.blue,
                               decoration: kAddProductDecoration.copyWith(
                                   hintText: "SP"),
                             ),

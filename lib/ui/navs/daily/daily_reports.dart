@@ -37,10 +37,10 @@ class _DailyReportsState extends State<DailyReports> {
   /// Variable to hold the total ProfitMade in today's report
   double _totalProfitMade = 0.0;
 
-  /// Variable to hold the name of the user logged in
+  /// Variable to hold the type of the user logged in
   String _userType;
 
-  /// Setting the current user's name logged in to [_userType]
+  /// Setting the current user's type logged in to [_userType]
   void _getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
       _userType = user.type;

@@ -46,10 +46,10 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
   /// A variable holding the length my daily report data
   int _dataLength;
 
-  /// Variable to hold the name of the user logged in
+  /// Variable to hold the type of the user logged in
   String userType;
 
-  /// Setting the current user's name logged in to [_username]
+  /// Setting the current user's type logged in to [userType]
   void getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
       userType = user.type;

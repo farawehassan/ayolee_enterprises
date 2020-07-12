@@ -348,12 +348,15 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
       floatingActionButton: FloatingActionButton(onPressed: () {
         printerManager.startScan(Duration(seconds: 4));
         printerManager.scanResults.listen((scannedDevices) {
+          if (!mounted) return;
           setState(() {
             _devices = scannedDevices;
           });
           if(_devices.isEmpty){
             _showMessage('No Available Printer');
           }
+        }).onError((handleError){
+          _showMessage('${handleError.toString()}');
         });
       },child: Icon(Icons.search),),
     );

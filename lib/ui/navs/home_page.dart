@@ -4,6 +4,7 @@ import 'package:ayolee_stores/model/productDB.dart';
 import 'package:ayolee_stores/ui/navs/other/other_reports.dart';
 import 'package:ayolee_stores/ui/receipt/receipt_page.dart';
 import 'package:ayolee_stores/utils/constants.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ayolee_stores/ui/welcome_screen.dart';
@@ -25,6 +26,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  /// Switch button for toggling between light mode and dark mode
+  bool _enabled = false;
+
+  /// Function for toggling between light mode and dark mode
+  void themeSwitch(context) {
+    DynamicTheme.of(context).setBrightness(
+        Theme.of(context).brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark);
+  }
 
   /// Instantiating a class of the [FutureValues]
   var futureValue = FutureValues();
@@ -68,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Variable to hold the type of the user logged in
   String _userType;
 
-  /// Setting the current user's name logged in to [_userType]
+  /// Setting the current user's type logged in to [_userType]
   void _getCurrentUser() async {
     await futureValue.getCurrentUser().then((user) {
       _userType = user.type;
@@ -98,6 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _getCurrentUser();
+    _getThemeBoolValuesSF();
   }
 
   /// Function to add a new row to record sales details:
@@ -113,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final TextEditingController productController = TextEditingController();
     final TextEditingController totalPriceController = TextEditingController();
 
+    if (!mounted) return;
     setState(() {
       _details = {'qty':'$_quantity','product':_selectedProduct,'costPrice':'$_costPrice','unitPrice':'$_unitPrice','totalPrice':'$_totalPrice'};
       increment ++;
@@ -238,6 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Function to delete a row from the record sales at a particular [index]
   void _deleteItem(index){
+    if (!mounted) return;
     setState((){
       print(index);
       _rows.removeAt(index);
@@ -253,6 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Function to undo deletion of a row from the record sales by replacing
   /// [item] at a particular [index]
   /*void _undoDeletion(index, item){
+   if (!mounted) return;
     setState((){
       _rows.insert(index, item);
       _detailsList.insert(index, item);
@@ -424,6 +440,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   ),
                   ListTile(
+                    leading: Icon(Icons.settings),
+                    trailing: Switch(
+                      activeColor: Colors.blue,
+                      value: _enabled,
+                      onChanged: (bool value) {
+                        if (!mounted) return;
+                        setState(() {
+                          _addThemeBoolToSF(value);
+                          themeSwitch(context);
+                        });
+                      },
+                    ),
+                    title: Text('Theme'),
+                    subtitle: _enabled ? Text('Dark Mode') : Text('Light Mode'),
+                    onTap: (){
+                    },
+                  ),
+                  ListTile(
                     title: Text('Sign Out'),
                     onTap: (){
                       showDialog(
@@ -583,6 +617,37 @@ class _MyHomePageState extends State<MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('loggedIn', false);
     Navigator.of(context).pushReplacementNamed(WelcomeScreen.id);
+  }
+
+  /// Function to get the 'loggedIn' in your SharedPreferences
+  _getThemeBoolValuesSF() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool boolValue = prefs.getBool('themeMode');
+    if(boolValue == true){
+      if (!mounted) return;
+      setState(() {
+        _enabled = true;
+      });
+    }
+    else if(boolValue == false){
+      if (!mounted) return;
+      setState(() {
+        _enabled = false;
+      });
+    } else {
+      _addThemeBoolToSF(false);
+      if (!mounted) return;
+      setState(() {
+        _enabled = false;
+      });
+    }
+  }
+
+  /// Function to set the 'loggedIn' in your SharedPreferences to false
+  _addThemeBoolToSF(bool state) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('themeMode', state);
+    _getThemeBoolValuesSF();
   }
 
 }
