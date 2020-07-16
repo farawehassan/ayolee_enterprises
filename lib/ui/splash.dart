@@ -38,25 +38,29 @@ class _SplashState extends State<Splash> {
         onTap: (){},
         child: Stack(
           fit: StackFit.expand,
+          overflow: Overflow.visible,
           children: <Widget>[
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Expanded(
                   flex: 2,
-                  child: new Container(
-                      child: new Column(
+                  child: Container(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          new CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            child: new Container(
-                                child: Image.asset('Assets/images/splash_logo.png'),
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.transparent,
+                              child: Container(
+                                  child: Image.asset('Assets/images/splash_logo.png'),
+                              ),
+                              radius: 200,
                             ),
-                            radius: 200,
                           ),
-                          new Padding(
-                            padding: const EdgeInsets.only(top: 10.0),
+                          Padding(
+                            padding: EdgeInsets.only(top: 10.0),
                           ),
                         ],
                       )),
@@ -67,10 +71,10 @@ class _SplashState extends State<Splash> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       CircularProgressIndicator(
-                        valueColor: new AlwaysStoppedAnimation<Color>(Colors.blue),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
+                        padding: EdgeInsets.only(top: 20.0),
                       ),
                     ],
                   ),
