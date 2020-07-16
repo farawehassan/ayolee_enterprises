@@ -6,5 +6,5 @@ A sales application in flutter that manages the products in the store and record
 
 This project was built with flutter
 
-- [Summary of the project](https://github.com/farawehassan/ayolee_enterprises.wiki)
+- [Summary of the project](https://github.com/farawehassan/ayolee_enterprises/wiki)
 
