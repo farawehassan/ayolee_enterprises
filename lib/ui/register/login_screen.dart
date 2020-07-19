@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       Container(
                         padding: EdgeInsets.all(5.0),
                         child: Text(
-                          'ENTERPRISES',
+                          'STORES',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 36.0,
