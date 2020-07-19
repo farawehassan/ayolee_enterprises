@@ -24,7 +24,6 @@ class FutureValues{
   Future<List<Product>> getAllProductsFromDB() {
     var data = RestDataSource();
     Future<List<Product>> product = data.fetchAllProducts();
-    print(product);
     return product;
   }
 
@@ -43,7 +42,6 @@ class FutureValues{
     }).catchError((e){
       throw e;
     });
-    print(products);
     return products;
   }
 
@@ -62,7 +60,6 @@ class FutureValues{
     }).catchError((e){
       throw e;
     });
-    print(products);
     return products;
   }
 

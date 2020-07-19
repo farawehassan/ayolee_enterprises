@@ -26,6 +26,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   /// A [GlobalKey] to hold the Scaffold state of my build widget
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  /// A [GlobalKey] to hold the form state of my form widget for form validation
+  final _formKey = GlobalKey<FormState>();
+
   /// An variable to hold an instance of [LoginScreenPresenter]
   LoginScreenPresenter _presenter;
 
@@ -62,6 +65,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Color left = Colors.black;
   Color right = Colors.white;
+
+  double _animatedHeight = 190;
+  double _loginMargin = 170;
 
   /// Setting device orientation to portraitUp or portraitDown only for this page
   @override
@@ -143,16 +149,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   Container(
                     child: _buildSignIn(context),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(5.0),
-                    child: Text(
-                      "3, Fawehinmi street Off Ojuelegba Road Surulere Lagos",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.0
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -199,95 +195,127 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             alignment: Alignment.topCenter,
             overflow: Overflow.visible,
             children: <Widget>[
-              Card(
-                elevation: 2.0,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Container(
-                  width: 300.0,
-                  height: 190.0,
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
-                        child: TextField(
-                          focusNode: myFocusNodeEmailLogin,
-                          controller: loginEmailController,
-                          keyboardType: TextInputType.phone,
-                          style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.black),
-                          onChanged: (value){
-                            _phoneNumber = value;
-                          },
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            icon: Icon(
-                              FontAwesomeIcons.phone,
-                              color: Colors.black,
-                              size: 22.0,
-                            ),
-                            hintText: "Phone Number",
-                            hintStyle: TextStyle(
-                              fontSize: 17.0,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 250.0,
-                        height: 1.0,
-                        color: Colors.grey[400],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
-                        child: TextField(
-                          focusNode: myFocusNodePasswordLogin,
-                          controller: loginPasswordController,
-                          obscureText: _obscureTextLogin,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.black),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            icon: Icon(
-                              FontAwesomeIcons.lock,
-                              size: 22.0,
-                              color: Colors.black,
-                            ),
-                            hintText: "Pin",
-                            hintStyle: TextStyle(
-                              fontSize: 17.0,
-                              color: Colors.black54,
-                            ),
-                            suffixIcon: GestureDetector(
-                              onTap: _toggleLogin,
-                              child: Icon(
-                                _obscureTextLogin
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
-                                size: 15.0,
+              Form(
+                key: _formKey,
+                child: Card(
+                  elevation: 2.0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: AnimatedContainer(
+                    width: 300.0,
+                    height: _animatedHeight,
+                    duration: Duration(seconds: 0),
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
+                          child: TextFormField(
+                            focusNode: myFocusNodeEmailLogin,
+                            controller: loginEmailController,
+                            keyboardType: TextInputType.phone,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                setState(() {
+                                  _animatedHeight = 230;
+                                  _loginMargin = 200;
+                                });
+                                return 'Enter a phone number';
+                              }
+                              setState(() {
+                                _animatedHeight = 190;
+                                _loginMargin = 170;
+                              });
+                              return null;
+                            },
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                color: Colors.black),
+                            onChanged: (value){
+                              _phoneNumber = value;
+                            },
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              icon: Icon(
+                                FontAwesomeIcons.phone,
                                 color: Colors.black,
+                                size: 22.0,
+                              ),
+                              hintText: "Phone Number",
+                              hintStyle: TextStyle(
+                                fontSize: 17.0,
+                                color: Colors.black54,
                               ),
                             ),
                           ),
-                          onChanged: (value){
-                            _pin = value;
-                          },
                         ),
-                      ),
-                    ],
+                        Container(
+                          width: 250.0,
+                          height: 1.0,
+                          color: Colors.grey[400],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
+                          child: TextFormField(
+                            focusNode: myFocusNodePasswordLogin,
+                            controller: loginPasswordController,
+                            obscureText: _obscureTextLogin,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                setState(() {
+                                  _animatedHeight = 230;
+                                  _loginMargin = 210;
+                                });
+                                return 'Enter a pin';
+                              }
+                              setState(() {
+                                _animatedHeight = 200;
+                                _loginMargin = 170;
+                              });
+                              return null;
+                            },
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                color: Colors.black),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              icon: Icon(
+                                FontAwesomeIcons.lock,
+                                size: 22.0,
+                                color: Colors.black,
+                              ),
+                              hintText: "Pin",
+                              hintStyle: TextStyle(
+                                fontSize: 17.0,
+                                color: Colors.black54,
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: _toggleLogin,
+                                child: Icon(
+                                  _obscureTextLogin
+                                      ? FontAwesomeIcons.eye
+                                      : FontAwesomeIcons.eyeSlash,
+                                  size: 15.0,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            onChanged: (value){
+                              _pin = value;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(top: 170.0),
+                margin: EdgeInsets.only(top: _loginMargin),
                 decoration: new BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   boxShadow: <BoxShadow>[
@@ -315,7 +343,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 child: MaterialButton(
                     highlightColor: Colors.transparent,
                     splashColor: Theme.ColorGradients.loginGradientEnd,
-                    //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           vertical: 10.0, horizontal: 42.0),
@@ -328,7 +355,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                     ),
                     onPressed: () async {
-                      _submit();
+                      if(_formKey.currentState.validate()) {
+                        _submit();
+                      }
                     }
                 ),
               ),

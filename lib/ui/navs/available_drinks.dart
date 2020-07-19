@@ -67,7 +67,7 @@ class _ProductsState extends State<Products> {
   Icon _searchIcon = new Icon(Icons.search);
 
   /// Variable to hold a Widget of Text for the appBarText
-  Widget _appBarTitle = new Text('Available Products');
+  Widget _appBarTitle = new Text('Products');
 
   /// Checking if the filter controller is empty to reset the
   /// _searchText on the appBar to "" and the filteredNames to Names
@@ -148,9 +148,7 @@ class _ProductsState extends State<Products> {
     }
 
     await productNames.then((value) {
-      print(value);
       if(value.length != 0){
-        print(value.length);
         for (int i = 0; i < value.length; i++){
           tempList.add(value[i]);
         }
@@ -161,7 +159,6 @@ class _ProductsState extends State<Products> {
           _filteredNames = _names;
         });
       } else if(value.length == 0 || value.isEmpty){
-        print(value.length);
         if (!mounted) return;
         setState(() {
           _productLength = 0;
@@ -194,7 +191,7 @@ class _ProductsState extends State<Products> {
       }
       else {
         this._searchIcon = new Icon(Icons.search);
-        this._appBarTitle = new Text('Available Products');
+        this._appBarTitle = new Text('Products');
         _filteredNames = _names;
         _filter.clear();
       }

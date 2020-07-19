@@ -99,7 +99,6 @@ class _ProductsSoldState extends State<ProductsSold> {
             increment++;
           }
         }
-        print(_data);
       });
       getColors();
     }).catchError((onError){

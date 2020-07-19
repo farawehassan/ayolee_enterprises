@@ -86,7 +86,6 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
             data[value[i].productName] = '${value[i].quantity}';
           }
         }
-        print(data);
       });
       getColors();
     }).catchError((onError){

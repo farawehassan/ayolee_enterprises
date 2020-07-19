@@ -56,9 +56,7 @@ class _DailyChartState extends State<DailyChart> {
             }
           }
         }
-        print(data);
       });
-      print(_dataLength);
       getColors();
     }).catchError((onError){
       _showMessage(onError);
