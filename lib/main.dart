@@ -4,6 +4,7 @@ import 'package:ayolee_stores/ui/navs/other/monthly/monthly_reports.dart';
 import 'package:ayolee_stores/ui/navs/other/monthly/reports_page.dart';
 import 'package:ayolee_stores/ui/navs/other/other_reports.dart';
 import 'package:ayolee_stores/ui/navs/other/products_sold.dart';
+import 'package:ayolee_stores/ui/navs/other/retail_sales.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -58,6 +59,7 @@ class MyApp extends StatelessWidget {
               OtherReports.id: (context) => OtherReports(),
               ReportPage.id: (context) => ReportPage(),
               ProductsSold.id: (context) => ProductsSold(),
+              RetailSales.id: (context) => RetailSales(),
               // ignore: missing_required_param
               MonthReport.id: (context) => MonthReport(),
               Profile.id: (context) => Profile(),

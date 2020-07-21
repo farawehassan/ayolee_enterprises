@@ -1,6 +1,8 @@
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
+import 'package:ayolee_stores/ui/navs/other/retail_sales.dart';
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -199,7 +201,7 @@ class _ProductsSoldState extends State<ProductsSold> {
   /// a container to show the [_totalSalesPrice] and the [_totalProfitMade]
   SingleChildScrollView _dataTable(List<Map> salesList){
     return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
+      scrollDirection: Axis.horizontal,
       child: Column(
         children: <Widget>[
           DataTable(
@@ -294,6 +296,19 @@ class _ProductsSoldState extends State<ProductsSold> {
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text('Products Sold')),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+              onSelected: choiceAction,
+              itemBuilder: (BuildContext context) {
+                return Constants.productsSoldChoices.map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Text(choice),
+                  );
+                }).toList();
+              }
+          )
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -313,6 +328,13 @@ class _ProductsSoldState extends State<ProductsSold> {
         ),
       ),
     );
+  }
+
+  /// A function to set actions for the options menu with the value [choice]
+  void choiceAction(String choice){
+    if(choice == Constants.ShowRetail){
+      Navigator.pushNamed(context, RetailSales.id);
+    }
   }
 
   /// Using flutter toast to display a toast message [message]

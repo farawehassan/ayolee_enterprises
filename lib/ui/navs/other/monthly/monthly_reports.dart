@@ -224,7 +224,7 @@ class _MonthReportState extends State<MonthReport> {
   /// a container to show the [__totalSalesPrice]
   SingleChildScrollView _dataTable(List<Map> salesList){
     return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
+      scrollDirection: Axis.horizontal,
       child: Column(
         children: <Widget>[
           DataTable(

@@ -32,8 +32,7 @@
 
 #keystore details
 android/key.properties
-my-release-key
-my-release-key.keystore
+android/app/key.jks
 
 # Web related
 lib/generated_plugin_registrant.dart

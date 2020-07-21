@@ -12,7 +12,9 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Ayo-Lee Stores"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:extractNativeLibs="false"
+        tools:targetApi="m">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
