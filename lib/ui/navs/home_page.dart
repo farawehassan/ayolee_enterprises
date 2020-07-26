@@ -5,6 +5,7 @@ import 'file:///C:/FlutterWorkspace/ayolee_enterprises/lib/ui/navs/productsSold/
 import 'package:ayolee_stores/ui/receipt/receipt_page.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:ayolee_stores/utils/round_icon.dart';
+import 'package:ayolee_stores/utils/size_config.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -313,6 +314,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// calling [_addRow()] and a drawer to show other screens and details when pressed
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text('Sales Record')),
@@ -477,8 +479,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           elevation: 0.0,
                           child: Container(
+                            width: SizeConfig.safeBlockHorizontal * 60,
                             height: 150.0,
-                            padding: const EdgeInsets.all(16.0),
+                            padding: EdgeInsets.all(16.0),
                             child:  Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -496,9 +499,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                       ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 24.0,
                                 ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

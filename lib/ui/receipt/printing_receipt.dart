@@ -3,6 +3,7 @@ import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
 import 'package:ayolee_stores/utils/constants.dart';
+import 'package:ayolee_stores/utils/size_config.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart';
@@ -151,6 +152,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Printer"),
@@ -170,7 +172,8 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                   ),
                   elevation: 0.0,
                   child: Container(
-                    height: 200.0,
+                    width: SizeConfig.safeBlockHorizontal * 60,
+                    height: 150.0,
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,9 +191,6 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 24.0,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -223,6 +223,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                                       ),
                                       elevation: 0.0,
                                       child: Container(
+                                        width: SizeConfig.safeBlockHorizontal * 60,
                                         height: 150.0,
                                         padding: const EdgeInsets.all(16.0),
                                         child: Column(
@@ -244,9 +245,6 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(
-                                              height: 24.0,
                                             ),
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
