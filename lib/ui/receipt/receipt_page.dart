@@ -27,40 +27,25 @@ class _ReceiptState extends State<Receipt> {
   var futureValue = FutureValues();
 
   /// Variable holding the company's name
-  String companyName = "Ayo-Lee Stores";
+  String _companyName = "Ayo-Lee Stores";
 
   /// Variable holding the company's address
-  String address = "14, Leigh street Off Ojuelegba Road Surulere Lagos";
+  String _address = "14, Leigh street Off Ojuelegba Road Surulere Lagos";
 
   /// Variable holding the company's phone number
-  String phoneNumber = "0802912565, 07033757855";
+  String _phoneNumber = "0802912565, 07033757855";
 
   /// Variable holding the company's email
-  String email = "farawebola@gmail.com";
+  String _email = "farawebola@gmail.com";
 
   /// Variable holding today's datetime
-  DateTime dateTime = DateTime.now();
-
-  /// Variable holding the buyer's name
-  String buyersName;
+  DateTime _dateTime = DateTime.now();
 
   /// Variable holding the total price
-  double totalPrice = 0.0;
-
-  /// A List to hold the widget [TableRow] for my products
-  List<TableRow> items = [];
+  double _totalPrice = 0.0;
 
   /// A List to hold the Map of [receivedProducts]
-  List<Map> receivedProducts = [];
-
-  /// Instantiating a class of the [Reports]
-  Reports dailyReportsData = new Reports();
-
-  /// A Map to hold the product's name to its current quantity
-  Map products = {};
-
-  /// A List to hold the Map of the data above
-  List<Map> productsList = [];
+  List<Map> _receivedProducts = [];
 
   /// Converting [dateTime] in string format to return a formatted time
   /// of hrs, minutes and am/pm
@@ -68,11 +53,16 @@ class _ReceiptState extends State<Receipt> {
     return DateFormat('h:mm a').format(DateTime.parse(dateTime)).toString();
   }
 
-  /// This adds the product details [sentProducts] to [receivedProducts] if it's
-  /// not empty and calculate the total price [totalPrice]
+  /// Converting [dateTime] in string format to return a formatted time
+  /// of weekday, month, day and year
+  String _getFormattedDate(String dateTime) {
+    return DateFormat('MMM d, ''yyyy').format(DateTime.parse(dateTime)).toString();
+  }
+
+  /// This adds the product details [sentProducts] to [_receivedProducts] if it's
+  /// not empty and calculate the total price [_totalPrice]
   void _addProducts() {
     for (var product in widget.sentProducts) {
-      print(product);
       if (product.isNotEmpty
           && product.containsKey('qty')
           && product.containsKey('product')
@@ -80,8 +70,8 @@ class _ReceiptState extends State<Receipt> {
           && product.containsKey('unitPrice')
           && product.containsKey('totalPrice')
       )  {
-        receivedProducts.add(product);
-        totalPrice += double.parse(product['totalPrice']);
+        _receivedProducts.add(product);
+        _totalPrice += double.parse(product['totalPrice']);
       }
     }
   }
@@ -89,56 +79,162 @@ class _ReceiptState extends State<Receipt> {
   /// Creating a [DataTable] widget from a List of Map [receivedProducts]
   /// using QTY, PRODUCT, UNIT, TOTAL, PAYMENT, TIME as DataColumn and
   /// the values of each DataColumn in the [receivedProducts] as DataRows
-  Widget _dataTable() {
-    return DataTable(
-      columnSpacing: 5.0,
-      columns: [
-        DataColumn(
-          label: Text(
-            'S/N',
-            style: TextStyle(fontWeight: FontWeight.bold),
+  Container _dataTable() {
+    return Container(
+      width: SizeConfig.safeBlockHorizontal * 80,
+      child: Column(
+        children: <Widget>[
+          DataTable(
+            columnSpacing: 5.0,
+            columns: [
+              DataColumn(
+                label: Text(
+                  'S/N',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              DataColumn(
+                  label: Text(
+                    'QTY',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+              DataColumn(
+                  label: Text(
+                    'PRODUCT',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+              DataColumn(
+                  label: Text(
+                    'UNIT PRICE',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+              DataColumn(
+                  label: Text(
+                    'TOTAL PRICE',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+            ],
+            rows: _receivedProducts.map((product) {
+              return DataRow(cells: [
+                DataCell(
+                  Text((widget.sentProducts.indexOf(product) + 1).toString()),
+                ),
+                DataCell(
+                  Text(product['qty'].toString()),
+                ),
+                DataCell(
+                  Text(product['product'].toString()),
+                ),
+                DataCell(
+                  Text(Constants.money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
+                ),
+                DataCell(
+                  Text(Constants.money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
+                ),
+              ]);
+            }).toList(),
           ),
-        ),
-        DataColumn(
-            label: Text(
-              'QTY',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            )),
-        DataColumn(
-            label: Text(
-              'PRODUCT',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            )),
-        DataColumn(
-            label: Text(
-              'UNIT PRICE',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            )),
-        DataColumn(
-            label: Text(
-              'TOTAL PRICE',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            )),
-      ],
-      rows: receivedProducts.map((product) {
-        return DataRow(cells: [
-          DataCell(
-            Text((widget.sentProducts.indexOf(product) + 1).toString()),
+          Container(
+            margin: EdgeInsets.only(left: 5.0, right: 5.0),
+            padding: EdgeInsets.only(right: 20.0, top: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  'TOTAL = ',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  '${Constants.money(_totalPrice).output.symbolOnLeft.toString()}',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  /// This function contains the details of the store such as [_companyName],
+  /// [_address], [_phoneNumber], [_email]
+  Container _storeDetails(){
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Container(
+            child: Text(
+                _companyName,
+                style: TextStyle(
+                  fontSize: 26.0,
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                )
+            ),
           ),
-          DataCell(
-            Text(product['qty'].toString()),
+          Container(
+            padding: EdgeInsets.all(2.0),
+            child: Text(
+              _address,
+              style: TextStyle(
+                fontSize: 17.0,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
-          DataCell(
-            Text(product['product'].toString()),
+          SizedBox(
+            height: 2.0,
           ),
-          DataCell(
-            Text(Constants.money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
+          Container(
+            child: Text(
+              "Tel: $_phoneNumber",
+              style: TextStyle(
+                fontSize: 17.0,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
-          DataCell(
-            Text(Constants.money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
+          SizedBox(
+            height: 2.0,
           ),
-        ]);
-      }).toList(),
+          Container(
+            child: Text(
+              "Email: $_email",
+              style: TextStyle(
+                fontSize: 17.0,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 2.0,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  child: Text(
+                    "Date: ${_getFormattedDate(_dateTime.toString())}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                Container(
+                  child: Text(
+                    "Time: ${_getFormattedTime(_dateTime.toString())}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -326,7 +422,7 @@ class _ReceiptState extends State<Receipt> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => PrintingReceipt(sentProducts: receivedProducts)),
+                MaterialPageRoute(builder: (context) => PrintingReceipt(sentProducts: widget.sentProducts)),
               );
             },
           ),
@@ -335,126 +431,21 @@ class _ReceiptState extends State<Receipt> {
       body: SafeArea(
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Column(
-            children: <Widget>[
-              Container(
-                child: Text(
-                  companyName,
-                  style: TextStyle(
-                    fontSize: 22.0,
-                    fontWeight: FontWeight.bold,
+          child: Align(
+            alignment: Alignment.center,
+            child: Column(
+              children: <Widget>[
+                _storeDetails(),
+                Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    verticalDirection: VerticalDirection.down,
+                    children: <Widget>[_dataTable()],
                   ),
                 ),
-              ),
-              Container(
-                padding: EdgeInsets.all(2.0),
-                child: Text(
-                  address,
-                  style: TextStyle(
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 2.0,
-              ),
-              Container(
-                child: Text(
-                  "Tel: $phoneNumber",
-                  style: TextStyle(
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 2.0,
-              ),
-              Container(
-                child: Text(
-                  "Email: $email",
-                  style: TextStyle(
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 2.0,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          Text(
-                            'Name: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 2.0,
-                          ),
-                          Container(
-                            width: 150.0,
-                            child: TextField(
-                              keyboardType: TextInputType.number,
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                              onChanged: (value) {
-                                buyersName = value;
-                              },
-                              decoration: InputDecoration(
-                                hoverColor: Colors.black,
-                                fillColor: Colors.black,
-                                focusColor: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      child: Text(
-                        "Date: ${_getFormattedTime(dateTime.toString())}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  verticalDirection: VerticalDirection.down,
-                  children: <Widget>[_dataTable()],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5.0, right: 5.0),
-                padding: EdgeInsets.only(right: 20.0, top: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Text(
-                      'TOTAL = ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      '${Constants.money(totalPrice).output.symbolOnLeft.toString()}',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              )
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -464,8 +455,8 @@ class _ReceiptState extends State<Receipt> {
   /// This function calls [saveNewDailyReport()] with the details in
   /// [receivedProducts]
   void _saveProduct(String paymentMode) async {
-    if(receivedProducts.length > 0 && receivedProducts.isNotEmpty){
-      for (var product in receivedProducts) {
+    if(_receivedProducts.length > 0 && _receivedProducts.isNotEmpty){
+      for (var product in _receivedProducts) {
         try {
           await _saveNewDailyReport(
               double.parse(
@@ -509,7 +500,7 @@ class _ReceiptState extends State<Receipt> {
       dailyReport.unitPrice = unitPrice.toString();
       dailyReport.totalPrice = total.toString();
       dailyReport.paymentMode = paymentMode;
-      dailyReport.createdAt = DateTime.now().toString();
+      dailyReport.createdAt = _dateTime.toString();
 
       await api.addNewDailyReport(dailyReport).then((value) {
         print('$productName saved successfully');
