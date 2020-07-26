@@ -1,8 +1,9 @@
-import 'package:ayolee_stores/ui/navs/other/products_sold.dart';
 import 'package:ayolee_stores/ui/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 /// A class to set constants for menu options in the profile page
 class Constants{
@@ -31,6 +32,55 @@ class Constants{
   static const List<String> productsSoldChoices = <String>[
     ShowRetail,
   ];
+
+  /// Method to capitalize the first letter of each word in [string]
+  static String capitalize(String string) {
+    String result = '';
+
+    if (string == null) {
+      throw ArgumentError("string: $string");
+    }
+
+    if (string.isEmpty) {
+      return string;
+    }
+
+    else{
+      List<String> values = string.split(' ');
+      List<String> valuesToJoin = new List();
+
+      if(values.length == 1){
+        result = string[0].toUpperCase() + string.substring(1);
+      }
+      else{
+        for(int i = 0; i < values.length; i++){
+          if(values[i].isNotEmpty){
+            valuesToJoin.add(values[i][0].toUpperCase() + values[i].substring(1));
+          }
+        }
+        result = valuesToJoin.join(' ');
+      }
+
+    }
+    return result;
+  }
+
+  /// Convert a double [value] to naira
+  static FlutterMoneyFormatter money(double value){
+    FlutterMoneyFormatter val;
+    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
+    return val;
+  }
+
+  /// Using FlutterToast to display toast message of value [message]
+  static showMessage(String message){
+    Fluttertoast.showToast(
+        msg: "$message",
+        toastLength: Toast.LENGTH_SHORT,
+        backgroundColor: Colors.white,
+        textColor: Colors.black
+    );
+  }
 
 }
 

@@ -2,8 +2,7 @@ import 'dart:typed_data';
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart';
@@ -67,13 +66,6 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
     _addProducts();
   }
 
-  /// Convert a double [value] to naira
-  FlutterMoneyFormatter _money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
-  }
-
   /// Function to build a ticket of [receivedProducts] using the
   /// package [esc_pos_printer]
   Future<Ticket> _showReceipt() async{
@@ -131,7 +123,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
             width: PosTextSize.size2,
           )),
       PosColumn(
-          text: '${_money(totalPrice).output.symbolOnLeft}',
+          text: '${Constants.money(totalPrice).output.symbolOnLeft}',
           width: 6,
           styles: PosStyles(
             align: PosTextAlign.right,
@@ -353,22 +345,13 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
             _devices = scannedDevices;
           });
           if(_devices.isEmpty){
-            _showMessage('No Available Printer');
+            Constants.showMessage('No Available Printer');
           }
         }).onError((handleError){
-          _showMessage('${handleError.toString()}');
+          Constants.showMessage('${handleError.toString()}');
         });
       },child: Icon(Icons.search),),
     );
-  }
-
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black);
   }
 
   /// This function calls [saveNewDailyReport()] with the details in
@@ -391,17 +374,17 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
               'totalPrice']),
               paymentMode)
               .then((value){
-            _showMessage("${product['product']} was sold successfully");
+            Constants.showMessage("${product['product']} was sold successfully");
           });
         } catch (e) {
           print(e);
-          _showMessage(e.toString());
+          Constants.showMessage(e.toString());
         }
       }
       Navigator.pop(context);
     }
     else {
-      _showMessage("Empty receipt");
+      Constants.showMessage("Empty receipt");
       Navigator.pop(context);
     }
   }

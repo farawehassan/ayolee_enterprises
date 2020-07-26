@@ -1,20 +1,21 @@
 import 'package:ayolee_stores/bloc/product_suggestions.dart';
 import 'package:ayolee_stores/database/user_db_helper.dart';
 import 'package:ayolee_stores/model/productDB.dart';
-import 'package:ayolee_stores/ui/navs/other/other_reports.dart';
+import 'file:///C:/FlutterWorkspace/ayolee_enterprises/lib/ui/navs/productsSold/products_sold.dart';
 import 'package:ayolee_stores/ui/receipt/receipt_page.dart';
 import 'package:ayolee_stores/utils/constants.dart';
+import 'package:ayolee_stores/utils/round_icon.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ayolee_stores/ui/welcome_screen.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../profile_page.dart';
 import 'available_drinks.dart';
 import 'daily/daily_reports.dart';
+import 'monthly/reports_page.dart';
 
 /// A StatefulWidget class that displays the sales record
 class MyHomePage extends StatefulWidget {
@@ -101,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }).catchError((error){
       print(error);
-      _showMessage(error.toString());
+      Constants.showMessage(error.toString());
     });
   }
 
@@ -244,7 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print(_detailsList);
       } catch (e) {
         print(e);
-        _showMessage("Error in records");
+        Constants.showMessage("Error in records");
       }
     }
 
@@ -299,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {
       print(e);
-      _showMessage("Error in fetching sales");
+      Constants.showMessage("Error in fetching sales");
       response = true;
     }
     print(response);
@@ -330,11 +331,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 } catch (e) {
                   print(e);
-                  _showMessage("Error in records");
+                  Constants.showMessage("Error in records");
                 }
               }
               else{
-                _showMessage("Error in records or no records");
+                Constants.showMessage("Error in records or no records");
               }
             },
           ),
@@ -434,9 +435,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   ListTile(
                     leading: Icon(Icons.assignment_returned),
-                    title: Text('Other Reports'),
+                    title: Text('Monthly Reports'),
                     onTap: (){
-                      Navigator.pushNamed(context, OtherReports.id);
+                      Navigator.pushNamed(context, ReportPage.id);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.assignment_returned),
+                    title: Text('Products Sold'),
+                    onTap: (){
+                      Navigator.pushNamed(context, ProductsSold.id);
                     },
                   ),
                   ListTile(
@@ -569,22 +577,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: RoundIconButton(
         onPressed: _addRow,
-        backgroundColor: Colors.blue,
-        tooltip: 'Relax',
-        child: Icon(Icons.add,),
+        icon: Icons.add,
       ),
     );
-  }
-
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black);
   }
 
   /// Function to show profile of the account if the user is an Admin 'Admin'

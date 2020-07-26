@@ -1,9 +1,8 @@
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pie_chart/pie_chart.dart';
 
 class RetailSales extends StatefulWidget {
@@ -51,7 +50,7 @@ class _RetailSalesState extends State<RetailSales> {
     await futureValue.getCurrentUser().then((user) {
       _userType = user.type;
     }).catchError((Object error) {
-      _showMessage(error.toString());
+      Constants.showMessage(error.toString());
     });
   }
 
@@ -95,7 +94,7 @@ class _RetailSalesState extends State<RetailSales> {
       getColors();
     }).catchError((onError){
       print(onError.toString());
-      _showMessage(onError.toString());
+      Constants.showMessage(onError.toString());
     });
   }
 
@@ -135,13 +134,6 @@ class _RetailSalesState extends State<RetailSales> {
       _dataMap.putIfAbsent("$k", () => double.parse('${_data[k][1]}'));
     });
 
-  }
-
-  /// Convert a double [value] to naira
-  FlutterMoneyFormatter _money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
   }
 
   /// Function to build my pie chart if dataMap is not empty and it's length is
@@ -213,13 +205,13 @@ class _RetailSalesState extends State<RetailSales> {
                   DataCell(Text(report['sn'].toString()),),
                   DataCell(Text(report['product'].toString()),),
                   DataCell(Text(report['quantitySold'].toString()),),
-                  DataCell(Text(_money(report['totalSales']).output.symbolOnLeft),),
-                  DataCell(Text(_money(report['profit']).output.symbolOnLeft),)
+                  DataCell(Text(Constants.money(report['totalSales']).output.symbolOnLeft),),
+                  DataCell(Text(Constants.money(report['profit']).output.symbolOnLeft),)
                 ] : [
                   DataCell(Text(report['sn'].toString()),),
                   DataCell(Text(report['product'].toString()),),
                   DataCell(Text(report['quantitySold'].toString()),),
-                  DataCell(Text(_money(report['totalSales']).output.symbolOnLeft),),
+                  DataCell(Text(Constants.money(report['totalSales']).output.symbolOnLeft),),
                 ]
             )).toList(),
           ),
@@ -236,7 +228,7 @@ class _RetailSalesState extends State<RetailSales> {
                   ),
                 ),
                 Text(
-                  '${_money(_totalSalesPrice).output.symbolOnLeft}',
+                  '${Constants.money(_totalSalesPrice).output.symbolOnLeft}',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Colors.blueAccent,
@@ -258,7 +250,7 @@ class _RetailSalesState extends State<RetailSales> {
                   ),
                 ),
                 Text(
-                  '${_money(_totalProfitMade).output.symbolOnLeft}',
+                  '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Colors.blueAccent,
@@ -304,16 +296,6 @@ class _RetailSalesState extends State<RetailSales> {
           ),
         ),
       ),
-    );
-  }
-
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black
     );
   }
 

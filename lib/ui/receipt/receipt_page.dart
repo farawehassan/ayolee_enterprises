@@ -2,9 +2,8 @@ import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
 import 'package:ayolee_stores/ui/receipt/printing_receipt.dart';
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:intl/intl.dart';
 
 /// A StatefulWidget class that displays receipt of items recorded
@@ -68,13 +67,6 @@ class _ReceiptState extends State<Receipt> {
     return DateFormat('h:mm a').format(DateTime.parse(dateTime)).toString();
   }
 
-  /// Convert a double [value] to naira
-  FlutterMoneyFormatter _money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
-  }
-
   /// This adds the product details [sentProducts] to [receivedProducts] if it's
   /// not empty and calculate the total price [totalPrice]
   void _addProducts() {
@@ -98,7 +90,7 @@ class _ReceiptState extends State<Receipt> {
   /// the values of each DataColumn in the [receivedProducts] as DataRows
   Widget _dataTable() {
     return DataTable(
-      columnSpacing: 1.0,
+      columnSpacing: 5.0,
       columns: [
         DataColumn(
           label: Text(
@@ -139,10 +131,10 @@ class _ReceiptState extends State<Receipt> {
             Text(product['product'].toString()),
           ),
           DataCell(
-            Text(_money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
+            Text(Constants.money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
           ),
           DataCell(
-            Text(_money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
+            Text(Constants.money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
           ),
         ]);
       }).toList(),
@@ -458,7 +450,7 @@ class _ReceiptState extends State<Receipt> {
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      '${_money(totalPrice).output.symbolOnLeft.toString()}',
+                      '${Constants.money(totalPrice).output.symbolOnLeft.toString()}',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -469,15 +461,6 @@ class _ReceiptState extends State<Receipt> {
         ),
       ),
     );
-  }
-
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message) async {
-    await Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black);
   }
 
   /// This function calls [saveNewDailyReport()] with the details in
@@ -500,17 +483,17 @@ class _ReceiptState extends State<Receipt> {
               'totalPrice']),
               paymentMode)
               .then((value){
-            _showMessage("${product['product']} was sold successfully");
+            Constants.showMessage("${product['product']} was sold successfully");
           });
         } catch (e) {
           print(e);
-          _showMessage(e.toString());
+          Constants.showMessage(e.toString());
         }
       }
       Navigator.pop(context);
     }
     else {
-      _showMessage("Empty receipt");
+      Constants.showMessage("Empty receipt");
       Navigator.pop(context);
     }
   }

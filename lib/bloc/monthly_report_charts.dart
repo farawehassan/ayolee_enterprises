@@ -1,10 +1,9 @@
 import 'package:ayolee_stores/model/reportsDB.dart';
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pie_chart/pie_chart.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 /// A StatefulWidget class creating a pie chart for my monthly report records
 class MonthlyReportCharts extends StatefulWidget {
@@ -58,13 +57,6 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
     });
   }
 
-  /// Convert a double [value] to naira
-  FlutterMoneyFormatter money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
-  }
-
   /// Function to get this [month] report and map [data] it's product name to
   /// its quantity accordingly
   /// It also calls the function [getColors()]
@@ -89,7 +81,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
       });
       getColors();
     }).catchError((onError){
-      _showMessage(onError);
+      Constants.showMessage(onError);
     });
   }
 
@@ -178,7 +170,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
                 ),
                 Center(
                   child: Text(
-                    '${money(totalProfitMade).output.symbolOnLeft.toString()}',
+                    '${Constants.money(totalProfitMade).output.symbolOnLeft.toString()}',
                     style: TextStyle(
                       fontSize: 18.0,
                       color: Colors.blue,
@@ -191,16 +183,6 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
           ) : Container(),
         ],
       ),
-    );
-  }
-
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black
     );
   }
 

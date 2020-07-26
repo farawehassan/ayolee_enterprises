@@ -1,10 +1,9 @@
 import 'package:ayolee_stores/ui/navs/daily/daily_report_list.dart';
 import 'package:ayolee_stores/ui/navs/daily/daily_reports.dart';
-import 'package:ayolee_stores/ui/navs/other/monthly/monthly_reports.dart';
-import 'package:ayolee_stores/ui/navs/other/monthly/reports_page.dart';
-import 'package:ayolee_stores/ui/navs/other/other_reports.dart';
-import 'package:ayolee_stores/ui/navs/other/products_sold.dart';
-import 'package:ayolee_stores/ui/navs/other/retail_sales.dart';
+import 'package:ayolee_stores/ui/navs/monthly/monthly_reports.dart';
+import 'package:ayolee_stores/ui/navs/monthly/reports_page.dart';
+import 'package:ayolee_stores/ui/navs/productsSold/products_sold.dart';
+import 'package:ayolee_stores/ui/navs/productsSold/retail_sales.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -56,7 +55,6 @@ class MyApp extends StatelessWidget {
               LoginScreen.id: (context) => LoginScreen(),
               DailyReports.id: (context) => DailyReports(),
               DailyReportList.id: (context) => DailyReportList(),
-              OtherReports.id: (context) => OtherReports(),
               ReportPage.id: (context) => ReportPage(),
               ProductsSold.id: (context) => ProductsSold(),
               RetailSales.id: (context) => RetailSales(),

@@ -5,10 +5,8 @@ import 'package:ayolee_stores/utils/constants.dart';
 import 'package:ayolee_stores/utils/reusable_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:ayolee_stores/bloc/year_line_charts.dart';
 import 'package:ayolee_stores/bloc/profit_charts.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 /// A StatefulWidget class that displays the business's profile
 /// only the admin can have access to this page
@@ -37,13 +35,6 @@ class _ProfileState extends State<Profile> {
   /// A double value to hold the total profit made so far
   double _totalProfit = 0.0;
 
-  /// Convert a double [value] to naira
-  FlutterMoneyFormatter _money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
-  }
-
   /// A function to set the values [_cpNetWorth], [_spNetWorth], [_numberOfItems],
   /// from the [StoreDetails] model fetching from the database
   void _getStoreValues() async {
@@ -51,23 +42,14 @@ class _ProfileState extends State<Profile> {
     await details.then((value) {
       if (!mounted) return;
       setState(() {
-        _cpNetWorth = _money(value.cpNetWorth).output.symbolOnLeft;
-        _spNetWorth = _money(value.spNetWorth).output.symbolOnLeft;
+        _cpNetWorth = Constants.money(value.cpNetWorth).output.symbolOnLeft;
+        _spNetWorth = Constants.money(value.spNetWorth).output.symbolOnLeft;
         _numberOfItems = value.totalItems;
         _totalProfit = value.totalProfitMade;
       });
     }).catchError((onError){
-      _showMessage(onError);
+      Constants.showMessage(onError);
     });
-  }
-
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black
-    );
   }
 
   /// Calling [_getStoreValues()] and before the page loads
@@ -275,7 +257,7 @@ class _ProfileState extends State<Profile> {
                                 Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Text(
-                                      '${_money(_totalProfit).output.symbolOnLeft}',
+                                      '${Constants.money(_totalProfit).output.symbolOnLeft}',
                                       style: TextStyle(
                                         fontSize: 20.0,
                                         color: Colors.blue,

@@ -1,5 +1,5 @@
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
@@ -59,7 +59,7 @@ class _DailyChartState extends State<DailyChart> {
       });
       getColors();
     }).catchError((onError){
-      _showMessage(onError);
+      Constants.showMessage(onError);
     });
   }
 
@@ -128,16 +128,6 @@ class _DailyChartState extends State<DailyChart> {
       child: Center(
         child: _buildChart(),
       ),
-    );
-  }
-
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black
     );
   }
 

@@ -1,13 +1,13 @@
 import 'package:ayolee_stores/model/productDB.dart';
 import 'package:ayolee_stores/networking/rest_data.dart';
+import 'package:ayolee_stores/utils/round_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:folding_cell/folding_cell.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 /// A StatefulWidget class that displays available product from the database
 class Products extends StatefulWidget {
@@ -89,39 +89,6 @@ class _ProductsState extends State<Products> {
     });
   }
 
-  /// Method to capitalize the first letter of each word in a productName [string]
-  /// while adding a new product or updating a particular product
-  String _capitalize(String string) {
-    String result = '';
-
-    if (string == null) {
-      throw ArgumentError("string: $string");
-    }
-
-    if (string.isEmpty) {
-      return string;
-    }
-
-    else{
-      List<String> values = string.split(' ');
-      List<String> valuesToJoin = new List();
-
-      if(values.length == 1){
-        result = string[0].toUpperCase() + string.substring(1);
-      }
-      else{
-        for(int i = 0; i < values.length; i++){
-          if(values[i].isNotEmpty){
-            valuesToJoin.add(values[i][0].toUpperCase() + values[i].substring(1));
-          }
-        }
-        result = valuesToJoin.join(' ');
-      }
-
-    }
-    return result;
-  }
-
   /// Function to refresh details of the Available products
   /// by calling [_getNames()]
   void _refreshData(){
@@ -168,7 +135,7 @@ class _ProductsState extends State<Products> {
       }
     }).catchError((error){
       print(error);
-      _showMessage(error.toString());
+      Constants.showMessage(error.toString());
     });
   }
 
@@ -349,8 +316,7 @@ class _ProductsState extends State<Products> {
           child: _buildList(),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
+      floatingActionButton: RoundIconButton(
         onPressed: () {
           showDialog(
             context: context,
@@ -501,8 +467,7 @@ class _ProductsState extends State<Products> {
             barrierDismissible: false,
           );
         },
-        tooltip: 'Add new product',
-        child: Icon(Icons.add),
+        icon: Icons.add,
       ),
     );
   }
@@ -799,15 +764,6 @@ class _ProductsState extends State<Products> {
     });
   }
 
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black);
-  }
-
   /// Function to check whether a product exists or not
   /// It returns true if it does and false if it does not
   Future<bool> _checkIfProductExists(String name) async {
@@ -842,11 +798,11 @@ class _ProductsState extends State<Products> {
     var api = new RestDataSource();
     var product = Product();
 
-    Future<bool> exists = _checkIfProductExists(_capitalize(_productName));
+    Future<bool> exists = _checkIfProductExists(Constants.capitalize(_productName));
     await exists.then((value) async {
       if(value == false) {
         try {
-          product.productName = _capitalize(_productName);
+          product.productName = Constants.capitalize(_productName);
           product.costPrice = _costPrice.toString();
           product.sellingPrice = _sellingPrice.toString();
           product.initialQuantity = _initialQuantity.toString();
@@ -854,19 +810,19 @@ class _ProductsState extends State<Products> {
           product.createdAt = DateTime.now().toString();
 
           api.addProduct(product).then((value) {
-            _showMessage("${product.productName} was added");
+            Constants.showMessage("${product.productName} was added");
           }).catchError((error) {
             print(error);
-            _showMessage(error.toString());
+            Constants.showMessage(error.toString());
           });
         } catch (e) {
           print(e);
-          _showMessage(e.toString());
+          Constants.showMessage(e.toString());
         }
       }
     }).catchError((onError){
       print(onError.toString());
-      _showMessage(onError.toString());
+      Constants.showMessage(onError.toString());
     });
 
   }
@@ -881,7 +837,7 @@ class _ProductsState extends State<Products> {
       if(updateName == ""){
         product.productName = name;
       }else{
-        product.productName = _capitalize(updateName);
+        product.productName = Constants.capitalize(updateName);
       }
       product.costPrice = cp.toString();
       product.sellingPrice = sp.toString();
@@ -889,14 +845,14 @@ class _ProductsState extends State<Products> {
       product.currentQuantity = currentQty.toString();
 
       api.updateProduct(product, id).then((value){
-        _showMessage( "$name is updated");
+        Constants.showMessage( "$name is updated");
       }).catchError((error) {
         print(error);
-        _showMessage(error.toString());
+        Constants.showMessage(error.toString());
       });
     } catch (e) {
       print(e);
-      _showMessage( "Error in adding data");
+      Constants.showMessage( "Error in adding data");
     }
   }
 

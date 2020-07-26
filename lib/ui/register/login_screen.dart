@@ -1,8 +1,8 @@
 import 'package:ayolee_stores/database/user_db_helper.dart';
 import 'package:ayolee_stores/model/user.dart';
+import 'package:ayolee_stores/ui/navs/home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'file:///C:/AndroidWorkspace/00-Flutter/ayolee_stores/lib/ui/navs/home_page.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ayolee_stores/styles/theme.dart' as Theme;

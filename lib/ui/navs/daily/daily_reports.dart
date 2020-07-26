@@ -2,14 +2,12 @@ import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:ayolee_stores/bloc/daily_report_value.dart';
 import 'package:ayolee_stores/bloc/daily_report_chart.dart';
 import 'package:ayolee_stores/utils/reusable_card.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'daily_report_list.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 /// A StatefulWidget class that displays the Today's Reports details
 class DailyReports extends StatefulWidget {
@@ -47,13 +45,6 @@ class _DailyReportsState extends State<DailyReports> {
     }).catchError((Object error) {
       print(error.toString());
     });
-  }
-
-  /// Convert a double [value] to naira
-  FlutterMoneyFormatter _money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
   }
 
   /// Calculating profit of a particular DailyReportsData [data],
@@ -97,7 +88,7 @@ class _DailyReportsState extends State<DailyReports> {
       });
     }).catchError((error){
       print(error);
-      _showMessage(error.toString());
+      Constants.showMessage(error.toString());
     });
   }
 
@@ -152,13 +143,13 @@ class _DailyReportsState extends State<DailyReports> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    titleText('Available Cash: ${_money(_availableCash).output.symbolOnLeft}'),
+                    titleText('Available Cash: ${Constants.money(_availableCash).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    titleText('Transferred Cash: ${_money(_totalTransfer).output.symbolOnLeft}'),
+                    titleText('Transferred Cash: ${Constants.money(_totalTransfer).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    titleText('Total Cash: ${_money(_availableCash + _totalTransfer).output.symbolOnLeft}'),
+                    titleText('Total Cash: ${Constants.money(_availableCash + _totalTransfer).output.symbolOnLeft}'),
                     SizedBox(height: 8.0,),
-                    _userType == 'Admin' ? titleText('Profit made: ${_money(_totalProfitMade).output.symbolOnLeft}') : Container(),
+                    _userType == 'Admin' ? titleText('Profit made: ${Constants.money(_totalProfitMade).output.symbolOnLeft}') : Container(),
                   ],
                 ),
               ),
@@ -166,16 +157,6 @@ class _DailyReportsState extends State<DailyReports> {
           ),
         ),
       ),
-    );
-  }
-
-  /// Using flutter toast to display a toast message [message]
-  void _showMessage(String message){
-    Fluttertoast.showToast(
-        msg: "$message",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.white,
-        textColor: Colors.black
     );
   }
 

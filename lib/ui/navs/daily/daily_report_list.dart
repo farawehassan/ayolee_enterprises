@@ -1,8 +1,8 @@
 import 'package:ayolee_stores/bloc/future_values.dart';
+import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 /// A StatelessWidget class that displays detailed list of items sold today
 // ignore: must_be_immutable
@@ -18,13 +18,6 @@ class DailyReportList extends StatelessWidget {
 
   /// A List to hold the Map of the report's data above
   List<Map> _reports = [];
-
-  /// Convert a double [value] to naira
-  FlutterMoneyFormatter _money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
-  }
 
   /// Converting [dateTime] in string format to return a formatted time
   /// of hrs, minutes and am/pm
@@ -57,10 +50,10 @@ class DailyReportList extends StatelessWidget {
                 Text(report['productName'].toString()),
               ),
               DataCell(
-                Text(_money(double.parse(report['unitPrice'])).output.symbolOnLeft.toString()),
+                Text(Constants.money(double.parse(report['unitPrice'])).output.symbolOnLeft.toString()),
               ),
               DataCell(
-                Text(_money(double.parse(report['totalPrice'])).output.symbolOnLeft.toString()),
+                Text(Constants.money(double.parse(report['totalPrice'])).output.symbolOnLeft.toString()),
               ),
               DataCell(
                 Text(report['paymentMode'].toString()),
