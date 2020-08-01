@@ -3,7 +3,6 @@ import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:ayolee_stores/bloc/monthly_report_charts.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
 
 /// A StatefulWidget class that displays a Month's Reports details
@@ -33,6 +32,12 @@ class _MonthReportState extends State<MonthReport> {
   /// Variable to hold the total totalTransfer of [_Widget.month] report
   double _totalTransfer = 0.0;
 
+  /// A variable holding the total profit made
+  double _totalProfitMade = 0.0;
+
+  /// A variable holding the length my daily report data
+  int _dataLength;
+
   /// A TextEditingController to control the searchText on the AppBar
   final TextEditingController _filter = new TextEditingController();
 
@@ -50,6 +55,18 @@ class _MonthReportState extends State<MonthReport> {
 
   /// Variable to hold a Widget of Text for the appBarText
   Widget _appBarTitle = new Text('Sales Report');
+
+  /// Variable to hold the type of the user logged in
+  String userType;
+
+  /// Setting the current user's type logged in to [userType]
+  void _getCurrentUser() async {
+    await futureValue.getCurrentUser().then((user) {
+      userType = user.type;
+    }).catchError((Object error) {
+      print(error.toString());
+    });
+  }
 
   /// Checking if the filter controller is empty to reset the
   /// _searchText on the appBar to "" and the filteredSales to Sales
@@ -105,8 +122,13 @@ class _MonthReportState extends State<MonthReport> {
     List<Map> tempList = new List();
     Future<List<Reports>> dailySales = futureValue.getMonthReports(widget.month);
     await dailySales.then((value) {
+      _dataLength = value.length;
       Map details = {};
       for (int i = 0; i < value.length; i++){
+        if(value[i].paymentMode != 'Iya Bimbo'){
+          _totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
+        }
         details = {'qty':'${value[i].quantity}', 'productName': '${value[i].productName}','unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};        if(value[i].paymentMode == 'Cash'){
           _availableCash += double.parse(value[i].totalPrice);
         }
@@ -195,13 +217,20 @@ class _MonthReportState extends State<MonthReport> {
       _resetTotalDetails();
       return _dataTable(_filteredSales);
     }
-    else{
-      Container(
+    else if(_dataLength == 0){
+      return Container(
         alignment: AlignmentDirectional.center,
         child: Center(child: Text("No sales yet")),
       );
     }
-    return Container();
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+        ),
+      ),
+    );
   }
 
   /// Converting [dateTime] in string format to return a formatted time
@@ -215,11 +244,32 @@ class _MonthReportState extends State<MonthReport> {
   /// the values of each DataColumn in the [salesList] as DataRows and
   /// a container to show the [__totalSalesPrice]
   SingleChildScrollView _dataTable(List<Map> salesList){
+    var dts = DTS(salesList: _filteredSales.reversed.toList());
+    int _rowPerPage = 50;
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+      scrollDirection: Axis.vertical,
       child: Column(
         children: <Widget>[
-          DataTable(
+          PaginatedDataTable(
+              header: Text('Data Table'),
+              columns: [
+                DataColumn(label: Text('QTY', style: TextStyle(fontWeight: FontWeight.bold),)),
+                DataColumn(label: Text('PRODUCT', style: TextStyle(fontWeight: FontWeight.bold),)),
+                DataColumn(label: Text('UNIT', style: TextStyle(fontWeight: FontWeight.bold),)),
+                DataColumn(label: Text('TOTAL', style: TextStyle(fontWeight: FontWeight.bold),)),
+                DataColumn(label: Text('PAYMENT', style: TextStyle(fontWeight: FontWeight.bold),)),
+                DataColumn(label: Text('TIME', style: TextStyle(fontWeight: FontWeight.bold),)),
+              ],
+              source: dts,
+            onRowsPerPageChanged: (r){
+              setState(() {
+                _rowPerPage = r;
+              });
+            },
+            columnSpacing: 5.0,
+            rowsPerPage: _rowPerPage,
+          ),
+          /*DataTable(
             columnSpacing: 20.0,
             columns: [
               DataColumn(label: Text('QTY', style: TextStyle(fontWeight: FontWeight.bold),)),
@@ -251,7 +301,7 @@ class _MonthReportState extends State<MonthReport> {
                   ),
                 ]
             )).toList(),
-          ),
+          ),*/
           Container(
             margin: EdgeInsets.only(left: 5.0, right: 40.0),
             padding: EdgeInsets.only(right: 20.0, top: 20.0),
@@ -268,7 +318,26 @@ class _MonthReportState extends State<MonthReport> {
                 ),
               ],
             ),
-          )
+          ),
+          userType == 'Admin' ? Center(
+            child: Container(
+              margin: EdgeInsets.only(left: 5.0, right: 40.0),
+              padding: EdgeInsets.only(right: 20.0, top: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    'PROFIT MADE = ',
+                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
+                  ),
+                  Text(
+                    '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
+                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
+                  ),
+                ],
+              ),
+            ),
+          ) : Container
         ],
       ),
     );
@@ -277,8 +346,9 @@ class _MonthReportState extends State<MonthReport> {
   /// Calls [_getSales()] before the class builds its widgets
   @override
   void initState() {
-    _getSales();
     super.initState();
+    _getSales();
+    _getCurrentUser();
   }
 
   /// Building a Scaffold Widget to display [_buildList()]
@@ -292,19 +362,58 @@ class _MonthReportState extends State<MonthReport> {
           scrollDirection: Axis.vertical,
           padding: EdgeInsets.only(left: 10.0, right: 10.0),
           reverse: true,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              _buildList(),
-              SizedBox(height: 60.0,),
-              MonthlyReportCharts(month: widget.month,),
-            ],
-          ),
+          child:_buildList(),
         ),
       ),
     );
   }
+
+}
+
+
+class DTS extends DataTableSource{
+
+  DTS({@required this.salesList});
+
+  final List<Map> salesList;
+
+  /// Converting [dateTime] in string format to return a formatted time
+  /// of hrs, minutes and am/pm
+  String _getFormattedTime(String dateTime) {
+    return DateFormat('EEE, MMM d, h:mm a').format(DateTime.parse(dateTime)).toString();
+  }
+
+  @override
+  DataRow getRow(int index) {
+    return DataRow.byIndex(index: index, cells: [
+      DataCell(
+        Text(salesList[index]['qty'].toString()),
+      ),
+      DataCell(
+        Text(salesList[index]['productName'].toString()),
+      ),
+      DataCell(
+        Text(Constants.money(double.parse(salesList[index]['unitPrice'])).output.symbolOnLeft),
+      ),
+      DataCell(
+        Text(Constants.money(double.parse(salesList[index]['totalPrice'])).output.symbolOnLeft),
+      ),
+      DataCell(
+        Text(salesList[index]['paymentMode'].toString()),
+      ),
+      DataCell(
+        Text(_getFormattedTime(salesList[index]['time'])),
+      ),
+    ]);
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => salesList.length;
+
+  @override
+  int get selectedRowCount => 0;
 
 }

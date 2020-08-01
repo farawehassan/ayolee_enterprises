@@ -549,10 +549,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         duration: Duration(milliseconds: 750),
                         curve: Curves.fastOutSlowIn,
                         child: Image(
-                          image: AssetImage('Assets/images/ayole-logo.png'),
+                          image: AssetImage('Assets/images/ayolee_logo.png'),
                         ),
                       ),
-                      applicationVersion: '1.0.0',
+                      applicationVersion: '1.0.3',
                       applicationLegalese: 'Developed by Farawe Taiwo Hassan',
                     );
                   },
