@@ -37,10 +37,12 @@ class MyApp extends StatelessWidget {
     return DynamicTheme(
         defaultBrightness: Brightness.light,
         data: (brightness) => ThemeData(
-              brightness: brightness,
-              cursorColor: Colors.blue,
-              primarySwatch: Colors.blue,
-            ),
+          brightness: brightness,
+          cursorColor: Colors.blue,
+          primarySwatch: Colors.blue,
+          floatingActionButtonTheme: FloatingActionButtonThemeData()
+              .copyWith(foregroundColor: Colors.white),
+          ),
         themedWidgetBuilder: (context, theme) {
           return MaterialApp(
             title: 'Ayo-Lee Stores',

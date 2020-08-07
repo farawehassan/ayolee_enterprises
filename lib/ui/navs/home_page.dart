@@ -1,7 +1,7 @@
 import 'package:ayolee_stores/bloc/product_suggestions.dart';
 import 'package:ayolee_stores/database/user_db_helper.dart';
 import 'package:ayolee_stores/model/productDB.dart';
-import 'file:///C:/FlutterWorkspace/ayolee_enterprises/lib/ui/navs/productsSold/products_sold.dart';
+import 'package:ayolee_stores/ui/navs/productsSold/products_sold.dart';
 import 'package:ayolee_stores/ui/receipt/receipt_page.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:ayolee_stores/utils/round_icon.dart';

@@ -571,19 +571,19 @@ class _ProductsState extends State<Products> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      'Initial quantity: $iq',
+                      'Initial Qty: $iq',
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                       ),
                     ),
                     Text(
-                      'Current quantity: $cq',
+                      'Current Qty: $cq',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
-                      'Quantity Sold: ${iq - cq}',
+                      'Qty Sold: ${iq - cq}',
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                       ),

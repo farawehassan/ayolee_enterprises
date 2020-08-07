@@ -106,7 +106,14 @@ class _RetailSalesState extends State<RetailSales> {
         child: Center(child: Text("No sales yet")),
       );
     }
-    return Container();
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+        ),
+      ),
+    );
   }
 
   /// Creating a [DataTable] widget from a List of Map [salesList]
@@ -176,7 +183,7 @@ class _RetailSalesState extends State<RetailSales> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  'TOTAL PROFITS = ',
+                  'ESTIMATED PROFITS = ',
                   style: TextStyle(
                       fontWeight: FontWeight.w600
                   ),
