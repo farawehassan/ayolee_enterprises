@@ -276,25 +276,23 @@ class _MonthReportState extends State<MonthReport> {
               ],
             ),
           ),
-          userType == 'Admin' ? Center(
-            child: Container(
-              margin: EdgeInsets.only(left: 5.0, right: 40.0),
-              padding: EdgeInsets.only(right: 20.0, top: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Text(
-                    'PROFIT MADE = ',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
-                  ),
-                  Text(
-                    '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
-                  ),
-                ],
-              ),
+          userType == 'Admin' ? Container(
+            margin: EdgeInsets.only(left: 5.0, right: 40.0),
+            padding: EdgeInsets.only(right: 20.0, top: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  'PROFIT MADE = ',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
+                ),
+                Text(
+                  '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
+                ),
+              ],
             ),
-          ) : Container,
+          ) : Container(),
           PaginatedDataTable(
               header: Text('Reports Table'),
               columns: [
