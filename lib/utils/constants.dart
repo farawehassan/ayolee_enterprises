@@ -12,9 +12,9 @@ class Constants{
 
   static const String ShowRetail = 'Retail Sales';
 
-  static const String ShowAll = 'Display all products';
-  static const String ShowAvailable = 'Display available products';
-  static const String ShowFinished = 'Display finished products';
+  static const String ShowAll = 'All products';
+  static const String ShowAvailable = 'Available products';
+  static const String ShowFinished = 'Products out of Stock';
 
   /// List of string to hold the menu options in [Products]
   static const List<String> showProductChoices = <String>[

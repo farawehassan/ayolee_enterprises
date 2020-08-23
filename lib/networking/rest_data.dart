@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:ayolee_stores/bloc/future_values.dart';
 import 'package:ayolee_stores/model/productDB.dart';
 import 'package:ayolee_stores/model/create_user.dart';
+import 'package:ayolee_stores/model/product_history.dart';
+import 'package:ayolee_stores/model/product_history_details.dart';
 import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/model/store_details.dart';
 import 'package:ayolee_stores/model/user.dart';
@@ -29,8 +31,16 @@ class RestDataSource {
   static final FETCH_PRODUCT_URL = BASE_URL + "/product/fetchProduct";
 
   static final ADD_REPORT_URL = BASE_URL + "/report/addNewReport";
+  static final UPDATE_REPORT_NAME_URL = BASE_URL + "/report/updateReportName";
   static final FETCH_REPORT_URL = BASE_URL + "/report/fetchAllReports";
   static final DELETE_REPORT_URL = BASE_URL + "/report/deleteReport";
+
+  static final ADD_PRODUCT_HISTORY_URL = BASE_URL + "/history/addProductHistory";
+  static final ADD_HISTORY_TO_PRODUCT_URL = BASE_URL + "/history/addNewProductToHistory";
+  static final FETCH_PRODUCT_HISTORY_URL = BASE_URL + "/history/fetchProductHistory";
+  static final FIND_PRODUCT_HISTORY_URL = BASE_URL + "/history/findProductHistory";
+  static final UPDATE_PRODUCT_HISTORY_NAME_URL = BASE_URL + "/history/updateProductName";
+  static final DELETE_PRODUCT_HISTORY_URL = BASE_URL + "/history/deleteHistory";
 
   static final FETCH_STORE_URL = BASE_URL + "/fetchStoreDetails";
 
@@ -248,6 +258,37 @@ class RestDataSource {
     });
   }
 
+  /// A function that updates report product name to the server PUT.
+  /// with [Reports] model
+  Future<dynamic> updateReportName(String productName, String updatedName) async{
+    Map<String, String> header;
+    Future<User> user = futureValue.getCurrentUser();
+    await user.then((value) {
+      if(value.token == null){
+        throw ("No user logged in");
+      }
+      header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
+    });
+
+    return _netUtil.put(UPDATE_REPORT_NAME_URL, headers: header, body: {
+      "productName": productName,
+      "updatedName": updatedName,
+    }).then((dynamic res) {
+      print(res.toString());
+      if(res["error"] == true){
+        throw (res["message"]);
+      }else{
+        return res["message"];
+      }
+    }).catchError((e){
+      print(e);
+      if(e is SocketException){
+        throw ("Unable to connect to the server, check your internet connection");
+      }
+      throw ("Error in updating $productName, try again");
+    });
+  }
+
   /// A function that fetches all reports from the server
   /// into a List of [Reports] GET.
   Future<List<Reports>> fetchAllReports() async {
@@ -327,6 +368,187 @@ class RestDataSource {
         throw ("Unable to connect to the server, check your internet connection");
       }
       throw ("Error in fetching store details, try again");
+    });
+  }
+
+  /// A function that adds new product history to the database POST
+  /// with [ProductHistoryDetails] model
+  Future<dynamic> addProductHistory(String productName, ProductHistoryDetails productHistoryDetails) async {
+    Map<String, String> header;
+    Future<User> user = futureValue.getCurrentUser();
+    await user.then((value) {
+      if(value.token == null){
+        throw ("No user logged in");
+      }
+      header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
+    });
+    return _netUtil.post(ADD_PRODUCT_HISTORY_URL, headers: header, body: {
+      "productName": productName,
+      "initialQty": productHistoryDetails.initialQty,
+      "qtyReceived": productHistoryDetails.qtyReceived,
+      "currentQty": productHistoryDetails.currentQty,
+      "collectedAt": productHistoryDetails.collectedAt,
+      "createdAt": DateTime.now().toString(),
+    }).then((dynamic res) {
+      print(res.toString());
+      if(res["error"] == true){
+        throw (res["message"]);
+      }else{
+        return res["message"];
+      }
+    }).catchError((e){
+      print(e);
+      if(e is SocketException){
+        throw ("Unable to connect to the server, check your internet connection");
+      }
+      throw ("Error in adding product history, try again");
+    });
+  }
+
+  /// A function that adds new reports to a customer reports details POST.
+  /// with [ProductHistoryDetails]
+  Future<dynamic> addHistoryToProduct(String id, ProductHistoryDetails productHistoryDetails) async {
+    Map<String, String> header;
+    Future<User> user = futureValue.getCurrentUser();
+    await user.then((value) {
+      if(value.token == null){
+        throw ("No user logged in");
+      }
+      header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
+    });
+    return _netUtil.post(ADD_HISTORY_TO_PRODUCT_URL, headers: header, body: {
+      "id": id,
+      "initialQty": productHistoryDetails.initialQty,
+      "qtyReceived": productHistoryDetails.qtyReceived,
+      "currentQty": productHistoryDetails.currentQty,
+      "collectedAt": productHistoryDetails.collectedAt,
+    }).then((dynamic res) {
+      if(res["error"] == true){
+        throw (res["message"]);
+      }else{
+        print(res["message"]);
+        return res["message"];
+      }
+    }).catchError((e){
+      print(e);
+      if(e is SocketException){
+        throw ("Unable to connect to the server, check your internet connection");
+      }
+      throw ("Error in adding history to product history, try again");
+    });
+  }
+
+  /// A function that fetches a particular product history from the database
+  /// into a model of [ProductHistory] GET.
+  Future<ProductHistory> findProductHistory(String id) async {
+    Map<String, String> header;
+    Future<User> user = futureValue.getCurrentUser();
+    await user.then((value) {
+      if(value.token == null){
+        throw ("No user logged in");
+      }
+      header = {"Authorization": "Bearer ${value.token}"};
+    });
+    final FETCH_URL = FIND_PRODUCT_HISTORY_URL + "/$id";
+    return _netUtil.get(FETCH_URL, headers: header).then((dynamic res) {
+      if(res["error"] == true){
+        throw (res["message"]);
+      }else{
+        return ProductHistory.fromJson(res["data"]);
+      }
+    }).catchError((e){
+      print(e);
+      if(e is SocketException){
+        throw ("Unable to connect to the server, check your internet connection");
+      }
+      throw ("Error in fetching product history, try again");
+    });
+  }
+
+  /// A function that fetches all product history from the database
+  /// into a List of [ProductHistory] GET.
+  Future<List<ProductHistory>> fetchAllProductHistory() async {
+    List<ProductHistory> history;
+    Map<String, String> header;
+    Future<User> user = futureValue.getCurrentUser();
+    await user.then((value) {
+      if(value.token == null){
+        throw ("No user logged in");
+      }
+      header = {"Authorization": "Bearer ${value.token}"};
+    });
+    return _netUtil.get(FETCH_PRODUCT_HISTORY_URL, headers: header).then((dynamic res) {
+      if(res["error"] == true){
+        throw (res["message"]);
+      }else{
+        var rest = res["data"] as List;
+        history = rest.map<ProductHistory>((json) => ProductHistory.fromJson(json)).toList();
+        return history;
+      }
+    }).catchError((e){
+      print(e);
+      if(e is SocketException){
+        throw ("Unable to connect to the server, check your internet connection");
+      }
+      print(e);
+      throw ("Error in fetching product history, try again");
+    });
+  }
+
+  /// A function that updates a product history name from the database using the [id]
+  /// and the [name] to be updated to  PUT
+  Future<dynamic> updateProductHistoryName(String id, String name) async {
+    Map<String, String> header;
+    Future<User> user = futureValue.getCurrentUser();
+    await user.then((value) {
+      if(value.token == null){
+        throw ("No user logged in");
+      }
+      header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
+    });
+    return _netUtil.put(UPDATE_PRODUCT_HISTORY_NAME_URL, headers: header, body: {
+      "id": id,
+      "name": name,
+    }).then((dynamic res) {
+      if(res["error"] == true){
+        throw (res["message"]);
+      }else{
+        print(res["message"]);
+        return res["message"];
+      }
+    }).catchError((e){
+      print(e);
+      if(e is SocketException){
+        throw ("Unable to connect to the server, check your internet connection");
+      }
+      throw ("Error in deleting product history, try again");
+    });
+  }
+
+  /// A function that deletes a product history from the database using the [id]
+  Future<dynamic> deleteProductHistory(String id) async {
+    Map<String, String> header;
+    Future<User> user = futureValue.getCurrentUser();
+    await user.then((value) {
+      if(value.token == null){
+        throw ("No user logged in");
+      }
+      header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
+    });
+    final DELETE_URL = DELETE_PRODUCT_HISTORY_URL + "/$id";
+    return _netUtil.delete(DELETE_URL, headers: header).then((dynamic res) {
+      if(res["error"] == true){
+        throw (res["message"]);
+      }else{
+        print(res["message"]);
+        return res["message"];
+      }
+    }).catchError((e){
+      print(e);
+      if(e is SocketException){
+        throw ("Unable to connect to the server, check your internet connection");
+      }
+      throw ("Error in deleting product history, try again");
     });
   }
 

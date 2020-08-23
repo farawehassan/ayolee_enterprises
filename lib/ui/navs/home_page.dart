@@ -113,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _getCurrentUser();
     _getThemeBoolValuesSF();
+    //addProductToHistory();
   }
 
   /// Function to add a new row to record sales details:
@@ -418,7 +419,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   ListTile(
                     leading: Icon(Icons.book),
-                    title: Text('Available Drinks'),
+                    title: Text('Products'),
                     onTap: (){
                       Navigator.pushNamed(context, Products.id);
                     },
