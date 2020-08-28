@@ -1,4 +1,5 @@
 import 'package:ayolee_stores/bloc/future_values.dart';
+import 'package:ayolee_stores/ui/navs/monthly/paginated_table.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -88,19 +89,26 @@ class _MonthReportState extends State<MonthReport> {
     });
   }
 
+  /// Function to re calculate [_totalSalesPrice] and [_totalProfitMade] of the
+  /// [_filteredSales]
   void _resetTotalDetails(){
     if (!mounted) return;
     setState(() {
       _totalSalesPrice = 0;
       _availableCash = 0;
       _totalTransfer = 0;
+      _totalProfitMade = 0;
 
       for (int i = 0; i < _filteredSales.length; i++){
         if(_filteredSales[i]['paymentMode'] == 'Cash'){
           _availableCash += double.parse(_filteredSales[i]['totalPrice']);
+          _totalProfitMade += double.parse(_filteredSales[i]['qty']) *
+              (double.parse(_filteredSales[i]['unitPrice']) - double.parse(_filteredSales[i]['costPrice']));
         }
         else if(_filteredSales[i]['paymentMode'] == 'Transfer'){
           _totalTransfer += double.parse(_filteredSales[i]['totalPrice']);
+          _totalProfitMade += double.parse(_filteredSales[i]['qty']) *
+              (double.parse(_filteredSales[i]['unitPrice']) - double.parse(_filteredSales[i]['costPrice']));
         }
       }
       _totalSalesPrice = _availableCash + _totalTransfer;
@@ -129,7 +137,8 @@ class _MonthReportState extends State<MonthReport> {
           _totalProfitMade += double.parse(value[i].quantity) *
               (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
         }
-        details = {'qty':'${value[i].quantity}', 'productName': '${value[i].productName}','unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};        if(value[i].paymentMode == 'Cash'){
+        details = {'qty':'${value[i].quantity}', 'productName': '${value[i].productName}', 'costPrice':'${value[i].costPrice}', 'unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};
+        if(value[i].paymentMode == 'Cash'){
           _availableCash += double.parse(value[i].totalPrice);
         }
         else if(value[i].paymentMode == 'Transfer'){
@@ -194,7 +203,7 @@ class _MonthReportState extends State<MonthReport> {
             child: Text(
               formattedDate,
               style: TextStyle(
-                fontWeight: FontWeight.bold
+                  fontWeight: FontWeight.bold
               ),
             ),
           ),
@@ -250,58 +259,6 @@ class _MonthReportState extends State<MonthReport> {
       scrollDirection: Axis.vertical,
       child: Column(
         children: <Widget>[
-          PaginatedDataTable(
-              header: Text('Data Table'),
-              columns: [
-                DataColumn(label: Text('QTY', style: TextStyle(fontWeight: FontWeight.bold),)),
-                DataColumn(label: Text('PRODUCT', style: TextStyle(fontWeight: FontWeight.bold),)),
-                DataColumn(label: Text('UNIT', style: TextStyle(fontWeight: FontWeight.bold),)),
-                DataColumn(label: Text('TOTAL', style: TextStyle(fontWeight: FontWeight.bold),)),
-                DataColumn(label: Text('PAYMENT', style: TextStyle(fontWeight: FontWeight.bold),)),
-                DataColumn(label: Text('TIME', style: TextStyle(fontWeight: FontWeight.bold),)),
-              ],
-              source: dts,
-            onRowsPerPageChanged: (r){
-              setState(() {
-                _rowPerPage = r;
-              });
-            },
-            columnSpacing: 5.0,
-            rowsPerPage: _rowPerPage,
-          ),
-          /*DataTable(
-            columnSpacing: 20.
-            columns: [
-              DataColumn(label: Text('QTY', style: TextStyle(fontWeight: FontWeight.bold),)),
-              DataColumn(label: Text('PRODUCT', style: TextStyle(fontWeight: FontWeight.bold),)),
-              DataColumn(label: Text('UNIT', style: TextStyle(fontWeight: FontWeight.bold),)),
-              DataColumn(label: Text('TOTAL', style: TextStyle(fontWeight: FontWeight.bold),)),
-              DataColumn(label: Text('PAYMENT', style: TextStyle(fontWeight: FontWeight.bold),)),
-              DataColumn(label: Text('TIME', style: TextStyle(fontWeight: FontWeight.bold),)),
-            ],
-            rows: salesList.map((report) => DataRow(
-                cells: [
-                  DataCell(
-                    Text(report['qty'].toString()),
-                  ),
-                  DataCell(
-                    Text(report['productName'].toString()),
-                  ),
-                  DataCell(
-                    Text(Constants.money(double.parse(report['unitPrice'])).output.symbolOnLeft),
-                  ),
-                  DataCell(
-                    Text(Constants.money(double.parse(report['totalPrice'])).output.symbolOnLeft),
-                  ),
-                  DataCell(
-                    Text(report['paymentMode'].toString()),
-                  ),
-                  DataCell(
-                    Text(_getFormattedTime(report['time'])),
-                  ),
-                ]
-            )).toList(),
-          ),*/
           Container(
             margin: EdgeInsets.only(left: 5.0, right: 40.0),
             padding: EdgeInsets.only(right: 20.0, top: 20.0),
@@ -319,25 +276,42 @@ class _MonthReportState extends State<MonthReport> {
               ],
             ),
           ),
-          userType == 'Admin' ? Center(
-            child: Container(
-              margin: EdgeInsets.only(left: 5.0, right: 40.0),
-              padding: EdgeInsets.only(right: 20.0, top: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Text(
-                    'PROFIT MADE = ',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
-                  ),
-                  Text(
-                    '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
-                  ),
-                ],
-              ),
+          userType == 'Admin' ? Container(
+            margin: EdgeInsets.only(left: 5.0, right: 40.0),
+            padding: EdgeInsets.only(right: 20.0, top: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  'PROFIT MADE = ',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
+                ),
+                Text(
+                  '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
+                ),
+              ],
             ),
-          ) : Container
+          ) : Container(),
+          PaginatedDataTable(
+            header: Text('Reports Table'),
+            columns: [
+              DataColumn(label: Text('QTY', style: TextStyle(fontWeight: FontWeight.bold),)),
+              DataColumn(label: Text('PRODUCT', style: TextStyle(fontWeight: FontWeight.bold),)),
+              DataColumn(label: Text('UNIT', style: TextStyle(fontWeight: FontWeight.bold),)),
+              DataColumn(label: Text('TOTAL', style: TextStyle(fontWeight: FontWeight.bold),)),
+              DataColumn(label: Text('PAYMENT', style: TextStyle(fontWeight: FontWeight.bold),)),
+              DataColumn(label: Text('TIME', style: TextStyle(fontWeight: FontWeight.bold),)),
+            ],
+            source: dts,
+            onRowsPerPageChanged: (r){
+              setState(() {
+                _rowPerPage = r;
+              });
+            },
+            columnSpacing: 5.0,
+            rowsPerPage: _rowPerPage,
+          ),
         ],
       ),
     );
@@ -361,59 +335,11 @@ class _MonthReportState extends State<MonthReport> {
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           padding: EdgeInsets.only(left: 10.0, right: 10.0),
-          reverse: true,
+          //reverse: true,
           child:_buildList(),
         ),
       ),
     );
   }
-
-}
-
-
-class DTS extends DataTableSource{
-
-  DTS({@required this.salesList});
-
-  final List<Map> salesList;
-
-  /// Converting [dateTime] in string format to return a formatted time
-  /// of hrs, minutes and am/pm
-  String _getFormattedTime(String dateTime) {
-    return DateFormat('EEE, MMM d, h:mm a').format(DateTime.parse(dateTime)).toString();
-  }
-
-  @override
-  DataRow getRow(int index) {
-    return DataRow.byIndex(index: index, cells: [
-      DataCell(
-        Text(salesList[index]['qty'].toString()),
-      ),
-      DataCell(
-        Text(salesList[index]['productName'].toString()),
-      ),
-      DataCell(
-        Text(Constants.money(double.parse(salesList[index]['unitPrice'])).output.symbolOnLeft),
-      ),
-      DataCell(
-        Text(Constants.money(double.parse(salesList[index]['totalPrice'])).output.symbolOnLeft),
-      ),
-      DataCell(
-        Text(salesList[index]['paymentMode'].toString()),
-      ),
-      DataCell(
-        Text(_getFormattedTime(salesList[index]['time'])),
-      ),
-    ]);
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => salesList.length;
-
-  @override
-  int get selectedRowCount => 0;
 
 }
