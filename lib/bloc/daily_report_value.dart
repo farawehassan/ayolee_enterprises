@@ -64,6 +64,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkIfToday(value[i].createdAt)){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -89,6 +90,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.january))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -114,6 +116,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.february))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -139,6 +142,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.march))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -164,6 +168,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.april))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -189,6 +194,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.may))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -214,6 +220,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.june))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -239,6 +246,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.july))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -264,6 +272,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.august))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -289,6 +298,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.september))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -314,6 +324,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.october))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -339,6 +350,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.november))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;
@@ -364,6 +376,7 @@ class DailyReportValue{
       for(int i = 0; i < value.length; i++){
         if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.december))){
           Reports reportsData = new Reports();
+          reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
           reportsData.costPrice = value[i].costPrice;

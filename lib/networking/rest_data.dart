@@ -328,9 +328,10 @@ class RestDataSource {
       }
       header = {"Authorization": "Bearer ${value.token}", "Accept": "application/json"};
     });
-    final DELETE_URL = DELETE_REPORT_URL + "$id";
+    final DELETE_URL = DELETE_REPORT_URL + "/$id";
     return _netUtil.delete(DELETE_URL, headers: header).then((dynamic res) {
       if(res["error"] == true){
+        print(res['message']);
         throw (res["message"]);
       }else{
         print(res["message"]);

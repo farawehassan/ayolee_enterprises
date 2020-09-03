@@ -45,6 +45,9 @@ class _MonthReportState extends State<MonthReport> {
   /// Variable of String to hold the searchText on the AppBar
   String _searchText = "";
 
+  /// Variable to hold true or false If the DataTable should be editable
+  bool _editable = false;
+
   /// Variable of List<Map> to hold the details of all the sales
   List<Map> _sales = new List();
 
@@ -137,7 +140,8 @@ class _MonthReportState extends State<MonthReport> {
           _totalProfitMade += double.parse(value[i].quantity) *
               (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
         }
-        details = {'qty':'${value[i].quantity}', 'productName': '${value[i].productName}', 'costPrice':'${value[i].costPrice}', 'unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};
+        print(value[i].id);
+        details = {'id':'${value[i].id}','qty':'${value[i].quantity}', 'productName': '${value[i].productName}', 'costPrice':'${value[i].costPrice}', 'unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};
         if(value[i].paymentMode == 'Cash'){
           _availableCash += double.parse(value[i].totalPrice);
         }
@@ -253,7 +257,11 @@ class _MonthReportState extends State<MonthReport> {
   /// the values of each DataColumn in the [salesList] as DataRows and
   /// a container to show the [__totalSalesPrice]
   SingleChildScrollView _dataTable(List<Map> salesList){
-    var dts = DTS(salesList: _filteredSales.reversed.toList());
+    var dts = DTS(
+        salesList: _filteredSales.reversed.toList(),
+        context: context,
+        editable: _editable
+    );
     int _rowPerPage = 50;
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -294,7 +302,28 @@ class _MonthReportState extends State<MonthReport> {
             ),
           ) : Container(),
           PaginatedDataTable(
-            header: Text('Reports Table'),
+            header: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text('Reports Table'),
+                IconButton(
+                  onPressed: () {
+                    if(!mounted)return;
+                    setState(() {
+                      if(_editable){
+                        _editable = false;
+                      }else{
+                        _editable = true;
+                      }
+                    });
+                  },
+                  icon: Icon(
+                    _editable ? Icons.close : Icons.create,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
             columns: [
               DataColumn(label: Text('QTY', style: TextStyle(fontWeight: FontWeight.bold),)),
               DataColumn(label: Text('PRODUCT', style: TextStyle(fontWeight: FontWeight.bold),)),
