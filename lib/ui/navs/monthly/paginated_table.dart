@@ -83,7 +83,6 @@ class DTS extends DataTableSource{
 
   /// Function to display dialog of sales details [index]
   void _displayDialog(Map index){
-    print(index);
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -331,7 +330,6 @@ class DTS extends DataTableSource{
   /// Function that deletes a report by calling
   /// [deleteReport] in the [RestDataSource] class
   void _deleteReport(String id){
-    print(id);
     var api = new RestDataSource();
     try {
       api.deleteReport(id).then((value) {

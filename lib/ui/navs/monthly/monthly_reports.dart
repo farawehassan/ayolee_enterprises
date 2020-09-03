@@ -140,7 +140,6 @@ class _MonthReportState extends State<MonthReport> {
           _totalProfitMade += double.parse(value[i].quantity) *
               (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
         }
-        print(value[i].id);
         details = {'id':'${value[i].id}','qty':'${value[i].quantity}', 'productName': '${value[i].productName}', 'costPrice':'${value[i].costPrice}', 'unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};
         if(value[i].paymentMode == 'Cash'){
           _availableCash += double.parse(value[i].totalPrice);
