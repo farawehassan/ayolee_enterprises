@@ -50,10 +50,10 @@ class DailyReportList extends StatelessWidget {
                 Text(report['productName'].toString()),
               ),
               DataCell(
-                Text(Constants.money(double.parse(report['unitPrice'])).output.symbolOnLeft.toString()),
+                Text(Constants.money(double.parse(report['unitPrice']))),
               ),
               DataCell(
-                Text(Constants.money(double.parse(report['totalPrice'])).output.symbolOnLeft.toString()),
+                Text(Constants.money(double.parse(report['totalPrice']))),
               ),
               DataCell(
                 Text(report['paymentMode'].toString()),

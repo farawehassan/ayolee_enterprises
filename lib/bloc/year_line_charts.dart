@@ -1,4 +1,5 @@
 import 'package:ayolee_stores/model/linear_sales.dart';
+import 'package:ayolee_stores/model/reportsDB.dart';
 import 'package:ayolee_stores/model/store_details.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';
@@ -26,6 +27,12 @@ class _PointsLineChartState extends State<PointsLineChart> {
   /// A variable holding my total sales value so far
   double totalSales = 0;
 
+  /// A string variable holding the start date of taking reports
+  String _startDate = '';
+
+  /// A string variable holding the last date of taking reports
+  String _endDate = '';
+
   /// A function to set the value for [totalSales]
   /// from the [StoreDetails] model fetching from the database
   void _getStoreValues() async {
@@ -44,16 +51,20 @@ class _PointsLineChartState extends State<PointsLineChart> {
   /// It adds every total sales gotten to [details] and sum them to [totalSales]
   void getReports() async {
     _getStoreValues();
-    Future<List<LinearSales>> report = futureValue.getYearReports();
+    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
     await report.then((value) {
+      List<LinearSales> sales = futureValue.getYearReports(value);
       if (!mounted) return;
       setState(() {
-        for(int i = 0; i < value.length; i++){
-          details.add(value[i].sales);
+        _startDate = sales.first.month;
+        _endDate = sales.last.month;
+        for(int i = 0; i < sales.length; i++){
+          details.add(sales[i].sales);
         }
       });
-    }).catchError((onError){
-      Constants.showMessage(onError);
+    }).catchError((error){
+      print(error);
+      Constants.showMessage(error.toString());
     });
   }
 
@@ -76,7 +87,7 @@ class _PointsLineChartState extends State<PointsLineChart> {
     }
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[300]),
         ),
@@ -97,19 +108,48 @@ class _PointsLineChartState extends State<PointsLineChart> {
       fit: FlexFit.tight,
       child: Column(
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(1.0),
-            child: Text(
-              Constants.money(totalSales).output.symbolOnLeft,
-              style: TextStyle(
-                fontSize: 20.0,
-                color: Colors.white70,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(1.0),
+                child: Text(
+                  _startDate,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.white70,
+                  ),
+                ),
               ),
-            ),
+              Container(
+                padding: EdgeInsets.all(1.0),
+                child: Text(
+                  Constants.money(totalSales),
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(1.0),
+                child: Text(
+                  _endDate,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: _buildLineChart(),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: _buildLineChart(),
+            ),
           ),
         ],
       ),

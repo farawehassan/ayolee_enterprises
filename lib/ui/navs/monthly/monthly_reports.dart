@@ -9,11 +9,19 @@ import 'package:ayolee_stores/model/reportsDB.dart';
 /// A StatefulWidget class that displays a Month's Reports details
 class MonthReport extends StatefulWidget {
 
-  MonthReport({@required this.month});
+  MonthReport({
+    @required this.month,
+    @required this.year,
+    @required this.userType
+  });
 
   static const String id = 'month_reports';
 
   final String month;
+
+  final int year;
+
+  final String userType;
 
   @override
   _MonthReportState createState() => _MonthReportState();
@@ -40,7 +48,7 @@ class _MonthReportState extends State<MonthReport> {
   int _dataLength;
 
   /// A TextEditingController to control the searchText on the AppBar
-  final TextEditingController _filter = new TextEditingController();
+  final TextEditingController _filter = TextEditingController();
 
   /// Variable of String to hold the searchText on the AppBar
   String _searchText = "";
@@ -49,28 +57,16 @@ class _MonthReportState extends State<MonthReport> {
   bool _editable = false;
 
   /// Variable of List<Map> to hold the details of all the sales
-  List<Map> _sales = new List();
+  List<Map> _sales = List();
 
   /// Variable of List<Map> to hold the details of all filtered sales
-  List<Map> _filteredSales= new List();
+  List<Map> _filteredSales = List();
 
   /// Variable to hold an Icon Widget of Search
-  Icon _searchIcon = new Icon(Icons.search);
+  Icon _searchIcon = Icon(Icons.search);
 
   /// Variable to hold a Widget of Text for the appBarText
-  Widget _appBarTitle = new Text('Sales Report');
-
-  /// Variable to hold the type of the user logged in
-  String userType;
-
-  /// Setting the current user's type logged in to [userType]
-  void _getCurrentUser() async {
-    await futureValue.getCurrentUser().then((user) {
-      userType = user.type;
-    }).catchError((Object error) {
-      print(error.toString());
-    });
-  }
+  Widget _appBarTitle = Text('Sales Report');
 
   /// Checking if the filter controller is empty to reset the
   /// _searchText on the appBar to "" and the filteredSales to Sales
@@ -129,32 +125,36 @@ class _MonthReportState extends State<MonthReport> {
   /// If the payment's mode of a report is transfer
   ///
   /// sets [_totalSalesPrice] to [_availableCash] + [_totalTransfer]
-  void _getSales() async {
-    List<Map> tempList = new List();
-    Future<List<Reports>> dailySales = futureValue.getMonthReports(widget.month);
-    await dailySales.then((value) {
-      _dataLength = value.length;
-      Map details = {};
-      for (int i = 0; i < value.length; i++){
-        if(value[i].paymentMode != 'Iya Bimbo'){
-          _totalProfitMade += double.parse(value[i].quantity) *
-              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
+  Future<void> _getSales() async {
+    List<Map> tempList = List();
+    Future<List<Reports>> reports = futureValue.getAllReportsFromDB();
+    await reports.then((allReports) {
+      List<Reports> value = futureValue.getMonthReports(widget.month, allReports, year: widget.year);
+      if (!mounted) return;
+      setState(() {
+        _dataLength = value.length;
+        Map details = {};
+        for (int i = 0; i < value.length; i++){
+          if(value[i].paymentMode != 'Iya Bimbo'){
+            _totalProfitMade += double.parse(value[i].quantity) *
+                (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
+          }
+          details = {'id':'${value[i].id}','qty':'${value[i].quantity}', 'productName': '${value[i].productName}', 'costPrice':'${value[i].costPrice}', 'unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};
+          if(value[i].paymentMode == 'Cash'){
+            _availableCash += double.parse(value[i].totalPrice);
+          }
+          else if(value[i].paymentMode == 'Transfer'){
+            _totalTransfer += double.parse(value[i].totalPrice);
+          }
+          tempList.add(details);
         }
-        details = {'id':'${value[i].id}','qty':'${value[i].quantity}', 'productName': '${value[i].productName}', 'costPrice':'${value[i].costPrice}', 'unitPrice':'${value[i].unitPrice}','totalPrice':'${value[i].totalPrice}', 'paymentMode':'${value[i].paymentMode}', 'time':'${value[i].createdAt}'};
-        if(value[i].paymentMode == 'Cash'){
-          _availableCash += double.parse(value[i].totalPrice);
-        }
-        else if(value[i].paymentMode == 'Transfer'){
-          _totalTransfer += double.parse(value[i].totalPrice);
-        }
-        tempList.add(details);
-      }
-      _totalSalesPrice = _availableCash + _totalTransfer;
-    }).catchError((onError){
-      print(onError.toString());
-      Constants.showMessage(onError.toString());
+        _totalSalesPrice = _availableCash + _totalTransfer;
+      });
+    }).catchError((error){
+      print(error);
+      Constants.showMessage(error.toString());
     });
-    if (!mounted) return;
+    if(!mounted)return;
     setState(() {
       _sales = tempList;
       _filteredSales = _sales;
@@ -217,7 +217,7 @@ class _MonthReportState extends State<MonthReport> {
 
   Widget _buildList() {
     if (_searchText.isNotEmpty) {
-      List<Map> tempList = new List();
+      List<Map> tempList = List();
       for (int i = 0; i < _filteredSales.length; i++) {
         if (_getFormattedTime(_filteredSales[i]['time']).toLowerCase().contains(_searchText.toLowerCase())) {
           tempList.add(_filteredSales[i]);
@@ -235,9 +235,10 @@ class _MonthReportState extends State<MonthReport> {
         child: Center(child: Text("No sales yet")),
       );
     }
-    return Center(
+    return Align(
+      alignment: Alignment.center,
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
         ),
@@ -261,7 +262,7 @@ class _MonthReportState extends State<MonthReport> {
         context: context,
         editable: _editable
     );
-    int _rowPerPage = 50;
+    int _rowPerPage = 100;
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -277,13 +278,13 @@ class _MonthReportState extends State<MonthReport> {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  '${Constants.money(_totalSalesPrice).output.symbolOnLeft}',
+                  '${Constants.money(_totalSalesPrice)}',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
           ),
-          userType == 'Admin' ? Container(
+          widget.userType == 'Admin' ? Container(
             margin: EdgeInsets.only(left: 5.0, right: 40.0),
             padding: EdgeInsets.only(right: 20.0, top: 20.0),
             child: Row(
@@ -294,7 +295,7 @@ class _MonthReportState extends State<MonthReport> {
                   style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
                 ),
                 Text(
-                  '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
+                  '${Constants.money(_totalProfitMade)}',
                   style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
                 ),
               ],
@@ -345,12 +346,10 @@ class _MonthReportState extends State<MonthReport> {
     );
   }
 
-  /// Calls [_getSales()] before the class builds its widgets
   @override
   void initState() {
-    super.initState();
     _getSales();
-    _getCurrentUser();
+    super.initState();
   }
 
   /// Building a Scaffold Widget to display [_buildList()]
@@ -363,7 +362,6 @@ class _MonthReportState extends State<MonthReport> {
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           padding: EdgeInsets.only(left: 10.0, right: 10.0),
-          //reverse: true,
           child:_buildList(),
         ),
       ),

@@ -37,6 +37,20 @@ class DailyReportValue{
     return DateTime(day.year, day.month);
   }
 
+  /// Method to format a string value [dateTime] to a [DateTime]
+  /// of year only
+  String getFormattedYear(String dateTime) {
+    DateTime day = DateTime.parse(dateTime);
+    return day.year.toString();
+  }
+
+  /// Method to format a string value [dateTime] to a [DateTime]
+  /// of year and month only
+  DateTime getFormattedMonthAndYear(String dateTime) {
+    DateTime day = DateTime.parse(dateTime);
+    return DateTime(day.year, day.month);
+  }
+
   /// Method to check if a date is today
   /// It returns true if it is and false if it's not
   bool checkIfToday(String dateTime){
@@ -55,15 +69,40 @@ class DailyReportValue{
     return false;
   }
 
+  /// Method to get all the years we've been taking reports based on time
+  /// It returns a list of [String]
+  List<String> getAllYears(List<Reports> value){
+    List<String> years = List();
+    for(int i = 0; i < value.length; i++){
+      if(!(years.contains(getFormattedYear(value[i].createdAt)))){
+        years.add(getFormattedYear(value[i].createdAt));
+      }
+    }
+    return years;
+  }
+
+  /// Method to get all the months and years we've been taking reports based on time
+  /// It returns a list of [String]
+  List<DateTime> getAllMonthsAndYears(List<Reports> value){
+    List<DateTime> months = List();
+    for(int i = 0; i < value.length; i++){
+      if(!(months.contains(getFormattedMonthAndYear(value[i].createdAt)))){
+        months.add(getFormattedMonthAndYear(value[i].createdAt));
+      }
+    }
+    return months;
+  }
+
+
   /// Method to get today's report based on time
   /// It returns a list of [Reports]
   Future<List<Reports>> getTodayReport() async {
-    List<Reports> reports = new List();
+    List<Reports> reports = List();
     Future<List<Reports>> report = futureValue.getAllReportsFromDB();
     await report.then((value) {
       for(int i = 0; i < value.length; i++){
         if(checkIfToday(value[i].createdAt)){
-          Reports reportsData = new Reports();
+          Reports reportsData = Reports();
           reportsData.id = value[i].id;
           reportsData.quantity = value[i].quantity;
           reportsData.productName = value[i].productName;
@@ -83,313 +122,253 @@ class DailyReportValue{
 
   /// Method to get January's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getJanReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.january))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getJanReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.january))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get February's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getFebReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.february))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getFebReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.february))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get March's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getMarReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.march))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getMarReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.march))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get April's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getAprReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.april))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getAprReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.april))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get May's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getMayReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.may))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getMayReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.may))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get June's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getJunReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.june))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getJunReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.june))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get July's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getJulReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.july))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getJulReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.july))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get August's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getAugReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.august))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getAugReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.august))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get September's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getSepReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.september))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getSepReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.september))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get October's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getOctReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.october))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getOctReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.october))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get November's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getNovReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.november))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getNovReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.november))){
+        Reports reportsData = Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 
   /// Method to get December's report based on time
   /// It returns a list of [Reports]
-  Future<List<Reports>> getDecReport() async {
-    List<Reports> reports = new List();
-    Future<List<Reports>> report = futureValue.getAllReportsFromDB();
-    await report.then((value) {
-      for(int i = 0; i < value.length; i++){
-        if(checkMonth(value[i].createdAt, DateTime(now.year, DateTime.december))){
-          Reports reportsData = new Reports();
-          reportsData.id = value[i].id;
-          reportsData.quantity = value[i].quantity;
-          reportsData.productName = value[i].productName;
-          reportsData.costPrice = value[i].costPrice;
-          reportsData.unitPrice = value[i].unitPrice;
-          reportsData.totalPrice = value[i].totalPrice;
-          reportsData.paymentMode = value[i].paymentMode;
-          reportsData.createdAt = value[i].createdAt;
-          reports.add(reportsData);
-        }
+  List<Reports> getDecReport(List<Reports> value, {int year}) {
+    List<Reports> reports = List();
+    for(int i = 0; i < value.length; i++){
+      if(checkMonth(value[i].createdAt, DateTime(year == null ? now.year : year, DateTime.december))){
+        Reports reportsData = new Reports();
+        reportsData.id = value[i].id;
+        reportsData.quantity = value[i].quantity;
+        reportsData.productName = value[i].productName;
+        reportsData.costPrice = value[i].costPrice;
+        reportsData.unitPrice = value[i].unitPrice;
+        reportsData.totalPrice = value[i].totalPrice;
+        reportsData.paymentMode = value[i].paymentMode;
+        reportsData.createdAt = value[i].createdAt;
+        reports.add(reportsData);
       }
-    }).catchError((onError){
-      throw (onError.toString());
-    });
+    }
     return reports;
   }
 

@@ -30,10 +30,10 @@ class DTS extends DataTableSource{
           Text(salesList[index]['productName'].toString()),
         ),
         DataCell(
-          Text(Constants.money(double.parse(salesList[index]['unitPrice'])).output.symbolOnLeft),
+          Text(Constants.money(double.parse(salesList[index]['unitPrice']))),
         ),
         DataCell(
-          Text(Constants.money(double.parse(salesList[index]['totalPrice'])).output.symbolOnLeft),
+          Text(Constants.money(double.parse(salesList[index]['totalPrice']))),
         ),
         DataCell(
           Text(salesList[index]['paymentMode'].toString()),
@@ -43,7 +43,6 @@ class DTS extends DataTableSource{
         ),
       ],
           onSelectChanged: (value){
-            print('selected');
             _displayDialog(salesList[index]);
           }
       );
@@ -56,10 +55,10 @@ class DTS extends DataTableSource{
           Text(salesList[index]['productName'].toString()),
         ),
         DataCell(
-          Text(Constants.money(double.parse(salesList[index]['unitPrice'])).output.symbolOnLeft),
+          Text(Constants.money(double.parse(salesList[index]['unitPrice']))),
         ),
         DataCell(
-          Text(Constants.money(double.parse(salesList[index]['totalPrice'])).output.symbolOnLeft),
+          Text(Constants.money(double.parse(salesList[index]['totalPrice']))),
         ),
         DataCell(
           Text(salesList[index]['paymentMode'].toString()),
@@ -168,7 +167,7 @@ class DTS extends DataTableSource{
                       ),
                     ),
                     Text(
-                      '${Constants.money(double.parse(index['unitPrice'])).output.symbolOnLeft}',
+                      '${Constants.money(double.parse(index['unitPrice']))}',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: Colors.blue,
@@ -190,7 +189,7 @@ class DTS extends DataTableSource{
                       ),
                     ),
                     Text(
-                      '${Constants.money(double.parse(index['totalPrice'])).output.symbolOnLeft}',
+                      '${Constants.money(double.parse(index['totalPrice']))}',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: Colors.blue,

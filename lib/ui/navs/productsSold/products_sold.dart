@@ -153,13 +153,13 @@ class _ProductsSoldState extends State<ProductsSold> {
                   DataCell(Text(report['sn'].toString()),),
                   DataCell(Text(report['product'].toString()),),
                   DataCell(Text(report['quantitySold'].toString()),),
-                  DataCell(Text(Constants.money(report['totalSales']).output.symbolOnLeft),),
-                  DataCell(Text(Constants.money(report['profit']).output.symbolOnLeft),)
+                  DataCell(Text(Constants.money(report['totalSales'])),),
+                  DataCell(Text(Constants.money(report['profit'])),)
                 ] : [
                   DataCell(Text(report['sn'].toString()),),
                   DataCell(Text(report['product'].toString()),),
                   DataCell(Text(report['quantitySold'].toString()),),
-                  DataCell(Text(Constants.money(report['totalSales']).output.symbolOnLeft),),
+                  DataCell(Text(Constants.money(report['totalSales'])),),
                 ]
             )).toList(),
           ),
@@ -176,7 +176,7 @@ class _ProductsSoldState extends State<ProductsSold> {
                   ),
                 ),
                 Text(
-                  '${Constants.money(_totalSalesPrice).output.symbolOnLeft}',
+                  '${Constants.money(_totalSalesPrice)}',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Colors.blueAccent,
@@ -198,7 +198,7 @@ class _ProductsSoldState extends State<ProductsSold> {
                   ),
                 ),
                 Text(
-                  '${Constants.money(_totalProfitMade).output.symbolOnLeft}',
+                  '${Constants.money(_totalProfitMade)}',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Colors.blueAccent,

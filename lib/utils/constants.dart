@@ -1,9 +1,8 @@
 import 'package:ayolee_stores/ui/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 /// A class to set constants for menu options in the profile page
 class Constants{
@@ -65,11 +64,10 @@ class Constants{
     return result;
   }
 
-  /// Convert a double [value] to naira
-  static FlutterMoneyFormatter money(double value){
-    FlutterMoneyFormatter val;
-    val = FlutterMoneyFormatter(amount: value, settings: MoneyFormatterSettings(symbol: 'N'));
-    return val;
+  /// Convert a double [value] to a currency
+  static String money(double value){
+    final nf = NumberFormat("#,##0.00", "en_US");
+    return 'N${nf.format(value)}';
   }
 
   /// Using FlutterToast to display toast message of value [message]

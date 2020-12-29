@@ -13,7 +13,10 @@ class MonthlyReportCharts extends StatefulWidget {
   /// Passing the month to load its data in this class constructor
   final String month;
 
-  MonthlyReportCharts({@required this.month});
+  final List<Reports> reports;
+
+  MonthlyReportCharts({@required this.month, @required this.reports});
+
 
   @override
   _MonthlyReportChartsState createState() => _MonthlyReportChartsState();
@@ -34,7 +37,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
   var data = {};
 
   /// Creating a map to my [data]'s product name to it's quantity for my charts
-  Map<String, double> dataMap = new Map();
+  Map<String, double> dataMap = Map();
 
   /// A variable holding the list of colors needed for my pie chart
   List<Color> colorList = [];
@@ -61,28 +64,23 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
   /// its quantity accordingly
   /// It also calls the function [getColors()]
   void getReports() async {
-    print(widget.month);
-    Future<List<Reports>> report = futureValue.getMonthReports(widget.month);
-    await report.then((value) {
-      if (!mounted) return;
-      setState(() {
-        _dataLength = value.length;
-        for(int i = 0; i < value.length; i++){
-          if(value[i].paymentMode != 'Iya Bimbo'){
-            totalProfitMade += double.parse(value[i].quantity) *
-                (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
-          }
-          if(data.containsKey(value[i].productName)){
-            data[value[i].productName] = (double.parse(data[value[i].productName]) + double.parse(value[i].quantity)).toString();
-          }else{
-            data[value[i].productName] = '${value[i].quantity}';
-          }
+    List<Reports> value = futureValue.getMonthReports(widget.month, widget.reports);
+    if (!mounted) return;
+    setState(() {
+      _dataLength = value.length;
+      for(int i = 0; i < value.length; i++){
+        if(value[i].paymentMode != 'Iya Bimbo'){
+          totalProfitMade += double.parse(value[i].quantity) *
+              (double.parse(value[i].unitPrice) - double.parse(value[i].costPrice));
         }
-      });
-      getColors();
-    }).catchError((onError){
-      Constants.showMessage(onError);
+        if(data.containsKey(value[i].productName)){
+          data[value[i].productName] = (double.parse(data[value[i].productName]) + double.parse(value[i].quantity)).toString();
+        }else{
+          data[value[i].productName] = '${value[i].quantity}';
+        }
+      }
     });
+    getColors();
   }
 
   /// Function to get the amount of colors needed for the pie chart and map
@@ -170,7 +168,7 @@ class _MonthlyReportChartsState extends State<MonthlyReportCharts> {
                 ),
                 Center(
                   child: Text(
-                    '${Constants.money(totalProfitMade).output.symbolOnLeft.toString()}',
+                    '${Constants.money(totalProfitMade)}',
                     style: TextStyle(
                       fontSize: 18.0,
                       color: Colors.blue,

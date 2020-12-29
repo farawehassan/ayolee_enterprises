@@ -129,10 +129,10 @@ class _ReceiptState extends State<Receipt> {
                   Text(product['product'].toString()),
                 ),
                 DataCell(
-                  Text(Constants.money(double.parse(product['unitPrice'])).output.symbolOnLeft.toString()),
+                  Text(Constants.money(double.parse(product['unitPrice']))),
                 ),
                 DataCell(
-                  Text(Constants.money(double.parse(product['totalPrice'])).output.symbolOnLeft.toString()),
+                  Text(Constants.money(double.parse(product['totalPrice']))),
                 ),
               ]);
             }).toList(),
@@ -148,7 +148,7 @@ class _ReceiptState extends State<Receipt> {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  '${Constants.money(_totalPrice).output.symbolOnLeft.toString()}',
+                  '${Constants.money(_totalPrice)}',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],

@@ -124,7 +124,7 @@ class _PrintingReceiptState extends State<PrintingReceipt> {
             width: PosTextSize.size2,
           )),
       PosColumn(
-          text: '${Constants.money(totalPrice).output.symbolOnLeft}',
+          text: '${Constants.money(totalPrice)}',
           width: 6,
           styles: PosStyles(
             align: PosTextAlign.right,

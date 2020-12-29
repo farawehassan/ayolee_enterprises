@@ -7,7 +7,6 @@ import 'package:ayolee_stores/utils/round_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:folding_cell/folding_cell.dart';
 import 'package:ayolee_stores/utils/constants.dart';
 import 'package:ayolee_stores/bloc/future_values.dart';
@@ -607,12 +606,12 @@ class _ProductsState extends State<Products> {
     final controllerCp = TextEditingController();
     final controllerSp = TextEditingController();
 
-    FlutterMoneyFormatter cpVal;
-    FlutterMoneyFormatter spVal;
+    String cpVal;
+    String spVal;
 
     return Builder(builder: (context) {
-      cpVal = FlutterMoneyFormatter(amount: cp, settings: MoneyFormatterSettings(symbol: 'N'));
-      spVal = FlutterMoneyFormatter(amount: sp, settings: MoneyFormatterSettings(symbol: 'N'));
+      cpVal = Constants.money(cp);
+      spVal = Constants.money(sp);
       return GestureDetector(
         onTap: () {
           SimpleFoldingCellState foldingCellState = context.findAncestorStateOfType<SimpleFoldingCellState>();
@@ -660,8 +659,8 @@ class _ProductsState extends State<Products> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('CP: ${cpVal.output.symbolOnLeft}'),
-                    Text('SP: ${spVal.output.symbolOnLeft}'),
+                    Text('CP: $cpVal'),
+                    Text('SP: $spVal'),
                   ],
                 ),
                 IconButton(
