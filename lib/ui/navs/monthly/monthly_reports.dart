@@ -190,8 +190,7 @@ class _MonthReportState extends State<MonthReport> {
   /// A function to build the AppBar of the page by calling
   /// [_searchPressed()] when the icon is pressed
   Widget _buildBar(BuildContext context) {
-    DateTime now = DateTime.now();
-    String formattedDate = '${widget.month}, ${DateFormat('yyyy').format(now)}';
+    String formattedDate = '${widget.month}, ${widget.year}';
     return new AppBar(
       centerTitle: false,
       title: _appBarTitle,
