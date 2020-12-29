@@ -553,7 +553,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           image: AssetImage('Assets/images/ayolee_logo.png'),
                         ),
                       ),
-                      applicationVersion: '1.0.8',
+                      applicationVersion: '1.0.9',
                       applicationLegalese: 'Developed by Farawe Taiwo Hassan',
                     );
                   },
